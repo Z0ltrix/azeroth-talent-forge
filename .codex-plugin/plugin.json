@@ -1,0 +1,22 @@
+{
+  "name": "azeroth-talent-forge",
+  "version": "0.1.0",
+  "description": "Local World of Warcraft talent planning tools for Codex.",
+  "author": {
+    "name": "Christian Pfarr"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Azeroth Talent Forge",
+    "shortDescription": "Build and verify WoW talent planner links locally.",
+    "longDescription": "Azeroth Talent Forge adds local Codex skills and scripts for World of Warcraft talent planning, Wowhead planner links, and Blizzard import strings.",
+    "developerName": "Christian Pfarr",
+    "category": "Productivity",
+    "capabilities": [
+      "World of Warcraft talent planning",
+      "Wowhead planner link generation",
+      "Blizzard import string generation"
+    ],
+    "defaultPrompt": "Plan a World of Warcraft talent build and generate a Wowhead link plus import code."
+  }
+}
