@@ -1,0 +1,20 @@
+{
+  "name": "azeroth-talent-forge",
+  "interface": {
+    "displayName": "Azeroth Talent Forge"
+  },
+  "plugins": [
+    {
+      "name": "azeroth-talent-forge",
+      "source": {
+        "source": "local",
+        "path": "./plugins/azeroth-talent-forge"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
