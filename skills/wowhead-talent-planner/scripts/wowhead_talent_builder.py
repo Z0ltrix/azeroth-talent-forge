@@ -9,37 +9,16 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import sys
-from copy import deepcopy
 from pathlib import Path
 from urllib.parse import urljoin
 from urllib.request import Request, urlopen
 
 B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 BASE = "https://www.wowhead.com"
-DEFAULT_BASE = "https://www.wowhead.com/talent-calc/blizzard/CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzMzMzMmxsZmZZGjxMNmxwyYmZYmxMDAAAAWGAmxAMwGssY0YGAzWMzGMzMzgZZAwMDAADwA"
 TYPE_CHOICE = 3
 TYPE_MULTI = 5
 GRID_WIDTH = 19
 UA = "Mozilla/5.0 (Codex Wowhead talent builder)"
-
-PRESETS = {
-    "prot-warrior-mt-selfheal-shield-charge": {
-        "base": DEFAULT_BASE,
-        "description": "Protection Warrior Mountain Thane M+ self-heal/defense, keeping Shield Charge.",
-        "clear": [
-            "Rend", "Rumbling Earth", "Honed Reflexes",
-            "Tough as Nails", "Enduring Alacrity", "Violent Outburst",
-            "Whirling Blade", "Focused Vigor",
-        ],
-        "set": [
-            "Leeching Strikes", "Pain and Gain", "Field Dressing",
-            "Armor Specialization", "Last Stand", "Indomitable",
-            "Battle-Scarred Veteran", "Shield Charge",
-        ],
-        "choice": {"Hunker Down": "Hunker Down"},
-    }
-}
 
 
 def fetch(url: str) -> bytes:
@@ -472,31 +451,21 @@ def spent(model: TalentModel, state: dict) -> list[dict]:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Build a local Wowhead talent code and planner link.")
-    ap.add_argument("--base", default=None, help="Base /talent-calc/blizzard/<hash> URL or raw Blizzard hash")
-    ap.add_argument("--preset", choices=sorted(PRESETS), help="Apply a bundled preset")
+    ap.add_argument("--base", required=True, help="Base /talent-calc/blizzard/<hash> URL or raw Blizzard hash")
     ap.add_argument("--set", action="append", default=[], metavar="TALENT", help="Set talent to 1 point by name")
     ap.add_argument("--clear", action="append", default=[], metavar="TALENT", help="Clear talent by name")
-    ap.add_argument("--choice", action="append", default=[], metavar="NODE=CHOICE", help="Set choice node, e.g. 'Spellbreaker / Hunker Down=Hunker Down'")
+    ap.add_argument("--choice", action="append", default=[], metavar="NODE=CHOICE", help="Set choice node, e.g. 'Choice Node Name=Choice Name'")
     ap.add_argument("--refresh-data", action="store_true", help="Re-download Wowhead talent data")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
-    preset = PRESETS.get(args.preset) if args.preset else None
-    base = args.base or (preset["base"] if preset else DEFAULT_BASE)
+    base = args.base
     data_text = load_talent_data(base, args.refresh_data)
     trees = extract_page_data(data_text, "wow.talentCalcDragonflight.live.trees")
     nodes = extract_page_data(data_text, "wow.talentCalcDragonflight.live.nodes")
     model = TalentModel(trees, nodes)
     base_hash = extract_blizzard_hash(base)
     state = decode(model, base_hash)
-
-    if preset:
-        for name in preset.get("clear", []):
-            clear_talent(model, state, name)
-        for name in preset.get("set", []):
-            set_talent(model, state, name)
-        for node, choice in preset.get("choice", {}).items():
-            set_talent(model, state, node, 1, choice)
 
     for name in args.clear:
         clear_talent(model, state, name)
@@ -511,10 +480,6 @@ def main() -> int:
     code = encode(model, state)
     link = f"{BASE}/talent-calc/blizzard/{code}"
     watched = []
-    if preset:
-        watched.extend(preset.get("set", []))
-        watched.extend(preset.get("clear", []))
-        watched.extend(preset.get("choice", {}).values())
     watched.extend(args.set)
     watched.extend(args.clear)
     watched.extend([x.split("=", 1)[-1].strip() for x in args.choice if "=" in x])

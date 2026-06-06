@@ -16,12 +16,12 @@ Use this when planning, modifying, or reviewing Warrior Protection builds. This 
 
 Protection Warrior is a shield tank built around smoothing incoming damage with active mitigation, Rage spending, short defensive cooldowns, interrupts, stops, and mobility. Talent planning should protect Rage economy because Rage turns into survival through Ignore Pain and Shield Block support.
 
-Core strengths for Mythic+ planning:
+Common strengths to account for in Mythic+ planning:
 
 - Strong physical mitigation.
 - Reliable short-cooldown defensive tools.
 - Group value through Battle Shout, Rallying Cry, Spell Reflection, Shockwave, Disrupting Shout, and mobility.
-- Mountain Thane currently fits defensive/rage-heavy planning well; Colossus can still be competitive but is more damage/tempo oriented.
+- Mountain Thane and Colossus both work; choose based on the user's requested gameplay, damage profile, and defensive goals.
 
 Common weaknesses/tradeoffs:
 
@@ -31,10 +31,11 @@ Common weaknesses/tradeoffs:
 
 ## Build Planning Rules
 
-- For survival-first M+, keep core mitigation, Rage generation, major stops, and at least one strong emergency layer.
-- Prefer Mountain Thane for max defense/self-heal unless the user explicitly wants Colossus gameplay or Demolish-centered damage.
-- Keep Shield Charge when requested; it is both mobility/control and damage tempo.
-- Do not blindly copy the default M+ build if the user asks for extra self-heal or defense; make explicit swaps.
+- Start from the user's stated goal, not from a bundled preference.
+- Preserve explicit must-have talents unless impossible within point/pathing limits.
+- For survival-first M+, consider core mitigation, Rage generation, major stops, and at least one strong emergency layer.
+- For damage-first M+, identify what defensive/utility cost is being paid for throughput.
+- Do not blindly copy a guide build if the user asks for a customized variant; make explicit swaps and explain tradeoffs.
 - Verify full point budgets after edits: Warrior class 34, Protection spec 34, hero tree 13.
 
 ## Hero Tree Choice
@@ -42,29 +43,14 @@ Common weaknesses/tradeoffs:
 Mountain Thane:
 
 - Theme: Thunder Clap/Thunder Blast, Avatar, lightning effects, faster rotational flow.
-- Build value: tends to support Rage flow and defensive feel; good default for defense/self-heal requests.
-- Defensive picks to prefer: Storm Shield, Steadfast as the Peaks, Snap Induction or Flashing Skies by need, Thorim's Might or Gathering Clouds by route/damage needs.
+- Build value: can support Rage flow and defensive feel; compare against Colossus for the user's requested content and playstyle.
+- Defensive-leaning choices include Storm Shield and Steadfast as the Peaks; offensive/tempo choices can still be correct if the user prioritizes damage or routing.
 
 Colossus:
 
 - Theme: Demolish, Revenge pressure, raw damage, slower feel.
-- Build value: viable for M+, but less aligned with max-defense/self-heal requests unless user prefers it.
-- Defensive picks to prefer: No Stranger to Pain or Veteran Vitality, Mountain of Muscle and Scars.
-
-## Presets
-
-Local preset:
-
-```powershell
-python -B C:\Users\chris\.codex\skills\wowhead-talent-planner\scripts\wowhead_talent_builder.py --preset prot-warrior-mt-selfheal-shield-charge
-```
-
-Purpose: Protection Warrior, Mountain Thane, M+ defense/self-heal, keeps Shield Charge.
-
-Preset swaps from a standard Mountain Thane M+ baseline:
-
-- Adds: Leeching Strikes, Pain and Gain, Field Dressing, Armor Specialization, Last Stand, Indomitable, Battle-Scarred Veteran, Shield Charge, Hunker Down.
-- Cuts: Rend, Rumbling Earth, Honed Reflexes, Tough as Nails, Enduring Alacrity, Violent Outburst, Whirling Blade/Ravager, Focused Vigor.
+- Build value: viable for M+ and raid; compare its slower Demolish/Revenge profile against Mountain Thane before recommending.
+- Defensive-leaning choices include No Stranger to Pain or Veteran Vitality and Mountain of Muscle and Scars.
 
 ## Warrior Class Talent Roles
 
@@ -166,8 +152,8 @@ Preset swaps from a standard Mountain Thane M+ baseline:
 | Strength of the Mountain | Core throughput scaling. |
 | Storm Surge | Thunder Blast/Avatar synergy. |
 | Thunder Blast | Core Mountain Thane button/proc. |
-| Storm Bolts / Storm Shield | Damage vs defense choice; Storm Shield for survival. |
-| Keep Your Feet on the Ground / Steadfast as the Peaks | Damage/utility vs defensive steadiness; Steadfast for survival. |
+| Storm Bolts / Storm Shield | Damage vs defense choice. |
+| Keep Your Feet on the Ground / Steadfast as the Peaks | Damage/utility vs defensive steadiness. |
 | Conductivity | Lightning engine support. |
 | Flashing Skies / Snap Induction | Cooldown/tempo choice; choose by route and uptime needs. |
 | Gathering Clouds / Thorim's Might | Damage/tempo choice; route dependent. |
@@ -201,4 +187,4 @@ Preset swaps from a standard Mountain Thane M+ baseline:
 - Point totals are full: 34/34/13.
 - Requested must-have talents are selected.
 - Explicit cuts are actually unselected.
-- If user asked for self-heal, check Leeching Strikes, Pain and Gain, Field Dressing, Indomitable, and Impending Victory if pathing allows.
+- If the user asked for self-heal, identify available self-heal/sustain talents and show what must be cut to take them.

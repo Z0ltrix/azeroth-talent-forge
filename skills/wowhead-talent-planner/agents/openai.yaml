@@ -1,4 +1,4 @@
 interface:
   display_name: "Wowhead Talent Planner"
   short_description: "Analyze and edit Wowhead WoW talent planner builds."
-  default_prompt: "Analyze this Wowhead talent build and suggest or export a safer variant."
+  default_prompt: "Analyze this Wowhead talent build and suggest or export a variant for my stated goal."
