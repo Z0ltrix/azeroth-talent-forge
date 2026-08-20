@@ -1346,11 +1346,13 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
                 invalid_candidates += 1
                 exclusion_reasons["fight_id"] = exclusion_reasons.get("fight_id", 0) + 1
     matched = []
+    processed_exclusions = 0
     for candidate in candidates:
         direct_match, missing, direct_reasons = _ranking_direct_match(candidate, filters)
         if not direct_match:
             for reason in direct_reasons:
                 exclusion_reasons[reason] = exclusion_reasons.get(reason, 0) + 1
+            processed_exclusions += 1
             continue
         if missing:
             hydrated_count += 1
@@ -1363,10 +1365,12 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
             except PartialGraphQLError as error:
                 errors.extend(error.errors)
                 exclusion_reasons["hydration"] = exclusion_reasons.get("hydration", 0) + 1
+                processed_exclusions += 1
                 continue
             except Exception as error:
                 errors.append({"message": str(error), "path": [candidate["report_code"]]})
                 exclusion_reasons["hydration"] = exclusion_reasons.get("hydration", 0) + 1
+                processed_exclusions += 1
                 continue
             hydrated_filters = _filters_without(filters, set(_DISCOVERY_FILTER_FIELDS) - set(missing))
             report = dict(candidate)
@@ -1374,8 +1378,11 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
             if not is_match:
                 for reason in reasons:
                     exclusion_reasons[reason] = exclusion_reasons.get(reason, 0) + 1
+                processed_exclusions += 1
                 continue
         matched.append(candidate)
+        if len(matched) >= top:
+            break
     truncated = has_more and pages_fetched >= max_pages or len(candidates) > top
     return make_global_result(
         matched,
@@ -1384,7 +1391,7 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
         source_rows=len(rows),
         unique_candidates=len(candidates),
         hydrated_candidates=hydrated_count,
-        excluded_candidates=len(candidates) - len(matched) + invalid_candidates,
+        excluded_candidates=processed_exclusions + invalid_candidates,
         returned_candidates=min(len(matched), top),
         pages_fetched=pages_fetched,
         truncated=truncated,

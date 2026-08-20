@@ -1210,6 +1210,45 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(client.calls[0][0], "encounter-rankings")
         self.assertNotIn("size", client.calls[0][1])
 
+    def test_global_stops_hydrating_after_top_matches(self):
+        class HydrationCountingClient:
+            def __init__(self):
+                self.calls = []
+
+            def execute(self, query_name, variables):
+                self.calls.append((query_name, dict(variables)))
+                if query_name == "encounter-rankings":
+                    return {
+                        "data": {
+                            "worldData": {
+                                "encounter": {
+                                    "fightRankings": json.dumps({
+                                        "rankings": [
+                                            {"reportID": "Match001", "fightID": 9},
+                                            {"reportID": "Match002", "fightID": 9},
+                                            {"reportID": "Match003", "fightID": 9},
+                                        ],
+                                        "page": 1,
+                                        "hasMorePages": False,
+                                    })
+                                }
+                            }
+                        }
+                    }
+                if query_name == "report-fights":
+                    return fixture("report-fights.json")
+                raise AssertionError("unexpected query %s" % query_name)
+
+        client = HydrationCountingClient()
+        result = warcraftlogs.discover_global(
+            client, warcraftlogs.DiscoveryFilters(encounter=2902, zone=2335, key_min=12), top=1, page=1
+        )
+
+        self.assertEqual(result["returned_candidates"], 1)
+        self.assertEqual(result["hydrated_candidates"], 1)
+        self.assertEqual(result["excluded_candidates"], 0)
+        self.assertEqual([name for name, _ in client.calls if name == "report-fights"], ["report-fights"])
+
     def test_global_hydration_is_fight_scoped_and_zone_filter_uses_fight_game_zone(self):
         client = FixtureClient({
             "report-fights": fixture("report-fights.json"),
