@@ -986,12 +986,75 @@ class DiscoveryTests(unittest.TestCase):
 
     def test_global_rankings_query_exposes_documented_encounter_arguments(self):
         query = warcraftlogs.load_query("encounter-rankings")
-        for value in (
-            "$encounterID", "$zoneID", "$className", "$specName", "$role",
-            "$difficulty", "$partition", "$page", "$serverRegion", "$serverSlug",
-            "$metric", "$leaderboard", "fightRankings", "characterRankings",
-        ):
+        for value in ("$encounterID", "$zoneID", "$difficulty", "$partition", "$page", "$serverRegion", "$serverSlug", "$metric", "$leaderboard", "fightRankings"):
             self.assertIn(value, query)
+        self.assertIn("zone(id: $zoneID)", query)
+        self.assertNotIn("zoneID: $zoneID", query)
+        self.assertNotIn("className: $className", query)
+        self.assertNotIn("specName: $specName", query)
+        self.assertNotIn("role: $role", query)
+        self.assertNotIn("characterRankings", query)
+
+    def test_global_error_only_ranking_is_sampled_with_sanitized_errors(self):
+        client = FixtureClient({"encounter-rankings": {"errors": [{"message": "ranking unavailable", "path": ["worldData"], "extensions": {"code": "DOWN"}}]}})
+        result = warcraftlogs.discover_global(client, warcraftlogs.DiscoveryFilters(encounter=2902, zone=1300), top=2, page=1)
+        self.assertEqual(result["completeness"], "sampled")
+        self.assertEqual(result["data"], [])
+        self.assertEqual(result["errors"], [{"message": "ranking unavailable", "path": ["worldData"], "extensions": {"code": "DOWN"}}])
+        self.assertEqual(result["requested_top"], 2)
+        self.assertIn(warcraftlogs.GLOBAL_WARNING, result["warnings"])
+
+    def test_global_partial_hydration_failure_is_sampled(self):
+        client = FixtureClient({
+            "metadata-world": fixture("metadata-world.json"),
+            "metadata-game": fixture("metadata-game.json"),
+            "encounter-rankings": fixture("global-rankings-page-1.json"),
+            "report-fights": {"errors": [{"message": "fight unavailable", "path": ["reportData"]}]},
+        })
+        result = warcraftlogs.discover_global(
+            client, warcraftlogs.DiscoveryFilters(encounter=2902, key_min=12), top=2, page=1
+        )
+        self.assertEqual(result["completeness"], "sampled")
+        self.assertTrue(result["partial"])
+        self.assertEqual(result["errors"], [{"message": "fight unavailable", "path": ["reportData"]}] * 2)
+
+    def test_global_fetches_until_unique_top_not_raw_duplicate_count(self):
+        class Pages:
+            def __init__(self):
+                self.calls = []
+                self.pages = [
+                    {"data": {"worldData": {"encounter": {"fightRankings": json.dumps({"rankings": [{"reportID": "AbCd1234", "fightID": 9}], "page": 1, "hasMorePages": True})}}}},
+                    {"data": {"worldData": {"encounter": {"fightRankings": json.dumps({"rankings": [{"reportID": "AbCd1234", "fightID": 9}, {"reportID": "EfGh5678", "fightID": 4}], "page": 2, "hasMorePages": False})}}}},
+                ]
+
+            def execute(self, query_name, variables):
+                if query_name == "metadata-world":
+                    return fixture("metadata-world.json")
+                self.calls.append((query_name, dict(variables)))
+                return self.pages.pop(0)
+
+        client = Pages()
+        result = warcraftlogs.discover_global(
+            client, warcraftlogs.DiscoveryFilters(encounter=2902), top=2, page=1, max_pages=2
+        )
+        self.assertEqual(len(client.calls), 2)
+        self.assertEqual(result["unique_candidates"], 2)
+        self.assertEqual([item["report_code"] for item in result["data"]], ["AbCd1234", "EfGh5678"])
+
+    def test_global_hydration_is_fight_scoped_and_zone_filter_uses_fight_game_zone(self):
+        client = FixtureClient({
+            "report-fights": fixture("report-fights.json"),
+        })
+        fights, actors = warcraftlogs.hydrate_discovery_report(
+            client, "AbCd1234", warcraftlogs.DiscoveryFilters(zone=2335), fight_id=9
+        )
+        self.assertEqual(client.variables[0]["fightIDs"], [9])
+        self.assertEqual([fight["id"] for fight in fights], [9])
+        matched, reasons = warcraftlogs.report_matches(
+            {}, fights, actors, warcraftlogs.DiscoveryFilters(zone=2335)
+        )
+        self.assertTrue(matched)
+        self.assertEqual(reasons, [])
 
     def test_global_cli_requires_zone_instance_or_encounter(self):
         with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
@@ -1000,6 +1063,8 @@ class DiscoveryTests(unittest.TestCase):
 
     def test_global_cli_extracts_candidates_dedupes_and_hydrates_derived_filters(self):
         client = FixtureClient({
+            "metadata-world": fixture("metadata-world.json"),
+            "metadata-game": fixture("metadata-game.json"),
             "encounter-rankings": fixture("global-rankings-page-1.json"),
             "report-fights": fixture("report-fights.json"),
             "report-master-data": fixture("report-master-data.json"),
@@ -1017,13 +1082,10 @@ class DiscoveryTests(unittest.TestCase):
             ])
         result = json.loads(output.getvalue())
         self.assertEqual(exit_code, 0)
-        self.assertEqual(client.calls, ["encounter-rankings", "report-fights"])
-        self.assertEqual(client.variables[0]["encounterID"], 2902)
-        self.assertEqual(client.variables[0]["className"], "Paladin")
-        self.assertEqual(client.variables[0]["specName"], "Protection")
-        self.assertEqual(client.variables[0]["role"], "tank")
-        self.assertEqual(client.variables[0]["partition"], 42)
-        self.assertEqual(client.variables[0]["difficulty"], 8)
+        self.assertEqual(client.calls, ["metadata-world", "metadata-game", "metadata-world", "encounter-rankings", "report-fights"])
+        self.assertEqual(client.variables[3]["encounterID"], 2902)
+        self.assertEqual(client.variables[3]["partition"], 42)
+        self.assertEqual(client.variables[3]["difficulty"], 8)
         self.assertEqual(result["completeness"], "sampled")
         self.assertEqual(result["source_rows"], 3)
         self.assertEqual(result["unique_candidates"], 2)
@@ -1047,7 +1109,10 @@ class DiscoveryTests(unittest.TestCase):
             self.assertEqual(client.calls, [])
 
     def test_global_empty_fixture_keeps_sample_contract(self):
-        client = FixtureClient({"encounter-rankings": fixture("global-rankings-empty.json")})
+        client = FixtureClient({
+            "metadata-world": fixture("metadata-world.json"),
+            "encounter-rankings": fixture("global-rankings-empty.json"),
+        })
         result = warcraftlogs.discover_global(
             client, warcraftlogs.DiscoveryFilters(encounter=2902), top=10, page=1
         )
