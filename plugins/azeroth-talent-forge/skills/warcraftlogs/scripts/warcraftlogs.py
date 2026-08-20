@@ -14,7 +14,7 @@ class Credentials:
     client_secret: str
 
 
-def load_dotenv(path: Path) -> dict:
+def load_dotenv(path: Path) -> Dict[str, str]:
     values = {}
     if not path.is_file():
         return values
