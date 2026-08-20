@@ -20,18 +20,25 @@ official host and a positive fight ID.
 The report must be public and positively accessible. Do not infer data from a
 missing or inaccessible archive status.
 
-## One-file-per-run details
+## Report-wide and per-run details
 
-After `report fights` identifies a fight, keep each run's details in its own
-file so local evaluation can preserve provenance. The `--fight` selector and
-`--output` path are intentionally repeated per command:
+`report summary` and `report master-data` return report-wide payloads. Their
+shared help accepts `--fight`, but these two commands do not send a fight
+filter to the API. Their payloads are not fight-filtered; `--fight` does not
+change that. Store these files once per report:
 
 ```powershell
 $report = "REPORTCODE"
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report summary $report --output "report-summary.json"
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report master-data $report --output "report-master-data.json"
+```
+
+After `report fights` identifies a fight, keep truly fight-scoped payloads in
+per-run files. The public selector is `--fight`:
+
+```powershell
 $fight = 123
-python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report summary $report --fight $fight --output "run-$fight-summary.json"
 python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report fights $report --fight $fight --output "run-$fight-fight.json"
-python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report master-data $report --fight $fight --output "run-$fight-master-data.json"
 python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report player-details $report --fight $fight --output "run-$fight-player-details.json"
 ```
 
@@ -41,18 +48,18 @@ evaluation.
 
 ## Events
 
-Events require either `--fight-id` (or a fight in the report URL) or both
+Events require either `--fight` (or a fight in the report URL) or both
 `--start-time` and `--end-time`. Use small, explicit values for:
 
 ```powershell
-python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report events REPORT --fight-id 3 --max-pages 2 --output events.jsonl
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report events REPORT --fight 3 --max-pages 2 --output events.jsonl
 ```
 
 For a stricter bounded export, add `--event-limit` and retain the first JSONL
 envelope record:
 
 ```powershell
-python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report events REPORTCODE --fight-id 123 --event-limit 5000 --max-pages 3 --output run-123-events.jsonl
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report events REPORTCODE --fight 123 --event-limit 5000 --max-pages 3 --output run-123-events.jsonl
 ```
 
 `--max-pages` and the requested window are coverage limits, not defaults to

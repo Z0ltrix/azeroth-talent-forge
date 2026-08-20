@@ -44,7 +44,7 @@ global cohorts are sampled and requires actor-bound `matched_actor` evidence.
 References include exact PowerShell examples for:
 
 - today's local-timezone fight window;
-- one-file-per-run summary, fights, master data, and player details;
+- report-wide summary/master-data files and per-run fights/player details;
 - default combatant-info retrieval;
 - bounded event JSONL with `--event-limit`, `--max-pages`, and `--output`;
 - same-spec/key sampled global cohort comparison.
@@ -66,3 +66,27 @@ Detailed schema material remains in references rather than being duplicated in
 The skill validator needs its external `yaml` dependency installed before it
 can provide validator evidence. Pressure-scenario evaluator repetitions remain
 pending until an evaluator is available.
+
+## Fix round 1
+
+Findings addressed:
+
+- Replaced the obsolete event fight-selector spelling in all Task 5 examples
+  with the public `--fight` flag. The deterministic documentation assertion now
+  requires `--fight`, and parser assertions verify it for `fights`,
+  `player-details`, and `events`.
+- Corrected report detail guidance: `summary` and `master-data` are explicitly
+  report-wide and are no longer presented as per-run or fight-filtered files.
+  Per-run examples retain `fights`, `player-details`, and bounded `events`,
+  which use fight selection.
+
+Exact fix-round checks:
+
+- Focused docs/CLI tests: passed, 2 tests.
+- CLI help verification: `report summary`, `report fights`, `report
+  master-data`, `report player-details`, and `report events` all expose
+  `--fight`; no obsolete selector appears in Task 5 documentation or tests.
+- Full Warcraft Logs unittest module: passed, 108 tests.
+- `git diff --check`: passed.
+- `quick_validate.py`: remains blocked by missing `yaml` unless the
+  environment changes.

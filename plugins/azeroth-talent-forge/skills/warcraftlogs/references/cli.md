@@ -76,7 +76,7 @@ it establishes fight/time bounds and truncation status.
 Use a fight ID and a page limit for a bounded export:
 
 ```powershell
-python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report events REPORTCODE --fight-id 123 --event-limit 5000 --max-pages 3 --output run-123-events.jsonl
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report events REPORTCODE --fight 123 --event-limit 5000 --max-pages 3 --output run-123-events.jsonl
 ```
 
 Do not request whole-report events. A truncated or partial export remains

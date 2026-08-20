@@ -221,12 +221,23 @@ class PackagingTests(unittest.TestCase):
             self.assertIn(phrase, cli)
         for phrase in ("absolute-start-time", "started", "timezone", "same-spec/key"):
             self.assertIn(phrase, discovery + reports)
-        for phrase in ("combatant", "fight-id", "event-limit", "sampled"):
+        for phrase in ("combatant", "--fight", "event-limit", "sampled"):
             self.assertIn(phrase, reports + discovery)
         for phrase in ("stale events", "report-level-only", "whole-report", "exhaustive global"):
             self.assertIn(phrase, scenarios.lower())
         self.assertIn("local run evaluation", prompt.lower())
         self.assertIn("comparable public-log cohorts", prompt.lower())
+
+    def test_documented_fight_selector_matches_public_cli(self):
+        cli = (self.ROOT / "references" / "cli.md").read_text(encoding="utf-8")
+        reports = (self.ROOT / "references" / "reports.md").read_text(encoding="utf-8")
+        for command in ("fights", "player-details", "events"):
+            args = warcraftlogs.build_parser().parse_args(
+                ["report", command, "REPORTCODE", "--fight", "3"]
+            )
+            self.assertEqual(args.fight, 3)
+        self.assertIn("report-wide", reports.lower())
+        self.assertIn("not fight-filtered", reports.lower())
 
 
 class TransportTests(unittest.TestCase):
