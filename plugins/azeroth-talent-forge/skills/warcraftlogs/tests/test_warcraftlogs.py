@@ -1121,6 +1121,33 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(result["hydrated_candidates"], 1)
         self.assertEqual(client.variables[1]["fightIDs"], [9])
 
+    def test_global_invalid_key_and_time_bounds_make_no_metadata_calls(self):
+        for options in (("--key-min", "20", "--key-max", "10"), ("--start-time", "20", "--end-time", "10")):
+            client = FixtureClient({})
+            with tempfile.TemporaryDirectory() as directory, patch.object(
+                warcraftlogs, "WarcraftLogsClient", return_value=client
+            ), patch.dict(os.environ, {}, clear=True), redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+                exit_code = warcraftlogs.main([
+                    "--client-id", "client-id", "--client-secret", "client-secret", "--env-file",
+                    str(Path(directory) / "missing.env"), "find", "global", "--zone", "Midnight Dungeon",
+                    *options,
+                ])
+            self.assertEqual(exit_code, 2)
+            self.assertEqual(client.calls, [])
+
+    def test_global_duplicate_fightless_rows_count_as_one_excluded_candidate(self):
+        client = FixtureClient({
+            "encounter-rankings": fixture("global-rankings-duplicate-no-fight.json"),
+            "report-fights": fixture("report-fights.json"),
+        })
+        result = warcraftlogs.discover_global(
+            client, warcraftlogs.DiscoveryFilters(encounter=2902, zone=2335), top=2, page=1
+        )
+        self.assertEqual(result["source_rows"], 3)
+        self.assertEqual(result["unique_candidates"], 1)
+        self.assertEqual(result["excluded_candidates"], 1)
+        self.assertLessEqual(result["excluded_candidates"], result["source_rows"])
+
     def test_global_cli_requires_zone_instance_or_encounter(self):
         with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
             warcraftlogs.build_parser().parse_args(["find", "global"])

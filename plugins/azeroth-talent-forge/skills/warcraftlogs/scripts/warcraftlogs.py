@@ -876,6 +876,23 @@ def _global_filters(args, client=None) -> DiscoveryFilters:
         raise ValueError("Global discovery requires a zone, instance, or encounter")
     if args.zone and args.instance:
         raise ValueError("Global discovery accepts either zone or instance, not both")
+    for value, label in (
+        (args.zone, "zone"), (args.instance, "instance"), (args.encounter, "encounter"),
+        (args.partition, "partition"), (args.difficulty, "difficulty"),
+        (args.class_name, "class"), (args.spec_name, "spec"),
+    ):
+        if value is not None and re.fullmatch(r"-?[0-9]+", str(value)):
+            _positive_id(value, label)
+    for bound_name in ("start_time", "end_time"):
+        value = getattr(args, bound_name)
+        if value is not None and (not math.isfinite(value) or value < 0):
+            raise ValueError("Discovery time bounds must be finite and non-negative")
+    if args.start_time is not None and args.end_time is not None and args.start_time > args.end_time:
+        raise ValueError("Discovery start time must not exceed end time")
+    if (args.key_min is not None and args.key_min < 0) or (args.key_max is not None and args.key_max < 0):
+        raise ValueError("Key bounds must be non-negative")
+    if args.key_min is not None and args.key_max is not None and args.key_min > args.key_max:
+        raise ValueError("Key minimum must not exceed key maximum")
     values = {
         "class_name": args.class_name, "spec_name": args.spec_name,
         "role": args.role.casefold() if isinstance(args.role, str) else args.role,
@@ -938,16 +955,6 @@ def _global_filters(args, client=None) -> DiscoveryFilters:
             values["spec_name"] = selected_spec["name"]
     if values["role"] is not None and values["role"] not in ("tank", "healer", "dps", "damage"):
         raise ValueError("Unknown role: %s" % args.role)
-    for bound_name in ("start_time", "end_time"):
-        value = values[bound_name]
-        if value is not None and (not math.isfinite(value) or value < 0):
-            raise ValueError("Discovery time bounds must be finite and non-negative")
-    if values["start_time"] is not None and values["end_time"] is not None and values["start_time"] > values["end_time"]:
-        raise ValueError("Discovery start time must not exceed end time")
-    if values["key_min"] is not None and values["key_min"] < 0 or values["key_max"] is not None and values["key_max"] < 0:
-        raise ValueError("Key bounds must be non-negative")
-    if values["key_min"] is not None and values["key_max"] is not None and values["key_min"] > values["key_max"]:
-        raise ValueError("Key minimum must not exceed key maximum")
     return DiscoveryFilters(**values)
 
 
@@ -1176,6 +1183,19 @@ def _dedupe_global_candidates(rows: Sequence[Mapping[str, object]]) -> list:
     return result
 
 
+def _invalid_ranking_key(row: Mapping[str, object]):
+    report = row.get("report") if isinstance(row.get("report"), Mapping) else {}
+    code = row.get("reportCode") or row.get("reportID") or row.get("reportId") or row.get("report_code") or report.get("code") or report.get("id")
+    fight_id = row.get("fightID", row.get("fightId", row.get("fight_id")))
+    if fight_id is None and isinstance(row.get("fight"), Mapping):
+        fight_id = row["fight"].get("id")
+    if code is not None and fight_id is None:
+        return ("report", str(code), "missing-fight")
+    if code is not None:
+        return ("report", str(code), "invalid-fight", str(fight_id))
+    return ("row", json.dumps(dict(row), sort_keys=True, ensure_ascii=True))
+
+
 def make_global_result(rows, sample_size, filters, ranking_basis="encounter_rankings", **metadata) -> dict:
     if not isinstance(sample_size, int) or isinstance(sample_size, bool) or sample_size < 0:
         raise ValueError("Global top must be a non-negative integer")
@@ -1308,13 +1328,12 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
         current_page = (pagination.get("current_page") or current_page) + 1
     candidates = _dedupe_global_candidates(rows)
     invalid_candidates = 0
+    invalid_keys = set()
     for row in rows:
         if _ranking_candidate(row) is None:
-            report = row.get("report") if isinstance(row, Mapping) else None
-            code = row.get("reportID", row.get("reportCode")) if isinstance(row, Mapping) else None
-            if isinstance(report, Mapping):
-                code = code or report.get("code") or report.get("id")
-            if code is not None:
+            key = _invalid_ranking_key(row)
+            if key not in invalid_keys:
+                invalid_keys.add(key)
                 invalid_candidates += 1
                 exclusion_reasons["fight_id"] = exclusion_reasons.get("fight_id", 0) + 1
     matched = []
