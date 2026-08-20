@@ -179,8 +179,8 @@ def report_request(args) -> tuple:
         scope["absolute_start_time"] = absolute_start
     if absolute_end is not None:
         scope["absolute_end_time"] = absolute_end
-    if getattr(args, "time_mode", None) is not None:
-        scope["time_mode"] = args.time_mode
+    if args.report_command == "fights":
+        scope["time_mode"] = getattr(args, "time_mode", None) or "started"
     filters = {
         variable_name: value
         for attribute, variable_name in variable_names.items()

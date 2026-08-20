@@ -702,7 +702,7 @@ class ReportTests(unittest.TestCase):
         result = json.loads(output)
         self.assertEqual(exit_code, 0)
         self.assertEqual(errors, "")
-        self.assertEqual(result["scope"], {"report_code": "AbCd1234", "fight_id": 9})
+        self.assertEqual(result["scope"], {"report_code": "AbCd1234", "fight_id": 9, "time_mode": "started"})
         self.assertEqual(client.variables[0]["fightIDs"], [9])
         self.assertEqual(result["data"][0]["keystoneLevel"], 12)
         self.assertEqual(result["data"][0]["keystoneAffixes"], [9])
@@ -1448,10 +1448,9 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(result["source_rows"], 3)
         self.assertEqual(result["unique_candidates"], 2)
         self.assertEqual(result["hydrated_candidates"], 1)
-        self.assertEqual(result["returned_candidates"], 1)
-        self.assertEqual(result["data"][0]["report_code"], "AbCd1234")
-        self.assertEqual(result["data"][0]["fight_id"], 9)
-        self.assertEqual(result["data"][0]["matched_actor"]["name"], "Tankadin")
+        self.assertEqual(result["returned_candidates"], 0)
+        self.assertEqual(result["data"], [])
+        self.assertGreaterEqual(result["exclusion_reasons"].get("actor_identity", 0), 1)
 
     def test_global_cli_bounds_top_and_page_before_execute(self):
         for option, value in (("--top", "0"), ("--top", "101"), ("--page", "0")):

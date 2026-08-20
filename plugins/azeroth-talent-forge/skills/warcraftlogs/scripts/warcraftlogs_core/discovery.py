@@ -429,11 +429,7 @@ def _resolve_ranked_actor(candidate: Mapping[str, object], fights, actors, filte
         return ranked[0], "ranked_group_member"
     if any("ranked" in actor for actor in actors):
         return None, "missing" if not ranked else "ambiguous"
-    friendly_ids = {player for fight in _report_fights(fights) for player in _items(fight.get("friendlyPlayers"))}
-    friendly = [actor for actor in actors if actor.get("id") in friendly_ids and satisfies(actor)]
-    if len(friendly) == 1:
-        return friendly[0], "ranked_group_member"
-    return None, "missing"
+    return None, "group_only"
 
 
 def _filters_without(filters: DiscoveryFilters, names) -> DiscoveryFilters:

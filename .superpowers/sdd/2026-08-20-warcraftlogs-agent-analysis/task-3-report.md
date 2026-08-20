@@ -39,3 +39,20 @@ Added focused tests for absolute fight selection, invalid/missing fight timestam
 
 - Warcraft Logs ranking payload variants may expose actor identity under additional field names not represented by current fixtures; the resolver covers common actor/player/character/source and ID/name forms.
 - Actor class/spec derivation from a `subType`-only master-data actor remains provider-shape dependent; explicit `className`/`specName` fields are preserved when available.
+
+## Fix round 1
+
+### RED
+
+Updated the existing global discovery fixture expectation so a candidate with no ranking-row actor identity and no explicit actor marker is excluded. Updated the fights fixture expectation so the default selection mode is always present in scope. Before the fix, the focused tests failed because the group-only candidate was returned and default `time_mode` was absent.
+
+### GREEN
+
+- `python -m unittest plugins.azeroth-talent-forge.skills.warcraftlogs.tests.test_api_contracts -v` — 13/13 passed.
+- `python -m unittest plugins.azeroth-talent-forge.skills.warcraftlogs.tests.test_warcraftlogs -v` — 103/103 passed.
+- `python -m unittest discover -s plugins/azeroth-talent-forge/skills/warcraftlogs/tests -p "test_*.py"` — 116/116 passed.
+
+### Fixes
+
+- Removed the unique-friendly-group fallback. Actor-filtered candidates now require ranking-row identity or an explicit actor marker; otherwise they are excluded with `actor_identity`.
+- Always records the applied fight `time_mode` in fight scope, defaulting to `started`, including empty selections.
