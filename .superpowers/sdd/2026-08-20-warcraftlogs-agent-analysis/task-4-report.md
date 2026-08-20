@@ -45,3 +45,28 @@ Implemented Task 4. Report commands now support bounded atomic JSON output with 
 - Event export uses bounded temporary disk spooling rather than retaining event objects in memory; available temporary disk space remains an operational prerequisite.
 - No live Warcraft Logs call was made; verification is fixture/unit based.
 - Existing unrelated worktree changes in `.gitignore`, `README.md`, and `metadata-realm.graphql` were not staged.
+
+## Fix round 1 — semantic errors with event output
+
+### RED
+
+Added `EventTests.test_events_output_preserves_private_report_error`, an end-to-end `main()`/dispatch regression using `--output`. Before the fix it failed because a private report produced `could not write event output file` instead of the semantic public/accessibility error.
+
+### GREEN
+
+- Focused regression + receipt/atomic tests — 4/4 passed.
+- `test_api_contracts` — 15/15 passed.
+- `test_warcraftlogs` — 106/106 passed.
+- Full discovery — 121/121 passed.
+- `git diff --check` — no whitespace errors; only existing line-ending warnings.
+
+### Fixes
+
+- Added `OutputWriteError` for filesystem/serialization failures during event spooling and atomic replacement.
+- `PublicReportError`, `RuntimeError` cursor failures, authentication, and API/parser errors now remain outside the file-write catch and retain semantic messages/statuses.
+- Successful receipt and atomic output behavior retained.
+
+### Fix-round concerns
+
+- Regression uses the private/inaccessible-report branch; non-advancing cursor behavior remains covered without `--output` and shares the same narrowed dispatch boundary.
+- No live Warcraft Logs call made.

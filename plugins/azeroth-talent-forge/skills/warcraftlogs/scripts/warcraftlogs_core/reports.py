@@ -18,6 +18,10 @@ from .transport import sanitize_graphql_errors, utc_now
 EVENT_PAGE_LIMIT = 10000
 EVENT_MAX_PAGES = 5
 
+
+class OutputWriteError(Exception):
+    """Filesystem or serialization failure while committing an output file."""
+
 def _fight_id(parameters) -> Optional[int]:
     values = urllib.parse.parse_qs(parameters, keep_blank_values=True).get("fight")
     if values is None:
@@ -440,18 +444,25 @@ def export_event_pages(path, metadata, pages, max_pages, end_time=None):
     errors = []
     last_cursor = None
     try:
-        with tempfile.NamedTemporaryFile(
-            mode="w", encoding="utf-8", dir=str(destination.parent),
-            prefix=destination.name + ".events.", suffix=".tmp", delete=False,
-        ) as spool:
-            spool_name = spool.name
-            for page in pages:
-                pages_fetched += 1
-                last_cursor = page["nextPageTimestamp"]
-                errors.extend(page.get("errors", []))
-                for event in page["data"]:
-                    spool.write(json.dumps({"type": "event", "event": event}, ensure_ascii=False, separators=(",", ":")) + "\n")
-                    records_written += 1
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", dir=str(destination.parent),
+                prefix=destination.name + ".events.", suffix=".tmp", delete=False,
+            ) as spool:
+                spool_name = spool.name
+                for page in pages:
+                    pages_fetched += 1
+                    last_cursor = page["nextPageTimestamp"]
+                    errors.extend(page.get("errors", []))
+                    for event in page["data"]:
+                        try:
+                            line = json.dumps({"type": "event", "event": event}, ensure_ascii=False, separators=(",", ":")) + "\n"
+                            spool.write(line)
+                        except (OSError, TypeError) as error:
+                            raise OutputWriteError(str(error)) from error
+                        records_written += 1
+        except OSError as error:
+            raise OutputWriteError(str(error)) from error
         truncated = bool(
             pages_fetched and last_cursor is not None and
             (end_time is None or last_cursor < end_time) and pages_fetched >= max_pages
@@ -463,16 +474,19 @@ def export_event_pages(path, metadata, pages, max_pages, end_time=None):
             final_metadata["partial"] = True
             final_metadata["errors"] = sanitize_graphql_errors(errors)
         temporary_name = None
-        with tempfile.NamedTemporaryFile(
-            mode="w", encoding="utf-8", dir=str(destination.parent),
-            prefix=destination.name + ".", suffix=".tmp", delete=False,
-        ) as temporary:
-            temporary_name = temporary.name
-            temporary.write(json.dumps({"type": "metadata", "metadata": final_metadata}, ensure_ascii=False, separators=(",", ":")) + "\n")
-            with open(spool_name, "r", encoding="utf-8") as spool:
-                for line in spool:
-                    temporary.write(line)
-        os.replace(temporary_name, str(destination))
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", dir=str(destination.parent),
+                prefix=destination.name + ".", suffix=".tmp", delete=False,
+            ) as temporary:
+                temporary_name = temporary.name
+                temporary.write(json.dumps({"type": "metadata", "metadata": final_metadata}, ensure_ascii=False, separators=(",", ":")) + "\n")
+                with open(spool_name, "r", encoding="utf-8") as spool:
+                    for line in spool:
+                        temporary.write(line)
+            os.replace(temporary_name, str(destination))
+        except (OSError, TypeError) as error:
+            raise OutputWriteError(str(error)) from error
         temporary_name = None
         return records_written, pagination, errors
     finally:

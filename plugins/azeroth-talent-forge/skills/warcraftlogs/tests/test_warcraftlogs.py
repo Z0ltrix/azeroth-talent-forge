@@ -1111,6 +1111,29 @@ class EventTests(unittest.TestCase):
         self.assertEqual(records[0]["type"], "metadata")
         self.assertEqual(records[1], {"type": "event", "event": {"timestamp": 100}})
 
+    def test_events_output_preserves_private_report_error(self):
+        payload = fixture("report-events-page-2.json")
+        report = payload["data"]["reportData"]["report"]
+        report["visibility"] = "private"
+        report["archiveStatus"] = {"isAccessible": False}
+        client = SequenceClient([payload])
+        output = io.StringIO()
+        errors = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, redirect_stdout(output), redirect_stderr(errors), patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ):
+            path = Path(directory) / "events.jsonl"
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret", "--env-file",
+                str(Path(directory) / "missing.env"), "report", "events", "CODE1234", "--fight", "7",
+                "--output", str(path),
+            ])
+            self.assertFalse(path.exists())
+        self.assertEqual(exit_code, 4)
+        self.assertIn("public", errors.getvalue().lower())
+        self.assertNotIn("write event output file", errors.getvalue().lower())
+        self.assertEqual(output.getvalue(), "")
+
     def test_report_output_is_atomic_and_stdout_is_receipt(self):
         client = FixtureClient({"report-summary": fixture("report-summary.json")})
         output = io.StringIO()

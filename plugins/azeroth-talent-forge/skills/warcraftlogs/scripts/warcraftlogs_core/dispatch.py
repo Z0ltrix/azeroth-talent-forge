@@ -118,7 +118,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 except AuthenticationError as error:
                     print(str(error), file=sys.stderr)
                     return 3
-                except (ApiError, KeyError, TypeError, OSError, ValueError, RuntimeError):
+                except PublicReportError as error:
+                    print(str(error), file=sys.stderr)
+                    return 4
+                except RuntimeError as error:
+                    print(str(error), file=sys.stderr)
+                    return 4
+                except OutputWriteError:
                     print("Could not write event output file", file=sys.stderr)
                     return 4
                 print(json.dumps(output_receipt("report events", args.output, records_written, pagination, unused_errors), ensure_ascii=True))
