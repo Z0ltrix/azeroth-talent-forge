@@ -256,7 +256,7 @@ def _normalize_game(payload: Mapping[str, object]) -> dict:
     return {
         "classes": classes,
         "affixes": _records(game["affixes"], ("id", "name")),
-        "abilities": _records(game["abilities"], ("id", "name")),
+        "abilities": _records(game["abilities"]["data"], ("id", "name")),
     }
 
 
@@ -264,11 +264,16 @@ def _normalize_realm(payload: Mapping[str, object]) -> dict:
     world = payload["data"]["worldData"]
     if not isinstance(world, Mapping) or not isinstance(world["server"], Mapping):
         raise TypeError("Realm metadata was not an object")
-    return {
-        field: world["server"][field]
-        for field in ("id", "name", "normalizedName", "slug", "region", "subregion")
-        if field in world["server"]
+    server = world["server"]
+    result = {
+        field: server[field]
+        for field in ("id", "name", "normalizedName", "slug")
+        if field in server
     }
+    for field in ("region", "subregion"):
+        if field in server:
+            result[field] = _records([server[field]], ("id", "name", "slug"))[0]
+    return result
 
 
 class MetadataResolver:

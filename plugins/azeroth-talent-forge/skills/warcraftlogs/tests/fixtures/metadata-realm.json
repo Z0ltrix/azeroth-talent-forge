@@ -6,8 +6,8 @@
         "name": "Area 52",
         "normalizedName": "area-52",
         "slug": "area-52",
-        "region": "US",
-        "subregion": "United States"
+        "region": {"id": 1, "name": "US", "slug": "us", "unsafe": "discard"},
+        "subregion": {"id": 1, "name": "North America", "slug": "na", "unsafe": "discard"}
       }
     }
   }

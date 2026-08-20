@@ -8,7 +8,9 @@
         "specs": [{"id": 66, "name": "Protection", "slug": "protection"}]
       }],
       "affixes": [{"id": 9, "name": "Tyrannical"}],
-      "abilities": [{"id": 20271, "name": "Judgment"}]
+      "abilities": {
+        "data": [{"id": 20271, "name": "Judgment"}]
+      }
     }
   }
 }

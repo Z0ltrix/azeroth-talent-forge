@@ -2,6 +2,6 @@ query MetadataGame($abilityLimit: Int, $abilityPage: Int) {
   gameData {
     classes { id name slug specs { id name slug } }
     affixes { id name }
-    abilities(limit: $abilityLimit, page: $abilityPage) { id name }
+    abilities(limit: $abilityLimit, page: $abilityPage) { data { id name } }
   }
 }

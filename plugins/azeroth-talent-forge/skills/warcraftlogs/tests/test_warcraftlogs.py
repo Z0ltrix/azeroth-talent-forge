@@ -361,7 +361,17 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(result["id"], 3676)
         self.assertEqual(result["name"], "Area 52")
         self.assertEqual(result["normalizedName"], "area-52")
+        self.assertEqual(result["region"], {"id": 1, "name": "US", "slug": "us"})
+        self.assertEqual(result["subregion"], {"id": 1, "name": "North America", "slug": "na"})
         self.assertEqual(provenance["status"], "miss")
+
+    def test_metadata_queries_select_pagination_data_and_realm_object_fields(self):
+        game_query = warcraftlogs.load_query("metadata-game")
+        realm_query = warcraftlogs.load_query("metadata-realm")
+
+        self.assertIn("abilities(limit: $abilityLimit, page: $abilityPage) { data { id name } }", game_query)
+        self.assertIn("region { id name slug }", realm_query)
+        self.assertIn("subregion { id name slug }", realm_query)
 
     def test_world_fixture_normalizes_partition_season_and_encounter_names(self):
         resolver = warcraftlogs.MetadataResolver(
@@ -388,12 +398,13 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(result["abilities"], [{"id": 20271, "name": "Judgment"}])
         self.assertEqual(provenance["status"], "miss")
 
-    def test_metadata_cache_uses_24_hour_ttl_and_bypasses_on_request(self):
+    def test_metadata_cache_expires_and_no_cache_does_not_write(self):
         payload = fixture("metadata-world.json")
         client = FixtureClient({"metadata-world": payload})
+        clock = [1000]
         with tempfile.TemporaryDirectory() as directory:
             cache = Path(directory)
-            resolver = warcraftlogs.MetadataResolver(client, cache)
+            resolver = warcraftlogs.MetadataResolver(client, cache, now=lambda: clock[0])
             resolver.world({"expansionId": 11})
             _, hit = resolver.world({"expansionId": 11})
             self.assertEqual(hit["status"], "hit")
@@ -401,10 +412,17 @@ class MetadataTests(unittest.TestCase):
             cache_file = next(cache.glob("*.json"))
             cached = json.loads(cache_file.read_text(encoding="utf-8"))
             self.assertEqual(cached["expires_at"] - cached["fetched_at"], 24 * 60 * 60)
-
-            no_cache = warcraftlogs.MetadataResolver(client, cache, no_cache=True)
-            no_cache.world({"expansionId": 11})
+            clock[0] = cached["expires_at"]
+            _, expired = resolver.world({"expansionId": 11})
+            self.assertEqual(expired["status"], "miss")
             self.assertEqual(client.calls, ["metadata-world", "metadata-world"])
+            cache_bytes = cache_file.read_bytes()
+
+            no_cache = warcraftlogs.MetadataResolver(client, cache, no_cache=True, now=lambda: clock[0])
+            no_cache.world({"expansionId": 11})
+            self.assertEqual(client.calls, ["metadata-world", "metadata-world", "metadata-world"])
+            self.assertEqual(cache_file.read_bytes(), cache_bytes)
+            self.assertEqual(list(cache.glob("*.tmp")), [])
 
     def test_metadata_command_emits_fixture_backed_collection_envelope(self):
         output = io.StringIO()
