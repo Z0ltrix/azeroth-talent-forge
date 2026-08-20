@@ -1,0 +1,21 @@
+{
+  "data": {
+    "reportData": {
+      "report": {
+        "playerDetails": {
+          "players": [
+            {
+              "id": 7,
+              "name": "Shieldbearer",
+              "gear": [{"id": 1001, "itemLevel": 639}],
+              "stats": {"strength": 1200, "stamina": 2400},
+              "specIDs": [73],
+              "talentTree": {"class": "Warrior", "spec": "Protection"},
+              "talents": [{"id": 8001, "rank": 1}]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "data": {
+    "reportData": {
+      "report": {
+        "startTime": 1000000,
+        "fights": [
+          {"id": 11, "startTime": 10000, "endTime": 70000, "friendlyPlayers": [7]},
+          {"id": 12, "startTime": 65000, "endTime": 85000, "friendlyPlayers": [7]}
+        ]
+      }
+    }
+  }
+}
