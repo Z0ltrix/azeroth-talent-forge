@@ -1300,7 +1300,6 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
         "encounterID": filters.encounter,
         "zoneID": zone_id,
         "page": page,
-        "size": top,
     }
     variables.update(filters.direct_variables())
     for field, value in (

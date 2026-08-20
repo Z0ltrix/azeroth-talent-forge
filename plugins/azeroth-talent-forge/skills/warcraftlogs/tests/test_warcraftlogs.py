@@ -1172,6 +1172,36 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(result["unique_candidates"], 2)
         self.assertEqual([item["report_code"] for item in result["data"]], ["AbCd1234", "EfGh5678"])
 
+    def test_global_top_is_local_sample_bound_not_raid_size_filter(self):
+        class RankingClient:
+            def __init__(self):
+                self.calls = []
+
+            def execute(self, query_name, variables):
+                self.calls.append((query_name, dict(variables)))
+                return {
+                    "data": {
+                        "worldData": {
+                            "encounter": {
+                                "fightRankings": json.dumps({
+                                    "rankings": [{"reportID": "AbCd1234", "fightID": 9}],
+                                    "page": 1,
+                                    "hasMorePages": False,
+                                })
+                            }
+                        }
+                    }
+                }
+
+        client = RankingClient()
+        result = warcraftlogs.discover_global(
+            client, warcraftlogs.DiscoveryFilters(encounter=2902, zone=1300), top=1, page=1
+        )
+
+        self.assertEqual(result["requested_top"], 1)
+        self.assertEqual(client.calls[0][0], "encounter-rankings")
+        self.assertNotIn("size", client.calls[0][1])
+
     def test_global_hydration_is_fight_scoped_and_zone_filter_uses_fight_game_zone(self):
         client = FixtureClient({
             "report-fights": fixture("report-fights.json"),
