@@ -1,0 +1,6 @@
+interface:
+  display_name: "Warcraft Logs"
+  short_description: "Inspect public Warcraft Logs reports and rankings"
+  default_prompt: "Use $warcraftlogs to inspect this report URL or find public logs with these character, realm, instance, season, or key filters."
+policy:
+  allow_implicit_invocation: true

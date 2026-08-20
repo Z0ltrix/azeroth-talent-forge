@@ -173,3 +173,49 @@ The builder does not contain bundled presets. Every build starts from the user-p
 - Keep class/spec knowledge in `plugins/azeroth-talent-forge/skills/<skill>/references/`.
 - Do not add bundled talent presets unless the plugin is intentionally changed to support presets.
 - Build recommendations should come from the user's stated goal and current sources, not personal defaults.
+
+## Warcraft Logs
+
+The plugin also includes the implicitly discoverable `warcraftlogs` skill and
+the standard-library orchestrator:
+
+```text
+plugins\azeroth-talent-forge\skills\warcraftlogs\
++-- SKILL.md
++-- agents\openai.yaml
++-- scripts\warcraftlogs.py
+`-- scripts\graphql\*.graphql
+```
+
+This integration uses the public Warcraft Logs v2 GraphQL client endpoint. It
+does not use Warcraft Logs UI username/password credentials and does not scrape
+HTML. Create an OAuth API client in the Warcraft Logs API settings, then set
+the client ID and secret in a local `.env` file (never commit it):
+
+```dotenv
+WARCRAFTLOGS_CLIENT_ID=your-client-id
+WARCRAFTLOGS_CLIENT_SECRET=your-client-secret
+```
+
+Credential precedence is per field: CLI parameters (`--client-id` and
+`--client-secret`) > the explicit `--env-file` (or repository `./.env`) >
+process environment variables. The script accepts `rate-limit`, `metadata`,
+`report`, and `find` commands. Examples:
+
+```powershell
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py rate-limit
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py metadata zones
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report summary https://www.warcraftlogs.com/reports/REPORTCODE
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report events REPORTCODE --fight 1 --max-pages 1
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py find character --name Character --server Area-52 --region us
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py find global --instance 1300 --top 10
+```
+
+Metadata is cached locally for 24 hours; use `--no-cache` for a refresh. Event
+downloads are deliberately bounded by a fight ID or time window and page limit.
+Every command prints JSON with scope, filters, completeness, pagination, and
+warnings so sampled or truncated results are not mistaken for exhaustive data.
+
+For Codex cloud execution, allow outbound `warcraftlogs.com` and HTTP `POST`
+to the public API endpoint. No API client secret or access token belongs in
+the repository, fixtures, or command output.

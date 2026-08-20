@@ -107,6 +107,45 @@ class CredentialTests(unittest.TestCase):
                 )
 
 
+class PackagingTests(unittest.TestCase):
+    """Exercise package contracts without matching instruction prose."""
+
+    ROOT = SCRIPT.parents[1]
+    MANIFEST = SCRIPT.parents[3] / ".codex-plugin" / "plugin.json"
+
+    def test_skill_frontmatter_declares_exact_runtime_name(self):
+        skill = self.ROOT / "SKILL.md"
+        self.assertTrue(skill.is_file())
+        frontmatter = skill.read_text(encoding="utf-8").split("---", 2)[1]
+        fields = {
+            line.split(":", 1)[0].strip(): line.split(":", 1)[1].strip()
+            for line in frontmatter.splitlines()
+            if ":" in line
+        }
+        self.assertEqual(fields.get("name"), "warcraftlogs")
+        self.assertTrue(fields.get("description"))
+
+    def test_manifest_version_and_skill_entry_are_machine_readable(self):
+        manifest = json.loads(self.MANIFEST.read_text(encoding="utf-8"))
+        self.assertEqual(manifest["version"], "0.2.0")
+        self.assertIn("skills", manifest)
+
+    def test_ui_metadata_is_present_with_explicit_interface_fields(self):
+        metadata = self.ROOT / "agents" / "openai.yaml"
+        self.assertTrue(metadata.is_file())
+        text = metadata.read_text(encoding="utf-8")
+        self.assertIn("interface:", text)
+        self.assertIn("display_name:", text)
+        self.assertIn("default_prompt:", text)
+
+    def test_all_bundled_query_documents_remain_loadable(self):
+        query_dir = SCRIPT.parent / "graphql"
+        names = sorted(path.stem for path in query_dir.glob("*.graphql"))
+        self.assertTrue(names)
+        for name in names:
+            self.assertTrue(warcraftlogs.load_query(name).strip())
+
+
 class TransportTests(unittest.TestCase):
     def test_query_loader_rejects_path_traversal(self):
         with self.assertRaisesRegex(ValueError, "query name"):
