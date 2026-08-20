@@ -764,6 +764,130 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(raised.exception.code, 2)
 
 
+def event_page(events, cursor):
+    return {"data": {"reportData": {"report": {"events": {"data": events, "nextPageTimestamp": cursor}}}}}
+
+
+class SequenceClient:
+    def __init__(self, payloads):
+        self.payloads = list(payloads)
+        self.calls = []
+        self.variables = []
+
+    def execute(self, query_name, variables):
+        self.calls.append(query_name)
+        self.variables.append(dict(variables))
+        return self.payloads.pop(0)
+
+
+class EventTests(unittest.TestCase):
+    def test_event_pagination_requires_fight_or_complete_window(self):
+        with self.assertRaisesRegex(ValueError, "fight ID or both startTime and endTime"):
+            list(warcraftlogs.iter_event_pages(SequenceClient([]), "CODE", {}, 5))
+
+    def test_event_pagination_advances_to_returned_cursor(self):
+        client = SequenceClient([
+            event_page([{"timestamp": 100}], 200),
+            event_page([{"timestamp": 200}], None),
+        ])
+
+        pages = list(warcraftlogs.iter_event_pages(client, "CODE", {"startTime": 0, "endTime": 1000}, 5))
+
+        self.assertEqual(len(pages), 2)
+        self.assertEqual(client.calls, ["report-events", "report-events"])
+        self.assertEqual(client.variables[0]["startTime"], 0)
+        self.assertEqual(client.variables[1]["startTime"], 200)
+        self.assertEqual(client.variables[1]["limit"], 10000)
+
+    def test_event_pagination_stops_at_null_cursor(self):
+        client = SequenceClient([event_page([{"timestamp": 100}], None)])
+
+        pages = list(warcraftlogs.iter_event_pages(client, "CODE", {"fightIDs": [7]}, 5))
+
+        self.assertEqual(len(pages), 1)
+        self.assertEqual(client.variables[0]["fightIDs"], [7])
+
+    def test_event_pagination_stops_at_end_window(self):
+        client = SequenceClient([event_page([{"timestamp": 100}], 1000)])
+
+        pages = list(warcraftlogs.iter_event_pages(client, "CODE", {"startTime": 0, "endTime": 1000}, 5))
+
+        self.assertEqual(len(pages), 1)
+        self.assertEqual(len(client.calls), 1)
+
+    def test_repeated_event_cursor_is_rejected(self):
+        client = SequenceClient([
+            event_page([{"timestamp": 100}], 200),
+            event_page([{"timestamp": 200}], 200),
+        ])
+        with self.assertRaisesRegex(RuntimeError, "did not advance"):
+            list(warcraftlogs.iter_event_pages(client, "CODE", {"startTime": 0, "endTime": 1000}, 5))
+
+    def test_event_pagination_honors_max_pages_and_preserves_partial_pages(self):
+        client = SequenceClient([
+            event_page([{"timestamp": 100}], 200),
+            event_page([{"timestamp": 200}], 300),
+            event_page([{"timestamp": 300}], 400),
+        ])
+
+        pages = list(warcraftlogs.iter_event_pages(client, "CODE", {"startTime": 0, "endTime": 1000}, 2))
+
+        self.assertEqual([page["data"] for page in pages], [[{"timestamp": 100}], [{"timestamp": 200}]])
+        self.assertEqual(len(client.calls), 2)
+
+    def test_event_limit_must_be_between_100_and_10000(self):
+        for limit in (99, 10001):
+            with self.subTest(limit=limit), self.assertRaisesRegex(ValueError, "100.*10000"):
+                list(warcraftlogs.iter_event_pages(
+                    SequenceClient([]), "CODE", {"fightIDs": [7], "limit": limit}, 5
+                ))
+
+    def test_event_query_contains_documented_variables_and_fields(self):
+        query = warcraftlogs.load_query("report-events")
+        for value in (
+            "$code", "$fightIDs", "$startTime", "$endTime", "$dataType", "$sourceID",
+            "$targetID", "$abilityID", "$hostility", "$filterExpression", "$includeResources",
+            "$useActorIDs", "$useAbilityIDs", "$limit", "nextPageTimestamp", "data",
+        ):
+            self.assertIn(value, query)
+
+    def test_event_jsonl_is_metadata_first_and_round_trips(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "events.jsonl"
+            metadata = {"command": "report events", "pagination": {"pages_fetched": 2, "truncated": True}}
+            events = [{"timestamp": 100, "ability": "é"}, {"timestamp": 200}]
+
+            warcraftlogs.write_event_jsonl(path, metadata, events)
+
+            records = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+        self.assertEqual(records[0], {"type": "metadata", "metadata": metadata})
+        self.assertEqual([record["type"] for record in records[1:]], ["event", "event"])
+        self.assertEqual([record["event"] for record in records[1:]], events)
+
+    def test_events_cli_writes_jsonl_and_stdout_envelope(self):
+        client = SequenceClient([event_page([{"timestamp": 100}], None)])
+        output = io.StringIO()
+        errors = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, redirect_stdout(output), redirect_stderr(errors), patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ):
+            path = Path(directory) / "events.jsonl"
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret", "--env-file",
+                str(Path(directory) / "missing.env"), "report", "events", "CODE1234", "--fight", "7",
+                "--output", str(path),
+            ])
+            records = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+
+        envelope = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(errors.getvalue(), "")
+        self.assertEqual(envelope["command"], "report events")
+        self.assertEqual(envelope["data"], [{"timestamp": 100}])
+        self.assertEqual(records[0]["type"], "metadata")
+        self.assertEqual(records[1], {"type": "event", "event": {"timestamp": 100}})
+
+
 def fixture(name):
     return json.loads((Path(__file__).parent / "fixtures" / name).read_text(encoding="utf-8"))
 

@@ -1,0 +1,42 @@
+query ReportEvents(
+  $code: String!
+  $allowUnlisted: Boolean!
+  $fightIDs: [Int!]
+  $startTime: Float
+  $endTime: Float
+  $dataType: EventDataType
+  $sourceID: Int
+  $targetID: Int
+  $abilityID: Int
+  $hostility: HostilityType
+  $filterExpression: String
+  $includeResources: Boolean
+  $useActorIDs: Boolean
+  $useAbilityIDs: Boolean
+  $limit: Int
+) {
+  reportData {
+    report(code: $code, allowUnlisted: $allowUnlisted) {
+      visibility
+      archiveStatus { isArchived isAccessible archiveDate }
+      events(
+        fightIDs: $fightIDs
+        startTime: $startTime
+        endTime: $endTime
+        dataType: $dataType
+        sourceID: $sourceID
+        targetID: $targetID
+        abilityID: $abilityID
+        hostility: $hostility
+        filterExpression: $filterExpression
+        includeResources: $includeResources
+        useActorIDs: $useActorIDs
+        useAbilityIDs: $useAbilityIDs
+        limit: $limit
+      ) {
+        data
+        nextPageTimestamp
+      }
+    }
+  }
+}

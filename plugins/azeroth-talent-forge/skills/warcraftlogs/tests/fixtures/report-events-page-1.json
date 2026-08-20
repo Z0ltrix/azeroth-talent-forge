@@ -1,0 +1,14 @@
+{
+  "data": {
+    "reportData": {
+      "report": {
+        "events": {
+          "data": [
+            {"timestamp": 100, "type": "damage", "sourceID": 1, "targetID": 2}
+          ],
+          "nextPageTimestamp": 200
+        }
+      }
+    }
+  }
+}

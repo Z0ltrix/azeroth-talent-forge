@@ -5,6 +5,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.parse
@@ -544,6 +545,141 @@ def report_data(payload: Mapping[str, object], kind: str):
     return report[field]
 
 
+EVENT_PAGE_LIMIT = 10000
+EVENT_MAX_PAGES = 5
+
+
+def _event_page(payload: Mapping[str, object]) -> dict:
+    report = payload["data"]["reportData"]["report"]
+    if not isinstance(report, Mapping):
+        raise TypeError("Report was not an object")
+    if "visibility" in report or "archiveStatus" in report:
+        archive_status = report.get("archiveStatus")
+        accessible = isinstance(archive_status, Mapping) and archive_status.get("isAccessible") is True
+        if str(report.get("visibility", "")).casefold() != "public" or not accessible:
+            raise PublicReportError("Report is not public or accessible")
+    events = report["events"]
+    if not isinstance(events, Mapping) or not isinstance(events.get("data"), list):
+        raise TypeError("Report events were not a list")
+    cursor = events.get("nextPageTimestamp")
+    if cursor is not None and not isinstance(cursor, (int, float)):
+        raise TypeError("Report event cursor was not numeric")
+    result = {"data": list(events["data"]), "nextPageTimestamp": cursor}
+    if payload.get("errors"):
+        result["errors"] = payload["errors"]
+    return result
+
+
+def iter_event_pages(client, code, variables, max_pages=EVENT_MAX_PAGES):
+    if not isinstance(max_pages, int) or isinstance(max_pages, bool) or max_pages < 1:
+        raise ValueError("Event max pages must be a positive integer")
+    request = dict(variables)
+    fight_ids = request.get("fightIDs")
+    has_fight = isinstance(fight_ids, (list, tuple)) and bool(fight_ids)
+    has_window = request.get("startTime") is not None and request.get("endTime") is not None
+    if not has_fight and not has_window:
+        raise ValueError("Event download requires a fight ID or both startTime and endTime")
+    if has_fight and any(not isinstance(fight_id, int) or isinstance(fight_id, bool) or fight_id < 1 for fight_id in fight_ids):
+        raise ValueError("Report fight must be a positive integer")
+    if has_window and request["startTime"] > request["endTime"]:
+        raise ValueError("Report start time must not exceed end time")
+    limit = request.get("limit", EVENT_PAGE_LIMIT)
+    if not isinstance(limit, int) or isinstance(limit, bool) or not 100 <= limit <= EVENT_PAGE_LIMIT:
+        raise ValueError("Event limit must be between 100 and 10000")
+    request["code"] = code
+    request["limit"] = limit
+    current_start = request.get("startTime")
+    previous_cursor = current_start if current_start is not None else 0
+    for unused_page_number in range(max_pages):
+        if current_start is None:
+            request.pop("startTime", None)
+        else:
+            request["startTime"] = current_start
+        page = _event_page(client.execute("report-events", request))
+        cursor = page["nextPageTimestamp"]
+        if cursor is not None and previous_cursor is not None and cursor <= previous_cursor:
+            raise RuntimeError("Event pagination cursor did not advance")
+        yield page
+        if cursor is None:
+            return
+        end_time = request.get("endTime")
+        if end_time is not None and cursor >= end_time:
+            return
+        previous_cursor = cursor
+        current_start = cursor
+
+
+def write_event_jsonl(path, metadata, events):
+    destination = Path(path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary_name = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=str(destination.parent),
+            prefix=destination.name + ".", suffix=".tmp", delete=False,
+        ) as temporary:
+            temporary_name = temporary.name
+            temporary.write(json.dumps({"type": "metadata", "metadata": dict(metadata)}, ensure_ascii=False, separators=(",", ":")) + "\n")
+            for event in events:
+                temporary.write(json.dumps({"type": "event", "event": event}, ensure_ascii=False, separators=(",", ":")) + "\n")
+        os.replace(temporary_name, str(destination))
+        temporary_name = None
+    finally:
+        if temporary_name:
+            try:
+                os.unlink(temporary_name)
+            except OSError:
+                pass
+
+
+def event_request(args) -> tuple:
+    reference = parse_report_reference(args.reference)
+    fight_id = args.fight if args.fight is not None else reference.fight_id
+    if fight_id is not None and fight_id < 1:
+        raise ValueError("Report fight must be a positive integer")
+    start_time = args.start_time
+    end_time = args.end_time
+    if (start_time is not None and start_time < 0) or (end_time is not None and end_time < 0):
+        raise ValueError("Report window times must not be negative")
+    if start_time is not None and end_time is not None and start_time > end_time:
+        raise ValueError("Report start time must not exceed end time")
+    if fight_id is None and (start_time is None or end_time is None):
+        raise ValueError("Event download requires a fight ID or both startTime and endTime")
+    if not 100 <= args.event_limit <= EVENT_PAGE_LIMIT:
+        raise ValueError("Event limit must be between 100 and 10000")
+    if args.max_pages < 1:
+        raise ValueError("Event max pages must be a positive integer")
+    variables = {"allowUnlisted": False, "limit": args.event_limit}
+    if fight_id is not None:
+        variables["fightIDs"] = [fight_id]
+    if start_time is not None:
+        variables["startTime"] = start_time
+    if end_time is not None:
+        variables["endTime"] = end_time
+    for attribute, variable_name in (
+        ("data_type", "dataType"), ("source_id", "sourceID"), ("target_id", "targetID"),
+        ("ability_id", "abilityID"), ("hostility", "hostility"),
+        ("filter_expression", "filterExpression"), ("include_resources", "includeResources"),
+        ("use_actor_ids", "useActorIDs"), ("use_ability_ids", "useAbilityIDs"),
+    ):
+        value = getattr(args, attribute)
+        if value is not None:
+            variables[variable_name] = value
+    scope = {"report_code": reference.code}
+    if fight_id is not None:
+        scope["fight_id"] = fight_id
+    if start_time is not None:
+        scope["start_time"] = start_time
+    if end_time is not None:
+        scope["end_time"] = end_time
+    filters = {
+        key: variables[key]
+        for key in variables
+        if key not in ("allowUnlisted", "fightIDs", "startTime", "endTime", "limit")
+    }
+    return reference, variables, scope, filters
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="warcraftlogs.py")
     parser.add_argument("--client-id")
@@ -598,6 +734,20 @@ def build_parser() -> argparse.ArgumentParser:
         command.add_argument("--view-by")
         command.add_argument("--wipe-cutoff", type=int)
         command.add_argument("--no-translate", dest="translate", action="store_false", default=True)
+    events = report_parsers.add_parser("events")
+    _add_report_options(events, window=True)
+    events.add_argument("--data-type")
+    events.add_argument("--source-id", type=int)
+    events.add_argument("--target-id", type=int)
+    events.add_argument("--ability-id", type=int)
+    events.add_argument("--hostility")
+    events.add_argument("--filter-expression")
+    events.add_argument("--include-resources", action="store_true", default=None)
+    events.add_argument("--use-actor-ids", action="store_true", default=None)
+    events.add_argument("--use-ability-ids", action="store_true", default=None)
+    events.add_argument("--event-limit", type=int, default=EVENT_PAGE_LIMIT)
+    events.add_argument("--max-pages", type=int, default=EVENT_MAX_PAGES)
+    events.add_argument("--output")
     rankings = report_parsers.add_parser("rankings")
     _add_report_options(rankings)
     rankings.add_argument("--difficulty", type=int)
@@ -625,6 +775,44 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 2
     client = WarcraftLogsClient(credentials)
     if args.command == "report":
+        if args.report_command == "events":
+            try:
+                unused, variables, scope, filters = event_request(args)
+            except ValueError as error:
+                print(str(error), file=sys.stderr)
+                return 2
+            try:
+                pages = list(iter_event_pages(client, unused.code, variables, args.max_pages))
+            except AuthenticationError as error:
+                print(str(error), file=sys.stderr)
+                return 3
+            except PublicReportError as error:
+                print(str(error), file=sys.stderr)
+                return 4
+            except (ApiError, KeyError, TypeError, OSError, RuntimeError, ValueError):
+                print("Warcraft Logs API response did not contain event data", file=sys.stderr)
+                return 4
+            data = [event for page in pages for event in page["data"]]
+            last_cursor = pages[-1]["nextPageTimestamp"] if pages else None
+            truncated = bool(
+                pages and last_cursor is not None and
+                (args.end_time is None or last_cursor < args.end_time) and
+                len(pages) >= args.max_pages
+            )
+            pagination = {"pages_fetched": len(pages), "truncated": truncated}
+            errors = [error for page in pages for error in page.get("errors", [])]
+            envelope = make_envelope(
+                "report events", scope, filters, "api_collection", data,
+                pagination=pagination, errors=errors,
+            )
+            try:
+                if args.output:
+                    write_event_jsonl(args.output, envelope, data)
+            except OSError:
+                print("Could not write event output file", file=sys.stderr)
+                return 4
+            print(json.dumps(envelope, ensure_ascii=True))
+            return 0
         if args.report_command not in REPORT_KINDS:
             return 0
         try:
