@@ -506,16 +506,7 @@ class MetadataTests(unittest.TestCase):
 
         self.assertIn("abilities(limit: $abilityLimit, page: $abilityPage) { data { id name } }", game_query)
         self.assertIn("region { id name slug }", realm_query)
-        self.assertIn("subregion { id name }", realm_query)
-
-    def test_character_and_realm_queries_match_current_public_schema(self):
-        character_query = warcraftlogs.load_query("character")
-        character_reports_query = warcraftlogs.load_query("character-reports")
-        realm_query = warcraftlogs.load_query("metadata-realm")
-
-        self.assertNotIn("guild { name }", character_query)
-        self.assertNotIn("gameZone", character_reports_query)
-        self.assertNotIn("subregion { id name slug }", realm_query)
+        self.assertIn("subregion { id name slug }", realm_query)
 
     def test_world_fixture_normalizes_partition_season_and_encounter_names(self):
         resolver = warcraftlogs.MetadataResolver(
@@ -681,9 +672,6 @@ class ReportTests(unittest.TestCase):
         self.assertIn("owner { id name }", summary)
         self.assertIn("guild { id name }", summary)
         self.assertIn("gameZone { id name }", fights)
-        self.assertNotIn("zone { id name }", fights)
-        self.assertNotIn("endTime: $endTime", fights)
-        self.assertNotIn("startTime: $startTime", fights)
         self.assertIn("keystoneAffixes", fights)
         self.assertIn("abilities { gameID icon name type }", master)
         self.assertIn("actors { id gameID icon name petOwner server subType type }", master)

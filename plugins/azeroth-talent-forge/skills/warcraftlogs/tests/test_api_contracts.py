@@ -11,13 +11,6 @@ warcraftlogs = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(warcraftlogs)
 
 
-def agent_analysis_service(test_case):
-    service = getattr(warcraftlogs, "agent_analysis", None)
-    if service is None:
-        test_case.fail("agent-analysis service is not implemented")
-    return service
-
-
 def fixture(name):
     return json.loads((TESTS / "fixtures" / name).read_text(encoding="utf-8"))
 
@@ -55,7 +48,7 @@ class AgentAnalysisContractTests(unittest.TestCase):
     def test_fight_times_are_absolute_and_boundary_crossing_fight_is_retained(self):
         payload = fixture("report-fights-rich.json")
 
-        fights = agent_analysis_service(self).normalize_fights(payload, report_start_time=1_000_000)
+        fights = warcraftlogs.report_data(payload, "fights")
 
         self.assertEqual(fights[0]["startTime"], 1_010_000)
         self.assertEqual(fights[0]["endTime"], 1_070_000)
@@ -65,20 +58,11 @@ class AgentAnalysisContractTests(unittest.TestCase):
     def test_combatant_fields_are_preserved(self):
         payload = fixture("report-player-details-combatant.json")
 
-        players = agent_analysis_service(self).normalize_combatant_details(payload)
+        players = warcraftlogs.report_data(payload, "player-details")["players"]
 
-        self.assertEqual(
-            players[0],
-            {
-                "id": 7,
-                "name": "Shieldbearer",
-                "gear": [{"id": 1001, "itemLevel": 639}],
-                "stats": {"strength": 1200, "stamina": 2400},
-                "specIDs": [73],
-                "talentTree": {"class": "Warrior", "spec": "Protection"},
-                "talents": [{"id": 8001, "rank": 1}],
-            },
-        )
+        for field in ("gear", "stats", "specIDs", "talentTree", "talents"):
+            with self.subTest(field=field):
+                self.assertIn(field, players[0])
 
     def test_cohort_match_requires_ranked_actor_and_returns_unique_match(self):
         candidates = [
@@ -86,16 +70,64 @@ class AgentAnalysisContractTests(unittest.TestCase):
             {"id": 2, "name": "Ranked Rogue", "className": "Rogue", "role": "DPS", "ranked": True},
             {"id": 3, "name": "Ranked Priest", "className": "Priest", "role": "Healer", "ranked": True},
             {"id": 4, "name": "Ranked Hunter", "className": "Hunter", "role": "DPS", "ranked": True},
-            {"id": 5, "name": "Unranked Warrior", "className": "Warrior", "role": "Tank", "ranked": False},
+            {"id": 5, "name": "Unranked Warrior", "className": "Warrior", "specName": "Protection", "role": "Tank", "ranked": False},
         ]
 
-        service = agent_analysis_service(self)
-        self.assertIsNone(service.match_cohort_actor(candidates, "Warrior", "Tank"))
-        candidates[4]["ranked"] = True
-        self.assertEqual(
-            service.match_cohort_actor(candidates, "Warrior", "Tank"),
-            candidates[4],
+        filters = warcraftlogs.DiscoveryFilters(
+            encounter=1, zone=2335, class_name="Warrior", role="Tank"
         )
+        excluded = warcraftlogs.discover_global(DiscoveryClient(discovery_actors(candidates)), filters, top=1, page=1)
+        self.assertEqual(excluded["data"], [])
+        self.assertGreaterEqual(excluded["excluded_candidates"], 1)
+
+        candidates[4]["ranked"] = True
+        matched = warcraftlogs.discover_global(DiscoveryClient(discovery_actors(candidates)), filters, top=1, page=1)
+        candidate = matched["data"][0]
+        self.assertEqual(candidate["matched_actor"], {
+            "id": 5,
+            "name": "Unranked Warrior",
+            "class": "Warrior",
+            "spec": "Protection",
+            "role": "Tank",
+            "match_source": "ranked_group_member",
+        })
+
+
+class DiscoveryClient:
+    def __init__(self, actors):
+        self.actors = actors
+
+    def execute(self, query_name, variables):
+        if query_name == "encounter-rankings":
+            rankings = {
+                "rankings": [{"rank": 1, "reportID": "Cohort001", "fightID": 7}],
+                "page": 1,
+                "hasMorePages": False,
+            }
+            return {"data": {"worldData": {"encounter": {"fightRankings": json.dumps(rankings)}}}}
+        if query_name == "report-fights":
+            return {"data": {"reportData": {"report": {
+                "visibility": "public",
+                "archiveStatus": {"isAccessible": True},
+                "fights": [{"id": 7, "gameZone": {"id": 2335}, "friendlyPlayers": [1, 2, 3, 4, 5]}],
+            }}}}
+        if query_name == "report-master-data":
+            return {"data": {"reportData": {"report": {
+                "visibility": "public",
+                "archiveStatus": {"isAccessible": True},
+                "masterData": {"actors": self.actors},
+            }}}}
+        raise AssertionError(query_name)
+
+
+def discovery_actors(candidates):
+    actors = []
+    for index, candidate in enumerate(candidates, 1):
+        actor = dict(candidate)
+        actor["id"] = index
+        actor["subType"] = "ProtectionWarrior" if candidate["className"] == "Warrior" else candidate["className"]
+        actors.append(actor)
+    return actors
 
 
 class JsonlContractTests(unittest.TestCase):

@@ -2,6 +2,8 @@
   "data": {
     "reportData": {
       "report": {
+        "visibility": "public",
+        "archiveStatus": {"isAccessible": true},
         "playerDetails": {
           "players": [
             {
