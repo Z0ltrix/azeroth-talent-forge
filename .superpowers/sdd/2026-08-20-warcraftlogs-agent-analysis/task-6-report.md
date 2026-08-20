@@ -43,3 +43,20 @@ live success is claimed.
   public report/fight were absent. Run the documented command when configured.
 - Existing unrelated worktree edits were preserved and excluded from the Task 6
   commit.
+
+## Fix round 1
+
+Addressed the two scoped review findings with TDD.
+
+- RED against parent: the new fake-client drift test for missing
+  `Report.playerDetails.fightIDs` failed because the validator returned success.
+- Extended the expected schema contract only for arguments used by the bounded
+  smoke calls: `playerDetails.fightIDs`, `events.fightIDs`, `events.limit`,
+  `table.fightIDs`, `table.dataType`, `graph.fightIDs`, and `graph.dataType`.
+  Types are derived from the checked-in GraphQL documents and the existing fake
+  introspection representation.
+- Added a fake-client test returning a top-level GraphQL `errors` response with
+  secret-like message/extension values. Output retains safe error text/status
+  while excluding the secret, extensions, and payload details.
+- Existing payload-style `ApiError` sanitization test remains covered without
+  network access.

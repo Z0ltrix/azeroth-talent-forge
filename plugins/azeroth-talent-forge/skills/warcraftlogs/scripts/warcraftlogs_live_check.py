@@ -51,10 +51,10 @@ def required_schema_fixture():
     """Small fake-client schema used by local tests; live responses use __type."""
     return {"contracts": {
         "fights": {"fightIDs": "[Int]", "translate": "Boolean"},
-        "playerDetails": {"includeCombatantInfo": "Boolean"},
+        "playerDetails": {"fightIDs": "[Int]", "includeCombatantInfo": "Boolean"},
         "events": {"fightIDs": "[Int!]", "abilityID": "Float", "hostilityType": "HostilityType", "limit": "Int"},
-        "table": {"fightIDs": "[Int]", "viewOptions": "Int"},
-        "graph": {"fightIDs": "[Int]", "viewOptions": "Int"},
+        "table": {"fightIDs": "[Int]", "dataType": "TableDataType!", "viewOptions": "Int"},
+        "graph": {"fightIDs": "[Int]", "dataType": "GraphDataType!", "viewOptions": "Int"},
     }}
 
 
@@ -98,10 +98,10 @@ def validate_schema(client):
     fields = _schema_fields(payload)
     expected = {
         "fights": {"fightIDs": "[Int]"},
-        "playerDetails": {"includeCombatantInfo": "Boolean"},
-        "events": {"abilityID": "Float", "hostilityType": "HostilityType", "limit": "Int"},
-        "table": {},
-        "graph": {},
+        "playerDetails": {"fightIDs": "[Int]", "includeCombatantInfo": "Boolean"},
+        "events": {"fightIDs": "[Int!]", "abilityID": "Float", "hostilityType": "HostilityType", "limit": "Int"},
+        "table": {"fightIDs": "[Int]", "dataType": "TableDataType!"},
+        "graph": {"fightIDs": "[Int]", "dataType": "GraphDataType!"},
     }
     for field, arguments in expected.items():
         if field not in fields:
