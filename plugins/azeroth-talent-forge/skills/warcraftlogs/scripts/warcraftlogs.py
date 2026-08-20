@@ -855,8 +855,12 @@ def _positive_id(value, label):
     return parsed
 
 
+def _expansion_variables(expansion_id):
+    return {} if expansion_id is None else {"expansionId": expansion_id}
+
+
 def _global_world(client, expansion_id):
-    return _normalize_world(client.execute("metadata-world", {"expansionId": expansion_id}))
+    return _normalize_world(client.execute("metadata-world", _expansion_variables(expansion_id)))
 
 
 def _resolve_global_metadata_id(value, records, label):
@@ -1235,7 +1239,7 @@ def make_global_result(rows, sample_size, filters, ranking_basis="encounter_rank
 
 def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_pages: int = 1,
                     metric=None, leaderboard=None, server_region=None, server_slug=None,
-                    expansion_id=11) -> dict:
+                    expansion_id=None) -> dict:
     if not isinstance(top, int) or isinstance(top, bool) or not GLOBAL_TOP_MIN <= top <= GLOBAL_TOP_MAX:
         raise ValueError("Global top must be between 1 and 100")
     if (
@@ -1543,7 +1547,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     metadata.add_argument("--region")
     metadata.add_argument("--name")
-    metadata.add_argument("--expansion-id", type=int, default=11)
+    metadata.add_argument("--expansion-id", type=int)
     metadata.add_argument("--ability-limit", type=int, default=100)
     metadata.add_argument("--ability-page", type=int, default=1)
     report = subparsers.add_parser("report")
@@ -1639,7 +1643,7 @@ def build_parser() -> argparse.ArgumentParser:
     global_scope.add_argument("--zone")
     global_scope.add_argument("--instance")
     global_scope.add_argument("--encounter", "--encounter-id", dest="encounter")
-    global_find.add_argument("--expansion-id", type=int, default=11)
+    global_find.add_argument("--expansion-id", type=int)
     global_find.add_argument("--page", type=int, default=1)
     global_find.add_argument("--top", type=int, default=100)
     global_find.add_argument("--max-pages", type=int, default=1)
@@ -1827,7 +1831,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 scope = {"region": args.region}
                 filters = {"name": args.name}
             elif args.kind in ("regions", "zones", "encounters", "seasons"):
-                world, provenance = resolver.world({"expansionId": args.expansion_id})
+                world, provenance = resolver.world(_expansion_variables(args.expansion_id))
                 scope = {"expansion_id": args.expansion_id}
                 filters = {}
                 if args.kind == "regions":

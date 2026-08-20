@@ -1052,6 +1052,25 @@ class EventTests(unittest.TestCase):
 
 
 class DiscoveryTests(unittest.TestCase):
+    def test_expansion_filter_defaults_to_unset_for_metadata_and_global(self):
+        metadata_args = warcraftlogs.build_parser().parse_args(["metadata", "zones"])
+        global_args = warcraftlogs.build_parser().parse_args([
+            "find", "global", "--zone", "1300",
+        ])
+        self.assertIsNone(metadata_args.expansion_id)
+        self.assertIsNone(global_args.expansion_id)
+
+        client = FixtureClient({"metadata-world": fixture("metadata-world.json")})
+        warcraftlogs._global_filters(global_args, client)
+        self.assertEqual(client.variables, [{}])
+
+        explicit_client = FixtureClient({"metadata-world": fixture("metadata-world.json")})
+        explicit_args = warcraftlogs.build_parser().parse_args([
+            "find", "global", "--zone", "1300", "--expansion-id", "11",
+        ])
+        warcraftlogs._global_filters(explicit_args, explicit_client)
+        self.assertEqual(explicit_client.variables, [{"expansionId": 11}])
+
     def test_global_results_are_always_sampled(self):
         envelope = warcraftlogs.make_global_result([], sample_size=0, filters={"encounter": 123})
         self.assertEqual(envelope["completeness"], "sampled")
@@ -1306,7 +1325,7 @@ class DiscoveryTests(unittest.TestCase):
         result = warcraftlogs.discover_global(client, filters, top=1, page=1)
         self.assertEqual(filters.zone, 1300)
         self.assertEqual(filters.encounter, 2902)
-        self.assertEqual(client.variables[0], {"expansionId": 11})
+        self.assertEqual(client.variables[0], {})
         self.assertEqual(result["completeness"], "sampled")
 
     def test_report_matches_returns_deterministic_derived_exclusion_reasons(self):
