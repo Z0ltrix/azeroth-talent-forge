@@ -137,5 +137,3 @@ def build_parser() -> argparse.ArgumentParser:
     global_find.add_argument("--server-region")
     global_find.add_argument("--server-slug")
     return parser
-
-

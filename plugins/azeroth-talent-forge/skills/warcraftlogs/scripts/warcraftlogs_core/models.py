@@ -287,4 +287,3 @@ def normalize_name(value) -> str:
     if not isinstance(value, str):
         raise ValueError("Name must be a string")
     return re.sub(r"[\s-]+", " ", value.casefold()).strip()
-
