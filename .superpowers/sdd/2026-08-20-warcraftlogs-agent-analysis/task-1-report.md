@@ -66,3 +66,31 @@ python -m unittest discover -s plugins/azeroth-talent-forge/skills/warcraftlogs/
 Result: 110 tests, 101 pass, 9 failures: 7 focused RED failures plus the same 2 pre-existing schema failures.
 
 Production tree remained untouched. Changes are test/report-only.
+
+## Fix round 1 — scoped re-review
+
+Applied remaining review corrections:
+
+- Removed the unrelated `subregion { id name slug }` assertion from `test_warcraftlogs.py`; no realm/schema expectation remains changed. The only legacy-test edit is the required `gameZone` assertion correction.
+- Added a genuine ambiguous cohort case with two ranked Warrior/Tank actors and stable exclusion assertion. Group-only rejection and unique `matched_actor` shape assertions remain.
+- Corrected failure attribution below: the remaining existing-suite failure is introduced by this task's required `gameZone` assertion correction, not pre-existing.
+
+Verification after this fix:
+
+```text
+python -m unittest plugins.azeroth-talent-forge.skills.warcraftlogs.tests.test_api_contracts -v
+```
+
+Result: 9 reported tests, 7 expected RED failures, 2 passes. Failures: fight normalization, group-only cohort exclusion, and five query-contract checks. No import/setup failures.
+
+```text
+python -m unittest plugins.azeroth-talent-forge.skills.warcraftlogs.tests.test_warcraftlogs -q
+```
+
+Result: 101 tests, 100 pass, 1 failure. Failure is the task-required `gameZone` assertion against unchanged production query text.
+
+```text
+python -m unittest discover -s plugins/azeroth-talent-forge/skills/warcraftlogs/tests -p "test_*.py"
+```
+
+Result: 110 tests, 102 pass, 8 failures: 7 focused RED contract failures plus the task-introduced `gameZone` assertion failure.

@@ -92,10 +92,23 @@ class AgentAnalysisContractTests(unittest.TestCase):
             "match_source": "ranked_group_member",
         })
 
+        ambiguous_candidates = candidates + [
+            {"id": 6, "name": "Second Warrior", "className": "Warrior", "specName": "Protection", "role": "Tank", "ranked": True},
+        ]
+        ambiguous = warcraftlogs.discover_global(
+            DiscoveryClient(discovery_actors(ambiguous_candidates), friendly_players=[1, 2, 3, 4, 5, 6]),
+            filters,
+            top=1,
+            page=1,
+        )
+        self.assertEqual(ambiguous["data"], [])
+        self.assertGreaterEqual(ambiguous["excluded_candidates"], 1)
+
 
 class DiscoveryClient:
-    def __init__(self, actors):
+    def __init__(self, actors, friendly_players=None):
         self.actors = actors
+        self.friendly_players = friendly_players or [1, 2, 3, 4, 5]
 
     def execute(self, query_name, variables):
         if query_name == "encounter-rankings":
@@ -109,7 +122,7 @@ class DiscoveryClient:
             return {"data": {"reportData": {"report": {
                 "visibility": "public",
                 "archiveStatus": {"isAccessible": True},
-                "fights": [{"id": 7, "gameZone": {"id": 2335}, "friendlyPlayers": [1, 2, 3, 4, 5]}],
+                "fights": [{"id": 7, "gameZone": {"id": 2335}, "friendlyPlayers": self.friendly_players}],
             }}}}
         if query_name == "report-master-data":
             return {"data": {"reportData": {"report": {

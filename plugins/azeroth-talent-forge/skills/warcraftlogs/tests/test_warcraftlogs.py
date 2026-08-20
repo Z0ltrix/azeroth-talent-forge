@@ -506,7 +506,6 @@ class MetadataTests(unittest.TestCase):
 
         self.assertIn("abilities(limit: $abilityLimit, page: $abilityPage) { data { id name } }", game_query)
         self.assertIn("region { id name slug }", realm_query)
-        self.assertIn("subregion { id name slug }", realm_query)
 
     def test_world_fixture_normalizes_partition_season_and_encounter_names(self):
         resolver = warcraftlogs.MetadataResolver(
