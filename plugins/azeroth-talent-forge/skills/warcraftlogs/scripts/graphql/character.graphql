@@ -4,7 +4,7 @@ query Character($name: String!, $serverSlug: String!, $serverRegion: String!) {
       name
       classID
       server { name slug region { name slug } }
-      guild { name }
+      guilds { id name }
     }
   }
 }

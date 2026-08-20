@@ -2,7 +2,7 @@ query CharacterReports($name: String!, $serverSlug: String!, $serverRegion: Stri
   characterData {
     character(name: $name, serverSlug: $serverSlug, serverRegion: $serverRegion) {
       recentReports(limit: $limit, page: $page) {
-        data { code title startTime endTime zone { id name } gameZone { id name } guild { name } }
+        data { code title startTime endTime zone { id name } guild { name } }
         current_page
         last_page
         has_more_pages

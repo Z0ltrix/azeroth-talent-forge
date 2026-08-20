@@ -7,8 +7,8 @@ query ReportEvents(
   $dataType: EventDataType
   $sourceID: Int
   $targetID: Int
-  $abilityID: Int
-  $hostility: HostilityType
+  $abilityID: Float
+  $hostilityType: HostilityType
   $filterExpression: String
   $includeResources: Boolean
   $useActorIDs: Boolean
@@ -27,7 +27,7 @@ query ReportEvents(
         sourceID: $sourceID
         targetID: $targetID
         abilityID: $abilityID
-        hostility: $hostility
+        hostilityType: $hostilityType
         filterExpression: $filterExpression
         includeResources: $includeResources
         useActorIDs: $useActorIDs

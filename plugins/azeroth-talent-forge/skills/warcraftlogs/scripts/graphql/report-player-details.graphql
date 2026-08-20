@@ -3,7 +3,7 @@ query ReportPlayerDetails($code: String!, $allowUnlisted: Boolean!, $difficulty:
     report(code: $code, allowUnlisted: $allowUnlisted) {
       visibility
       archiveStatus { isArchived isAccessible archiveDate }
-      playerDetails(difficulty: $difficulty, encounterID: $encounterID, endTime: $endTime, fightIDs: $fightIDs, killType: $killType, startTime: $startTime, translate: $translate)
+      playerDetails(difficulty: $difficulty, encounterID: $encounterID, endTime: $endTime, fightIDs: $fightIDs, includeCombatantInfo: true, killType: $killType, startTime: $startTime, translate: $translate)
     }
   }
 }

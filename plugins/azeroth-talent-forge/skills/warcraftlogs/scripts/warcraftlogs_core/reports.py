@@ -145,10 +145,9 @@ def report_request(args) -> tuple:
         "ability_id": "abilityID", "death": "death", "filter_expression": "filterExpression",
         "source_auras_absent": "sourceAurasAbsent", "source_auras_present": "sourceAurasPresent",
         "source_class": "sourceClass", "source_id": "sourceID", "source_instance_id": "sourceInstanceID",
-        "source_pet_type": "sourcePetType", "source_spec": "sourceSpec",
         "target_auras_absent": "targetAurasAbsent", "target_auras_present": "targetAurasPresent",
         "target_class": "targetClass", "target_id": "targetID", "target_instance_id": "targetInstanceID",
-        "target_pet_type": "targetPetType", "target_spec": "targetSpec", "wipe_cutoff": "wipeCutoff",
+        "wipe_cutoff": "wipeCutoff", "view_options": "viewOptions",
         "hostility_type": "hostilityType", "view_by": "viewBy", "compare": "compare",
         "player_metric": "playerMetric", "timeframe": "timeframe", "translate": "translate",
     }
@@ -186,7 +185,14 @@ def report_data(payload: Mapping[str, object], kind: str):
     if kind == "summary":
         return dict(report)
     field = {"master-data": "masterData", "player-details": "playerDetails"}.get(kind, kind)
-    return report[field]
+    value = report[field]
+    if kind == "fights" and isinstance(value, list):
+        report_start = report.get("startTime", 0)
+        return [
+            dict(fight, startTime=report_start + fight["startTime"], endTime=report_start + fight["endTime"])
+            for fight in value
+        ]
+    return value
 
 
 def _pagination_data(payload: Mapping[str, object], path: Sequence[str]) -> Tuple[dict, list, dict]:
@@ -361,7 +367,7 @@ def event_request(args) -> tuple:
         variables["endTime"] = end_time
     for attribute, variable_name in (
         ("data_type", "dataType"), ("source_id", "sourceID"), ("target_id", "targetID"),
-        ("ability_id", "abilityID"), ("hostility", "hostility"),
+        ("ability_id", "abilityID"), ("hostility_type", "hostilityType"),
         ("filter_expression", "filterExpression"), ("include_resources", "includeResources"),
         ("use_actor_ids", "useActorIDs"), ("use_ability_ids", "useAbilityIDs"),
     ):

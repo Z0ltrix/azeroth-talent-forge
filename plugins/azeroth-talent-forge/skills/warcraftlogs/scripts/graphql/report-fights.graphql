@@ -1,14 +1,30 @@
-query ReportFights($code: String!, $allowUnlisted: Boolean!, $endTime: Float, $fightIDs: [Int], $startTime: Float, $translate: Boolean) {
+query ReportFights($code: String!, $allowUnlisted: Boolean!, $fightIDs: [Int], $translate: Boolean) {
   reportData {
     report(code: $code, allowUnlisted: $allowUnlisted) {
       visibility
       archiveStatus { isArchived isAccessible archiveDate }
-      fights(endTime: $endTime, fightIDs: $fightIDs, startTime: $startTime, translate: $translate) {
-        id encounterID difficulty startTime endTime kill friendlyPlayers friendlySpecs
+      fights(fightIDs: $fightIDs, translate: $translate) {
+        id name encounterID difficulty startTime endTime kill inProgress
         gameZone { id name }
-        inProgress
-        keystoneAffixes
-        keystoneLevel keystoneTime keystoneBonus
+        rating keystoneLevel keystoneTime keystoneBonus keystoneAffixes
+        friendlyPlayers friendlySpecs friendlyItemLevels averageItemLevel
+        enemyPlayers
+        friendlyNPCs { id gameID instanceCount groupCount petOwner }
+        friendlyPets { id gameID instanceCount groupCount petOwner }
+        enemyNPCs { id gameID instanceCount groupCount petOwner }
+        enemyPets { id gameID instanceCount groupCount petOwner }
+        dungeonPulls {
+          id name encounterID startTime endTime kill x y
+          boundingBox { minX maxX minY maxY }
+          enemyNPCs { id gameID instanceCount groupCount petOwner }
+          maps { id }
+        }
+        maps { id }
+        boundingBox { minX maxX minY maxY }
+        size fightPercentage bossPercentage
+        lastPhase lastPhaseAsAbsoluteIndex lastPhaseIsIntermission
+        phaseTransitions { id startTime }
+        wipeCalledTime completeRaid hardModeLevel originalEncounterID
       }
     }
   }
