@@ -54,6 +54,35 @@ class QueryContractTests(unittest.TestCase):
 
 
 class AgentAnalysisContractTests(unittest.TestCase):
+    def test_select_fights_supports_started_overlap_and_completed_absolute_windows(self):
+        fights = [
+            {"id": 1, "startTime": 86_340_000, "endTime": 86_399_000},
+            {"id": 2, "startTime": 86_399_000, "endTime": 86_501_000},
+            {"id": 3, "startTime": 86_500_000, "endTime": 86_560_000},
+        ]
+
+        started = warcraftlogs.select_fights(fights, 0, 86_399_000, 86_500_000, "started")
+        overlap = warcraftlogs.select_fights(fights, 0, 86_399_000, 86_500_000, "overlap")
+        completed = warcraftlogs.select_fights(fights, 0, 86_399_000, 86_500_000, "completed")
+
+        self.assertEqual([fight["id"] for fight in started], [2, 3])
+        self.assertEqual([fight["id"] for fight in overlap], [1, 2])
+        self.assertEqual([fight["id"] for fight in completed], [1])
+
+    def test_select_fights_skips_invalid_timestamps_and_rejects_invalid_mode(self):
+        fights = [
+            {"id": 1, "startTime": 10, "endTime": 20},
+            {"id": 2, "startTime": None, "endTime": 30},
+            {"id": 3, "startTime": 40},
+            {"id": 4, "startTime": 50, "endTime": 45},
+        ]
+
+        selected = warcraftlogs.select_fights(fights, 100)
+
+        self.assertEqual([fight["id"] for fight in selected], [1])
+        with self.assertRaisesRegex(ValueError, "time mode"):
+            warcraftlogs.select_fights(fights, 100, mode="unknown")
+
     def test_fight_times_are_absolute_and_boundary_crossing_fight_is_retained(self):
         payload = fixture("report-fights-rich.json")
 

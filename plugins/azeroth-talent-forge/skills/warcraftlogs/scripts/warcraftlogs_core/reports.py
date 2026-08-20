@@ -93,12 +93,16 @@ def make_envelope(
     return result
 
 
-def _add_report_options(parser, window=False, translate=False) -> None:
+def _add_report_options(parser, window=False, translate=False, absolute_window=False) -> None:
     parser.add_argument("reference", help="report code or official Warcraft Logs report URL")
     parser.add_argument("--fight", type=int)
     if window:
         parser.add_argument("--start-time", type=float)
         parser.add_argument("--end-time", type=float)
+    if absolute_window:
+        parser.add_argument("--absolute-start-time", type=float)
+        parser.add_argument("--absolute-end-time", type=float)
+        parser.add_argument("--time-mode", choices=("started", "overlap", "completed"))
     if translate:
         parser.add_argument("--no-translate", dest="translate", action="store_false", default=True)
 
@@ -122,10 +126,16 @@ def report_request(args) -> tuple:
         raise ValueError("Report fight must be a positive integer")
     start_time = getattr(args, "start_time", None)
     end_time = getattr(args, "end_time", None)
+    absolute_start = getattr(args, "absolute_start_time", None)
+    absolute_end = getattr(args, "absolute_end_time", None)
     if (start_time is not None and start_time < 0) or (end_time is not None and end_time < 0):
         raise ValueError("Report window times must not be negative")
     if start_time is not None and end_time is not None and start_time > end_time:
         raise ValueError("Report start time must not exceed end time")
+    if absolute_start is not None and absolute_start < 0 or absolute_end is not None and absolute_end < 0:
+        raise ValueError("Absolute fight times must not be negative")
+    if absolute_start is not None and absolute_end is not None and absolute_start > absolute_end:
+        raise ValueError("Absolute fight start time must not exceed end time")
     _enum(getattr(args, "kill_type", None), KILL_TYPES, "kill type")
     _enum(
         getattr(args, "data_type", None),
@@ -165,6 +175,12 @@ def report_request(args) -> tuple:
         scope["start_time"] = start_time
     if end_time is not None:
         scope["end_time"] = end_time
+    if absolute_start is not None:
+        scope["absolute_start_time"] = absolute_start
+    if absolute_end is not None:
+        scope["absolute_end_time"] = absolute_end
+    if getattr(args, "time_mode", None) is not None:
+        scope["time_mode"] = args.time_mode
     filters = {
         variable_name: value
         for attribute, variable_name in variable_names.items()
@@ -174,7 +190,40 @@ def report_request(args) -> tuple:
     return reference, variables, scope, filters
 
 
-def report_data(payload: Mapping[str, object], kind: str):
+def select_fights(fights, report_start_ms, start_ms=None, end_ms=None, mode="started") -> list:
+    if mode not in ("started", "overlap", "completed"):
+        raise ValueError("Invalid fight time mode")
+    if isinstance(report_start_ms, bool) or not isinstance(report_start_ms, (int, float)):
+        raise ValueError("Report startTime is required for fight time derivation")
+    if start_ms is not None and start_ms < 0 or end_ms is not None and end_ms < 0:
+        raise ValueError("Absolute fight times must not be negative")
+    if start_ms is not None and end_ms is not None and start_ms > end_ms:
+        raise ValueError("Absolute fight start time must not exceed end time")
+    selected = []
+    for fight in _items(fights):
+        if not isinstance(fight, Mapping):
+            continue
+        start = fight.get("startTime")
+        end = fight.get("endTime")
+        if (
+            isinstance(start, bool) or not isinstance(start, (int, float)) or
+            isinstance(end, bool) or not isinstance(end, (int, float)) or end < start
+        ):
+            continue
+        absolute_start = report_start_ms + start
+        absolute_end = report_start_ms + end
+        if mode == "started":
+            matches = (start_ms is None or absolute_start >= start_ms) and (end_ms is None or absolute_start <= end_ms)
+        elif mode == "overlap":
+            matches = (start_ms is None or absolute_end >= start_ms) and (end_ms is None or absolute_start < end_ms)
+        else:
+            matches = (start_ms is None or absolute_end >= start_ms) and (end_ms is None or absolute_end <= end_ms)
+        if matches:
+            selected.append(dict(fight, startTime=absolute_start, endTime=absolute_end))
+    return selected
+
+
+def report_data(payload: Mapping[str, object], kind: str, absolute_start=None, absolute_end=None, time_mode="started"):
     report = payload["data"]["reportData"]["report"]
     if not isinstance(report, Mapping):
         raise TypeError("Report was not an object")
@@ -190,10 +239,7 @@ def report_data(payload: Mapping[str, object], kind: str):
         report_start = report.get("startTime")
         if isinstance(report_start, bool) or not isinstance(report_start, (int, float)):
             raise ValueError("Report startTime is required for fight time derivation")
-        return [
-            dict(fight, startTime=report_start + fight["startTime"], endTime=report_start + fight["endTime"])
-            for fight in value
-        ]
+        return select_fights(value, report_start, absolute_start, absolute_end, time_mode)
     return value
 
 

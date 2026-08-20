@@ -715,6 +715,27 @@ class ReportTests(unittest.TestCase):
             )
         self.assertEqual(raised.exception.code, 2)
 
+    def test_fights_accept_absolute_selection_options_without_sending_them_to_api(self):
+        args = warcraftlogs.build_parser().parse_args([
+            "report", "fights", "AbCd1234", "--absolute-start-time", "1000",
+            "--absolute-end-time", "2000", "--time-mode", "overlap",
+        ])
+        reference, variables, scope, filters = warcraftlogs.report_request(args)
+
+        self.assertEqual(reference.code, "AbCd1234")
+        self.assertNotIn("startTime", variables)
+        self.assertNotIn("endTime", variables)
+        self.assertEqual(scope["absolute_start_time"], 1000.0)
+        self.assertEqual(scope["absolute_end_time"], 2000.0)
+        self.assertEqual(scope["time_mode"], "overlap")
+        self.assertEqual(filters, {"translate": True})
+
+    def test_fights_reject_invalid_absolute_selection_before_request(self):
+        for options in (("--absolute-start-time", "-1"), ("--absolute-start-time", "2000", "--absolute-end-time", "1000")):
+            args = warcraftlogs.build_parser().parse_args(["report", "fights", "AbCd1234", *options])
+            with self.subTest(options=options), self.assertRaises(ValueError):
+                warcraftlogs.report_request(args)
+
     def test_master_data_fixture_preserves_actors_and_abilities(self):
         exit_code, output, errors, client = self.run_report(
             {"report-master-data": fixture("report-master-data.json")},
@@ -1419,7 +1440,7 @@ class DiscoveryTests(unittest.TestCase):
             ])
         result = json.loads(output.getvalue())
         self.assertEqual(exit_code, 0)
-        self.assertEqual(client.calls, ["metadata-world", "metadata-game", "metadata-world", "encounter-rankings", "report-fights"])
+        self.assertEqual(client.calls, ["metadata-world", "metadata-game", "metadata-world", "encounter-rankings", "report-fights", "report-master-data"])
         self.assertEqual(client.variables[3]["encounterID"], 2902)
         self.assertEqual(client.variables[3]["partition"], 42)
         self.assertEqual(client.variables[3]["difficulty"], 8)
@@ -1430,6 +1451,7 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(result["returned_candidates"], 1)
         self.assertEqual(result["data"][0]["report_code"], "AbCd1234")
         self.assertEqual(result["data"][0]["fight_id"], 9)
+        self.assertEqual(result["data"][0]["matched_actor"]["name"], "Tankadin")
 
     def test_global_cli_bounds_top_and_page_before_execute(self):
         for option, value in (("--top", "0"), ("--top", "101"), ("--page", "0")):

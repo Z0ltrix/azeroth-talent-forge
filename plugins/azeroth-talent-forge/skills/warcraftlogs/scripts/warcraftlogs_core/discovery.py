@@ -4,7 +4,8 @@ import json
 import math
 import re
 from typing import Mapping, Optional, Sequence, Tuple
-from .models import (DiscoveryFilters, PublicReportError, PartialGraphQLError, report_matches, _casefold,
+from .models import (DiscoveryFilters, PublicReportError, PartialGraphQLError, report_matches, _casefold, _items,
+                     _actor_field_matches, _actor_role_matches,
                      _DISCOVERY_FILTER_FIELDS, GLOBAL_TOP_MIN, GLOBAL_TOP_MAX,
                      GLOBAL_MAX_PAGES, GLOBAL_WARNING, _report_fights)
 from .metadata import (MetadataResolver, normalize_name, select_named,
@@ -374,6 +375,67 @@ def _ranking_direct_match(candidate: Mapping[str, object], filters: DiscoveryFil
     return not reasons, missing, reasons
 
 
+def _ranking_actor(candidate: Mapping[str, object]) -> Optional[dict]:
+    for key in ("actor", "player", "character", "source"):
+        value = candidate.get(key)
+        if isinstance(value, Mapping):
+            actor = dict(value)
+            if actor.get("id") is not None or actor.get("name") is not None:
+                return actor
+    actor_id = next((candidate.get(key) for key in ("actorID", "actorId", "playerID", "playerId", "sourceID", "sourceId") if candidate.get(key) is not None), None)
+    name = next((candidate.get(key) for key in ("playerName", "characterName", "name") if candidate.get(key) is not None), None)
+    if actor_id is None and name is None:
+        return None
+    return {"id": actor_id, "name": name}
+
+
+def _actor_identity(actor: Mapping[str, object], match_source: str) -> dict:
+    subtype = actor.get("subType") or actor.get("specName") or actor.get("spec")
+    return {
+        "id": actor.get("id"),
+        "name": actor.get("name"),
+        "class": actor.get("className") or actor.get("class") or (
+            subtype.replace(actor.get("specName", ""), "") if isinstance(subtype, str) and actor.get("specName") else subtype
+        ),
+        "spec": actor.get("specName") or actor.get("spec") or subtype,
+        "role": actor.get("role") or actor.get("roles"),
+        "match_source": match_source,
+    }
+
+
+def _resolve_ranked_actor(candidate: Mapping[str, object], fights, actors, filters: DiscoveryFilters):
+    if not any(getattr(filters, field) is not None for field in ("class_name", "spec_name", "role")):
+        return None, None
+    row_actor = _ranking_actor(candidate)
+    if row_actor is not None:
+        if not actors:
+            return dict(candidate, **row_actor), "ranking_row"
+        matches = [
+            actor for actor in actors
+            if (row_actor.get("id") is None or actor.get("id") == row_actor.get("id")) and
+            (row_actor.get("name") is None or _casefold(actor.get("name")) == _casefold(row_actor.get("name")))
+        ]
+        if len(matches) == 1:
+            return matches[0], "ranking_row"
+        return None, "ambiguous"
+    def satisfies(actor):
+        return (
+            (filters.class_name is None or _actor_field_matches(actor, filters.class_name, ("className", "class", "subType"))) and
+            (filters.spec_name is None or _actor_field_matches(actor, filters.spec_name, ("specName", "spec", "subType"))) and
+            (filters.role is None or _actor_role_matches(actor, filters.role))
+        )
+    ranked = [actor for actor in actors if actor.get("ranked") is True and satisfies(actor)]
+    if len(ranked) == 1:
+        return ranked[0], "ranked_group_member"
+    if any("ranked" in actor for actor in actors):
+        return None, "missing" if not ranked else "ambiguous"
+    friendly_ids = {player for fight in _report_fights(fights) for player in _items(fight.get("friendlyPlayers"))}
+    friendly = [actor for actor in actors if actor.get("id") in friendly_ids and satisfies(actor)]
+    if len(friendly) == 1:
+        return friendly[0], "ranked_group_member"
+    return None, "missing"
+
+
 def _filters_without(filters: DiscoveryFilters, names) -> DiscoveryFilters:
     values = {field: getattr(filters, field) for field in _DISCOVERY_FILTER_FIELDS}
     for name in names:
@@ -563,10 +625,13 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
             continue
         if missing:
             hydrated_count += 1
+            hydration_fields = set(missing)
+            if any(getattr(filters, field) is not None for field in ("class_name", "spec_name", "role")):
+                hydration_fields.update(("class_name", "spec_name", "role"))
             try:
                 fights, actors = hydrate_discovery_report(
                     client, candidate["report_code"],
-                    _filters_without(filters, set(_DISCOVERY_FILTER_FIELDS) - set(missing)),
+                    _filters_without(filters, set(_DISCOVERY_FILTER_FIELDS) - hydration_fields),
                     fight_id=candidate.get("fight_id"),
                 )
             except PartialGraphQLError as error:
@@ -579,14 +644,30 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
                 exclusion_reasons["hydration"] = exclusion_reasons.get("hydration", 0) + 1
                 processed_exclusions += 1
                 continue
-            hydrated_filters = _filters_without(filters, set(_DISCOVERY_FILTER_FIELDS) - set(missing))
+            hydrated_filters = _filters_without(filters, set(_DISCOVERY_FILTER_FIELDS) - hydration_fields)
             report = dict(candidate)
+            matched_actor, actor_source = _resolve_ranked_actor(candidate, fights, actors, filters)
+            if any(getattr(filters, field) is not None for field in ("class_name", "spec_name", "role")):
+                if matched_actor is None:
+                    exclusion_reasons["actor_identity"] = exclusion_reasons.get("actor_identity", 0) + 1
+                    processed_exclusions += 1
+                    continue
+                actors = [matched_actor]
             is_match, reasons = report_matches(report, fights, actors, hydrated_filters)
             if not is_match:
                 for reason in reasons:
                     exclusion_reasons[reason] = exclusion_reasons.get(reason, 0) + 1
                 processed_exclusions += 1
                 continue
+            if matched_actor is not None:
+                candidate = dict(candidate, matched_actor=_actor_identity(matched_actor, actor_source))
+        elif any(getattr(filters, field) is not None for field in ("class_name", "spec_name", "role")):
+            matched_actor, actor_source = _resolve_ranked_actor(candidate, [], [], filters)
+            if matched_actor is None:
+                exclusion_reasons["actor_identity"] = exclusion_reasons.get("actor_identity", 0) + 1
+                processed_exclusions += 1
+                continue
+            candidate = dict(candidate, matched_actor=_actor_identity(matched_actor, actor_source))
         matched.append(candidate)
         if len(matched) >= top:
             break

@@ -146,7 +146,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return 2
         try:
             payload = client.execute("report-" + args.report_command, variables)
-            data = report_data(payload, args.report_command)
+            data = report_data(
+                payload,
+                args.report_command,
+                getattr(args, "absolute_start_time", None),
+                getattr(args, "absolute_end_time", None),
+                getattr(args, "time_mode", None) or "started",
+            )
         except AuthenticationError as error:
             print(str(error), file=sys.stderr)
             return 3
