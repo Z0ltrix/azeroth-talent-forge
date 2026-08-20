@@ -863,7 +863,10 @@ def _resolve_global_metadata_id(value, records, label):
     if value is None:
         return None
     try:
-        return _positive_id(value, label)
+        parsed = _positive_id(value, label)
+        if records and not any(item.get("id") == parsed for item in records):
+            raise ValueError("Unknown %s: %s" % (label, value))
+        return parsed
     except ValueError:
         return select_named(records, value, label)["id"]
 
@@ -884,12 +887,7 @@ def _global_filters(args, client=None) -> DiscoveryFilters:
         "season": None,
     }
     world = None
-    if client is not None and any(
-        value is not None and not str(value).isdigit()
-        for value in (args.zone, args.instance, args.encounter, args.partition, args.difficulty)
-    ):
-        world = _global_world(client, args.expansion_id)
-    elif client is not None and args.encounter and not args.zone and not args.instance:
+    if client is not None:
         world = _global_world(client, args.expansion_id)
     selected_zone = None
     if args.zone:
@@ -924,11 +922,20 @@ def _global_filters(args, client=None) -> DiscoveryFilters:
         values["difficulty"] = _resolve_global_metadata_id(args.difficulty, difficulty_records, "difficulty")
     if client is not None and (args.class_name or args.spec_name):
         game = _normalize_game(client.execute("metadata-game", {"abilityLimit": 100, "abilityPage": 1}))
-        selected_class = select_named(game["classes"], args.class_name, "class") if args.class_name else None
+        selected_class = None
+        if args.class_name:
+            class_id = _positive_id(args.class_name, "class") if str(args.class_name).isdigit() else None
+            selected_class = next((item for item in game["classes"] if item.get("id") == class_id), None) if class_id is not None else select_named(game["classes"], args.class_name, "class")
+            if selected_class is None:
+                raise ValueError("Unknown class: %s" % args.class_name)
         values["class_name"] = selected_class["name"] if selected_class else None
         if args.spec_name:
             specs = selected_class["specs"] if selected_class else [spec for game_class in game["classes"] for spec in game_class["specs"]]
-            values["spec_name"] = select_named(specs, args.spec_name, "spec")["name"]
+            spec_id = _positive_id(args.spec_name, "spec") if str(args.spec_name).isdigit() else None
+            selected_spec = next((item for item in specs if item.get("id") == spec_id), None) if spec_id is not None else select_named(specs, args.spec_name, "spec")
+            if selected_spec is None:
+                raise ValueError("Unknown spec: %s" % args.spec_name)
+            values["spec_name"] = selected_spec["name"]
     if values["role"] is not None and values["role"] not in ("tank", "healer", "dps", "damage"):
         raise ValueError("Unknown role: %s" % args.role)
     for bound_name in ("start_time", "end_time"):
@@ -1082,8 +1089,10 @@ def _ranking_candidate(row: Mapping[str, object]) -> Optional[dict]:
             result["fight_id"] = int(fight_id)
         except (TypeError, ValueError):
             return None
+        if result["fight_id"] < 1:
+            return None
     else:
-        result["fight_id"] = None
+        return None
     return result
 
 
@@ -1298,6 +1307,16 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
             break
         current_page = (pagination.get("current_page") or current_page) + 1
     candidates = _dedupe_global_candidates(rows)
+    invalid_candidates = 0
+    for row in rows:
+        if _ranking_candidate(row) is None:
+            report = row.get("report") if isinstance(row, Mapping) else None
+            code = row.get("reportID", row.get("reportCode")) if isinstance(row, Mapping) else None
+            if isinstance(report, Mapping):
+                code = code or report.get("code") or report.get("id")
+            if code is not None:
+                invalid_candidates += 1
+                exclusion_reasons["fight_id"] = exclusion_reasons.get("fight_id", 0) + 1
     matched = []
     for candidate in candidates:
         direct_match, missing, direct_reasons = _ranking_direct_match(candidate, filters)
@@ -1337,7 +1356,7 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
         source_rows=len(rows),
         unique_candidates=len(candidates),
         hydrated_candidates=hydrated_count,
-        excluded_candidates=len(candidates) - len(matched),
+        excluded_candidates=len(candidates) - len(matched) + invalid_candidates,
         returned_candidates=min(len(matched), top),
         pages_fetched=pages_fetched,
         truncated=truncated,

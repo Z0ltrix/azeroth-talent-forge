@@ -1,0 +1,9 @@
+{
+  "data": {
+    "worldData": {
+      "encounter": {
+        "fightRankings": "{\"rankings\":[{\"rank\":1,\"reportID\":\"NoFight1\",\"gameZoneID\":2335},{\"rank\":2,\"reportID\":\"AbCd1234\",\"fightID\":9,\"gameZoneID\":2335}],\"page\":1,\"hasMorePages\":false}"
+      }
+    }
+  }
+}

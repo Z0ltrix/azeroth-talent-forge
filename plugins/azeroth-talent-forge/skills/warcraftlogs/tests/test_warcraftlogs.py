@@ -1056,6 +1056,71 @@ class DiscoveryTests(unittest.TestCase):
         self.assertTrue(matched)
         self.assertEqual(reasons, [])
 
+    def test_global_numeric_ids_are_scoped_by_metadata(self):
+        client = FixtureClient({"metadata-world": fixture("metadata-world.json")})
+        valid_args = warcraftlogs.build_parser().parse_args([
+            "find", "global", "--zone", "1300", "--partition", "42",
+        ])
+        filters = warcraftlogs._global_filters(valid_args, client)
+        self.assertEqual(filters.zone, 1300)
+        self.assertEqual(filters.encounter, 2902)
+        self.assertEqual(filters.partition, 42)
+        invalid_args = warcraftlogs.build_parser().parse_args([
+            "find", "global", "--zone", "1300", "--partition", "999",
+        ])
+        with self.assertRaisesRegex(ValueError, "partition"):
+            warcraftlogs._global_filters(invalid_args, client)
+
+    def test_global_numeric_class_and_spec_ids_are_validated_by_game_metadata(self):
+        client = FixtureClient({
+            "metadata-world": fixture("metadata-world.json"),
+            "metadata-game": fixture("metadata-game.json"),
+        })
+        args = warcraftlogs.build_parser().parse_args([
+            "find", "global", "--encounter", "2902", "--class-name", "2", "--spec-name", "66",
+        ])
+        filters = warcraftlogs._global_filters(args, client)
+        self.assertEqual(filters.class_name, "Paladin")
+        self.assertEqual(filters.spec_name, "Protection")
+
+        encounter_args = warcraftlogs.build_parser().parse_args(["find", "global", "--encounter", "2902"])
+        encounter_filters = warcraftlogs._global_filters(encounter_args, client)
+        self.assertEqual(encounter_filters.encounter, 2902)
+
+    def test_global_invalid_bounds_make_no_metadata_calls(self):
+        client = FixtureClient({})
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ), patch.dict(os.environ, {}, clear=True), redirect_stdout(output), redirect_stderr(io.StringIO()):
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret", "--env-file",
+                str(Path(directory) / "missing.env"), "find", "global", "--zone", "Midnight Dungeon",
+                "--top", "0",
+            ])
+        self.assertEqual(exit_code, 2)
+        self.assertEqual(client.calls, [])
+
+    def test_global_rejects_fightless_candidates_before_hydration(self):
+        class NoReportWideHydrationClient(FixtureClient):
+            def execute(self, query_name, variables):
+                if query_name == "report-fights" and "fightIDs" not in variables:
+                    raise AssertionError("global discovery attempted report-wide hydration")
+                return super().execute(query_name, variables)
+
+        client = NoReportWideHydrationClient({
+            "encounter-rankings": fixture("global-rankings-no-fight.json"),
+            "report-fights": fixture("report-fights.json"),
+        })
+        result = warcraftlogs.discover_global(
+            client, warcraftlogs.DiscoveryFilters(encounter=2902, zone=2335, key_min=12), top=2, page=1
+        )
+        self.assertEqual(result["source_rows"], 2)
+        self.assertEqual(result["unique_candidates"], 1)
+        self.assertEqual(result["excluded_candidates"], 1)
+        self.assertEqual(result["hydrated_candidates"], 1)
+        self.assertEqual(client.variables[1]["fightIDs"], [9])
+
     def test_global_cli_requires_zone_instance_or_encounter(self):
         with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
             warcraftlogs.build_parser().parse_args(["find", "global"])
