@@ -1,0 +1,12 @@
+query MetadataRealm($region: String!, $slug: String!) {
+  worldData {
+    server(region: $region, slug: $slug) {
+      id
+      name
+      normalizedName
+      slug
+      region
+      subregion
+    }
+  }
+}

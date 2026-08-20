@@ -326,3 +326,125 @@ class TransportTests(unittest.TestCase):
 
         self.assertEqual(exit_code, 0)
         self.assertTrue(output.getvalue().isascii())
+
+
+class MetadataTests(unittest.TestCase):
+    def test_normalize_name_casefolds_whitespace_and_hyphens(self):
+        self.assertEqual(warcraftlogs.normalize_name("  ThE-Dawnbreaker  "), "the dawnbreaker")
+
+    def test_select_named_prefers_exact_display_name(self):
+        items = [{"id": 1, "name": "The Dawnbreaker"}, {"id": 2, "name": "The-Dawnbreaker"}]
+        self.assertEqual(warcraftlogs.select_named(items, "The Dawnbreaker", "instance")["id"], 1)
+
+    def test_select_named_rejects_ambiguous_normalized_match(self):
+        items = [{"id": 1, "name": "The Dawnbreaker"}, {"id": 2, "name": "The-Dawnbreaker"}]
+        with self.assertRaisesRegex(ValueError, "Ambiguous instance"):
+            warcraftlogs.select_named(items, "the dawnbreaker", "instance")
+
+    def test_select_named_error_lists_display_names(self):
+        items = [{"id": 1, "name": "Alpha"}, {"id": 2, "name": "ALPHA"}]
+        with self.assertRaisesRegex(ValueError, "Alpha, ALPHA"):
+            warcraftlogs.select_named(items, "alpha", "class")
+
+    def test_realm_lookup_requires_region(self):
+        resolver = warcraftlogs.MetadataResolver(FixtureClient({}), Path(tempfile.mkdtemp()))
+        with self.assertRaisesRegex(ValueError, "region"):
+            resolver.realm(None, "Area 52")
+
+    def test_realm_fixture_uses_region_and_normalized_slug(self):
+        client = FixtureClient({"metadata-realm": fixture("metadata-realm.json")})
+        resolver = warcraftlogs.MetadataResolver(client, Path(tempfile.mkdtemp()))
+
+        result, provenance = resolver.realm("US", "Area 52")
+
+        self.assertEqual(client.calls, ["metadata-realm"])
+        self.assertEqual(result["id"], 3676)
+        self.assertEqual(result["name"], "Area 52")
+        self.assertEqual(result["normalizedName"], "area-52")
+        self.assertEqual(provenance["status"], "miss")
+
+    def test_world_fixture_normalizes_partition_season_and_encounter_names(self):
+        resolver = warcraftlogs.MetadataResolver(
+            FixtureClient({"metadata-world": fixture("metadata-world.json")}), Path(tempfile.mkdtemp())
+        )
+
+        result, provenance = resolver.world({"expansionId": 11})
+
+        self.assertEqual(result["regions"], [{"id": 1, "name": "US", "slug": "us"}])
+        self.assertEqual(result["zones"][0]["partitions"], [{"id": 42, "name": "Season 1"}])
+        self.assertEqual(result["zones"][0]["encounters"], [{"id": 2902, "name": "The Dawnbreaker"}])
+        self.assertEqual(provenance["status"], "miss")
+
+    def test_game_fixture_normalizes_classes_specs_and_affix_ids(self):
+        resolver = warcraftlogs.MetadataResolver(
+            FixtureClient({"metadata-game": fixture("metadata-game.json")}), Path(tempfile.mkdtemp())
+        )
+
+        result, provenance = resolver.game({"abilityLimit": 100, "abilityPage": 1})
+
+        self.assertEqual(result["classes"][0]["slug"], "paladin")
+        self.assertEqual(result["classes"][0]["specs"], [{"id": 66, "name": "Protection", "slug": "protection"}])
+        self.assertEqual(result["affixes"], [{"id": 9, "name": "Tyrannical"}])
+        self.assertEqual(result["abilities"], [{"id": 20271, "name": "Judgment"}])
+        self.assertEqual(provenance["status"], "miss")
+
+    def test_metadata_cache_uses_24_hour_ttl_and_bypasses_on_request(self):
+        payload = fixture("metadata-world.json")
+        client = FixtureClient({"metadata-world": payload})
+        with tempfile.TemporaryDirectory() as directory:
+            cache = Path(directory)
+            resolver = warcraftlogs.MetadataResolver(client, cache)
+            resolver.world({"expansionId": 11})
+            _, hit = resolver.world({"expansionId": 11})
+            self.assertEqual(hit["status"], "hit")
+            self.assertEqual(client.calls, ["metadata-world"])
+            cache_file = next(cache.glob("*.json"))
+            cached = json.loads(cache_file.read_text(encoding="utf-8"))
+            self.assertEqual(cached["expires_at"] - cached["fetched_at"], 24 * 60 * 60)
+
+            no_cache = warcraftlogs.MetadataResolver(client, cache, no_cache=True)
+            no_cache.world({"expansionId": 11})
+            self.assertEqual(client.calls, ["metadata-world", "metadata-world"])
+
+    def test_metadata_command_emits_fixture_backed_collection_envelope(self):
+        output = io.StringIO()
+        errors = io.StringIO()
+        client = FixtureClient({"metadata-game": fixture("metadata-game.json")})
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(warcraftlogs, "WarcraftLogsClient", return_value=client), patch.dict(
+                os.environ, {"LOCALAPPDATA": directory}, clear=True
+            ), redirect_stdout(output), redirect_stderr(errors):
+                exit_code = warcraftlogs.main(
+                    [
+                        "--client-id",
+                        "client-id",
+                        "--client-secret",
+                        "client-secret",
+                        "--env-file",
+                        str(Path(directory) / "missing.env"),
+                        "metadata",
+                        "classes",
+                    ]
+                )
+
+        result = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(errors.getvalue(), "")
+        self.assertEqual(result["command"], "metadata classes")
+        self.assertEqual(result["completeness"], "api_collection")
+        self.assertEqual(result["data"], [{"id": 2, "name": "Paladin", "slug": "paladin"}])
+        self.assertEqual(result["cache"]["status"], "miss")
+
+
+def fixture(name):
+    return json.loads((Path(__file__).parent / "fixtures" / name).read_text(encoding="utf-8"))
+
+
+class FixtureClient:
+    def __init__(self, payloads):
+        self.payloads = payloads
+        self.calls = []
+
+    def execute(self, query_name, variables):
+        self.calls.append(query_name)
+        return self.payloads[query_name]

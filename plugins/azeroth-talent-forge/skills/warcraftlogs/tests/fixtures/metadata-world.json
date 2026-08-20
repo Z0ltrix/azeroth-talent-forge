@@ -1,0 +1,15 @@
+{
+  "data": {
+    "worldData": {
+      "regions": [{"id": 1, "name": "US", "slug": "us"}],
+      "expansions": [{"id": 11, "name": "Midnight"}],
+      "zones": [{
+        "id": 1300,
+        "name": "Midnight Dungeon",
+        "difficulties": [{"id": 8, "name": "Mythic"}],
+        "encounters": [{"id": 2902, "name": "The Dawnbreaker"}],
+        "partitions": [{"id": 42, "name": "Season 1"}]
+      }]
+    }
+  }
+}

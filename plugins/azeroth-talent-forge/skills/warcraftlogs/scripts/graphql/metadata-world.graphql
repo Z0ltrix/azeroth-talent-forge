@@ -1,0 +1,13 @@
+query MetadataWorld($expansionId: Int) {
+  worldData {
+    regions { id name slug }
+    expansions { id name }
+    zones(expansion_id: $expansionId) {
+      id
+      name
+      difficulties { id name }
+      encounters { id name }
+      partitions { id name }
+    }
+  }
+}

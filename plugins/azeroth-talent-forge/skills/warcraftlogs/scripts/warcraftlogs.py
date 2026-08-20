@@ -1,5 +1,6 @@
 import argparse
 import base64
+import hashlib
 import json
 import os
 import re
@@ -18,6 +19,7 @@ CLIENT_SECRET_ENV = "WARCRAFTLOGS_CLIENT_SECRET"
 TOKEN_URL = "https://www.warcraftlogs.com/oauth/token"
 GRAPHQL_URL = "https://www.warcraftlogs.com/api/v2/client"
 QUERY_NAME = re.compile(r"^[a-z0-9-]+$")
+METADATA_TTL_SECONDS = 24 * 60 * 60
 
 
 class AuthenticationError(RuntimeError):
@@ -181,6 +183,154 @@ def normalize_rate_limit(payload: Mapping[str, object]) -> dict:
     }
 
 
+def normalize_name(value) -> str:
+    if not isinstance(value, str):
+        raise ValueError("Name must be a string")
+    return re.sub(r"[\s-]+", " ", value.casefold()).strip()
+
+
+def select_named(items, name, kind) -> dict:
+    exact = [item for item in items if isinstance(item, Mapping) and item.get("name") == name]
+    if len(exact) == 1:
+        return dict(exact[0])
+    normalized = normalize_name(name)
+    matches = [
+        item
+        for item in items
+        if isinstance(item, Mapping) and isinstance(item.get("name"), str) and normalize_name(item["name"]) == normalized
+    ]
+    if len(matches) == 1:
+        return dict(matches[0])
+    if len(matches) > 1:
+        names = ", ".join(str(item["name"]) for item in matches)
+        raise ValueError("Ambiguous %s: %s" % (kind, names))
+    raise ValueError("Unknown %s: %s" % (kind, name))
+
+
+def default_metadata_cache_dir() -> Path:
+    if os.name == "nt":
+        local_app_data = os.environ.get("LOCALAPPDATA")
+        root = Path(local_app_data) if local_app_data else Path.home() / ".cache"
+    else:
+        xdg_cache_home = os.environ.get("XDG_CACHE_HOME")
+        root = Path(xdg_cache_home) if xdg_cache_home else Path.home() / ".cache"
+    return root / "azeroth-talent-forge" / "warcraftlogs"
+
+
+def _records(items, fields) -> List[dict]:
+    if not isinstance(items, list):
+        raise TypeError("Metadata collection was not a list")
+    result = []
+    for item in items:
+        if not isinstance(item, Mapping):
+            raise TypeError("Metadata collection item was not an object")
+        result.append({field: item[field] for field in fields if field in item})
+    return result
+
+
+def _normalize_world(payload: Mapping[str, object]) -> dict:
+    world = payload["data"]["worldData"]
+    if not isinstance(world, Mapping):
+        raise TypeError("World metadata was not an object")
+    zones = []
+    for zone in _records(world["zones"], ("id", "name", "difficulties", "encounters", "partitions")):
+        zone["difficulties"] = _records(zone.get("difficulties", []), ("id", "name"))
+        zone["encounters"] = _records(zone.get("encounters", []), ("id", "name"))
+        zone["partitions"] = _records(zone.get("partitions", []), ("id", "name"))
+        zones.append(zone)
+    return {
+        "regions": _records(world["regions"], ("id", "name", "slug")),
+        "expansions": _records(world["expansions"], ("id", "name")),
+        "zones": zones,
+    }
+
+
+def _normalize_game(payload: Mapping[str, object]) -> dict:
+    game = payload["data"]["gameData"]
+    if not isinstance(game, Mapping):
+        raise TypeError("Game metadata was not an object")
+    classes = []
+    for game_class in _records(game["classes"], ("id", "name", "slug", "specs")):
+        game_class["specs"] = _records(game_class.get("specs", []), ("id", "name", "slug"))
+        classes.append(game_class)
+    return {
+        "classes": classes,
+        "affixes": _records(game["affixes"], ("id", "name")),
+        "abilities": _records(game["abilities"], ("id", "name")),
+    }
+
+
+def _normalize_realm(payload: Mapping[str, object]) -> dict:
+    world = payload["data"]["worldData"]
+    if not isinstance(world, Mapping) or not isinstance(world["server"], Mapping):
+        raise TypeError("Realm metadata was not an object")
+    return {
+        field: world["server"][field]
+        for field in ("id", "name", "normalizedName", "slug", "region", "subregion")
+        if field in world["server"]
+    }
+
+
+class MetadataResolver:
+    def __init__(self, client, cache: Optional[Path] = None, no_cache: bool = False, now=None):
+        self.client = client
+        self.cache = Path(cache) if cache is not None else default_metadata_cache_dir()
+        self.no_cache = no_cache
+        self.now = now or time.time
+        self.errors = []
+
+    def _cache_path(self, query_name: str, variables: Mapping[str, object]) -> Path:
+        encoded = json.dumps(dict(variables), sort_keys=True, separators=(",", ":")).encode("utf-8")
+        return self.cache / (query_name + "-" + hashlib.sha256(encoded).hexdigest() + ".json")
+
+    def _query(self, query_name: str, variables: Mapping[str, object]) -> tuple:
+        cache_path = self._cache_path(query_name, variables)
+        if not self.no_cache and cache_path.is_file():
+            try:
+                cached = json.loads(cache_path.read_text(encoding="utf-8"))
+                if isinstance(cached, Mapping) and cached["expires_at"] > self.now() and isinstance(cached["payload"], Mapping):
+                    payload = cached["payload"]
+                    self.errors = payload.get("errors", [])
+                    return payload, {"status": "hit"}
+            except (KeyError, TypeError, ValueError, OSError):
+                pass
+        payload = self.client.execute(query_name, variables)
+        if not isinstance(payload, Mapping):
+            raise TypeError("Metadata response was not an object")
+        self.errors = payload.get("errors", [])
+        if not self.no_cache:
+            self.cache.mkdir(parents=True, exist_ok=True)
+            fetched_at = self.now()
+            temporary = cache_path.with_suffix(cache_path.suffix + ".tmp")
+            temporary.write_text(
+                json.dumps(
+                    {"variables": dict(variables), "payload": payload, "fetched_at": fetched_at, "expires_at": fetched_at + METADATA_TTL_SECONDS},
+                    ensure_ascii=True,
+                    separators=(",", ":"),
+                ),
+                encoding="utf-8",
+            )
+            temporary.replace(cache_path)
+        return payload, {"status": "bypassed" if self.no_cache else "miss"}
+
+    def world(self, variables: Mapping[str, object]) -> tuple:
+        payload, provenance = self._query("metadata-world", variables)
+        return _normalize_world(payload), provenance
+
+    def game(self, variables: Mapping[str, object]) -> tuple:
+        payload, provenance = self._query("metadata-game", variables)
+        return _normalize_game(payload), provenance
+
+    def realm(self, region, name) -> tuple:
+        if not isinstance(region, str) or not region.strip():
+            raise ValueError("Realm lookup requires region")
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError("Realm lookup requires name")
+        slug = normalize_name(name).replace(" ", "-")
+        payload, provenance = self._query("metadata-realm", {"region": region.strip(), "slug": slug})
+        return _normalize_realm(payload), provenance
+
+
 def make_envelope(
     command,
     scope,
@@ -218,13 +368,24 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--client-secret")
     parser.add_argument("--env-file")
     parser.add_argument("--no-cache", action="store_true")
-    parser.add_subparsers(dest="command").add_parser("rate-limit")
+    subparsers = parser.add_subparsers(dest="command")
+    subparsers.add_parser("rate-limit")
+    metadata = subparsers.add_parser("metadata")
+    metadata.add_argument(
+        "kind",
+        choices=("regions", "realms", "zones", "encounters", "seasons", "classes", "specs", "affixes", "abilities"),
+    )
+    metadata.add_argument("--region")
+    metadata.add_argument("--name")
+    metadata.add_argument("--expansion-id", type=int, default=11)
+    metadata.add_argument("--ability-limit", type=int, default=100)
+    metadata.add_argument("--ability-page", type=int, default=1)
     return parser
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = build_parser().parse_args(argv)
-    if args.command != "rate-limit":
+    if args.command not in ("rate-limit", "metadata"):
         return 0
     try:
         credentials = resolve_credentials(
@@ -238,6 +399,71 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(str(error), file=sys.stderr)
         return 2
     client = WarcraftLogsClient(credentials)
+    if args.command == "metadata":
+        resolver = MetadataResolver(client, no_cache=args.no_cache)
+        try:
+            if args.kind == "realms":
+                data, provenance = resolver.realm(args.region, args.name)
+                scope = {"region": args.region}
+                filters = {"name": args.name}
+            elif args.kind in ("regions", "zones", "encounters", "seasons"):
+                world, provenance = resolver.world({"expansionId": args.expansion_id})
+                scope = {"expansion_id": args.expansion_id}
+                filters = {}
+                if args.kind == "regions":
+                    data = world["regions"]
+                elif args.kind == "zones":
+                    data = world["zones"]
+                elif args.kind == "encounters":
+                    data = [
+                        dict(encounter, zone={"id": zone["id"], "name": zone["name"]})
+                        for zone in world["zones"]
+                        for encounter in zone["encounters"]
+                    ]
+                else:
+                    data = [
+                        dict(partition, zone={"id": zone["id"], "name": zone["name"]})
+                        for zone in world["zones"]
+                        for partition in zone["partitions"]
+                    ]
+            else:
+                game, provenance = resolver.game({"abilityLimit": args.ability_limit, "abilityPage": args.ability_page})
+                scope = {}
+                filters = {"limit": args.ability_limit, "page": args.ability_page} if args.kind == "abilities" else {}
+                if args.kind == "classes":
+                    data = [{field: value for field, value in item.items() if field != "specs"} for item in game["classes"]]
+                elif args.kind == "specs":
+                    data = [
+                        dict(spec, game_class={"id": game_class["id"], "name": game_class["name"], "slug": game_class["slug"]})
+                        for game_class in game["classes"]
+                        for spec in game_class["specs"]
+                    ]
+                else:
+                    data = game[args.kind]
+        except AuthenticationError as error:
+            print(str(error), file=sys.stderr)
+            return 3
+        except ValueError as error:
+            print(str(error), file=sys.stderr)
+            return 2
+        except (ApiError, KeyError, TypeError, OSError):
+            print("Warcraft Logs API response did not contain metadata", file=sys.stderr)
+            return 4
+        print(
+            json.dumps(
+                make_envelope(
+                    "metadata " + args.kind,
+                    scope,
+                    filters,
+                    "api_collection",
+                    data,
+                    errors=resolver.errors,
+                    cache=provenance,
+                ),
+                ensure_ascii=True,
+            )
+        )
+        return 0
     try:
         payload = client.execute("rate-limit", {})
     except AuthenticationError as error:
