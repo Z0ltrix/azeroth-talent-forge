@@ -217,7 +217,7 @@ def report_request(args) -> tuple:
         variables["fightIDs"] = [fight_id]
 
     scope = {"report_code": reference.code}
-    if fight_id is not None:
+    if fight_id is not None and args.report_command not in ("summary", "master-data"):
         scope["fight_id"] = fight_id
     if start_time is not None:
         scope["start_time"] = start_time

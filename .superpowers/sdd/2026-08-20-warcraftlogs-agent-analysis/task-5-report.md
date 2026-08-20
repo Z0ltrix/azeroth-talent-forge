@@ -91,6 +91,28 @@ Exact fix-round checks:
 - `quick_validate.py`: remains blocked by missing `yaml` unless the
   environment changes.
 
+## Task 5 cross-contract fix
+
+Root cause: `report_request()` correctly omitted API `fightIDs` for the
+compatibility-accepted `summary` and `master-data` commands, but added
+`scope.fight_id` unconditionally whenever `--fight` was present. Their
+report-wide payloads therefore carried a false fight-specific envelope scope.
+
+TDD evidence:
+
+- RED: the new regression test passed `--fight 3` to both commands and failed
+  on the unexpected `scope.fight_id`; both commands already had no
+  `fightIDs` variable.
+- GREEN: the minimal conditional now omits `scope.fight_id` for `summary` and
+  `master-data` while retaining it for fight-scoped commands.
+
+Exact checks:
+
+- Focused regression test: passed, 1 test covering summary and master-data.
+- Full Warcraft Logs unittest module: passed, 109 tests.
+- `git diff --check`: passed.
+- Commit: `fix: preserve report-only scope for compatibility commands`.
+
 ## Fix round 2
 
 Finding addressed: the staged routing bullet no longer describes summary or

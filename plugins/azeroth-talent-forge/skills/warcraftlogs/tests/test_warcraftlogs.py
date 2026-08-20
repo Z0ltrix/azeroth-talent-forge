@@ -723,6 +723,22 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(result["completeness"], "single_report")
         self.assertEqual(result["data"]["zone"], {"id": 38, "name": "Nerub-ar Palace"})
 
+    def test_report_wide_commands_drop_compatibility_fight_scope(self):
+        cases = (
+            ("summary", "report-summary.json", "report-summary"),
+            ("master-data", "report-master-data.json", "report-master-data"),
+        )
+        for kind, fixture_name, query_name in cases:
+            with self.subTest(kind=kind):
+                exit_code, output, errors, client = self.run_report(
+                    {query_name: fixture(fixture_name)}, kind, "AbCd1234", "--fight", "3"
+                )
+                result = json.loads(output)
+                self.assertEqual(exit_code, 0)
+                self.assertEqual(errors, "")
+                self.assertNotIn("fightIDs", client.variables[0])
+                self.assertEqual(result["scope"], {"report_code": "AbCd1234"})
+
     def test_fights_fixture_keeps_empty_and_mythic_plus_fields(self):
         exit_code, output, errors, client = self.run_report(
             {"report-fights": fixture("report-fights.json")},
