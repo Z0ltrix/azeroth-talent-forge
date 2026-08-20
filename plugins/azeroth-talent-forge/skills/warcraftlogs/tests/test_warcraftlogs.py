@@ -781,6 +781,21 @@ class SequenceClient:
 
 
 class EventTests(unittest.TestCase):
+    def test_direct_event_pagination_rejects_malformed_bounds_and_fight_ids_before_execute(self):
+        cases = (
+            {"startTime": "0", "endTime": 1000},
+            {"startTime": float("inf"), "endTime": 1000},
+            {"startTime": 0, "endTime": float("nan")},
+            {"startTime": -1, "endTime": 1000},
+            {"startTime": 0, "endTime": 1000, "fightIDs": "7"},
+            {"startTime": 0, "endTime": 1000, "fightIDs": [0]},
+        )
+        for variables in cases:
+            client = SequenceClient([])
+            with self.subTest(variables=variables), self.assertRaises(ValueError):
+                list(warcraftlogs.iter_event_pages(client, "CODE", variables, 5))
+            self.assertEqual(client.calls, [])
+
     def test_event_pagination_requires_fight_or_complete_window(self):
         with self.assertRaisesRegex(ValueError, "fight ID or both startTime and endTime"):
             list(warcraftlogs.iter_event_pages(SequenceClient([]), "CODE", {}, 5))
@@ -822,6 +837,72 @@ class EventTests(unittest.TestCase):
         ])
         with self.assertRaisesRegex(RuntimeError, "did not advance"):
             list(warcraftlogs.iter_event_pages(client, "CODE", {"startTime": 0, "endTime": 1000}, 5))
+
+    def test_events_cli_surfaces_non_advancing_cursor_error(self):
+        client = SequenceClient([
+            fixture("report-events-page-1.json"),
+            fixture("report-events-repeated-cursor.json"),
+        ])
+        output = io.StringIO()
+        errors = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, redirect_stdout(output), redirect_stderr(errors), patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ):
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret", "--env-file",
+                str(Path(directory) / "missing.env"), "report", "events", "CODE1234", "--fight", "7",
+            ])
+        self.assertEqual(exit_code, 4)
+        self.assertEqual(output.getvalue(), "")
+        self.assertIn("did not advance", errors.getvalue())
+
+    def test_events_cli_marks_max_page_truncation_and_fixture_round_trip(self):
+        client = SequenceClient([fixture("report-events-page-1.json")])
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, redirect_stdout(output), patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ):
+            path = Path(directory) / "events.jsonl"
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret", "--env-file",
+                str(Path(directory) / "missing.env"), "report", "events", "CODE1234", "--fight", "7",
+                "--max-pages", "1", "--output", str(path),
+            ])
+            records = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+        envelope = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(envelope["pagination"], {"pages_fetched": 1, "truncated": True})
+        self.assertEqual(records[0]["metadata"]["pagination"], {"pages_fetched": 1, "truncated": True})
+        self.assertEqual(records[1]["event"]["timestamp"], 100)
+
+    def test_events_cli_fixture_null_cursor_is_not_truncated(self):
+        client = SequenceClient([fixture("report-events-page-2.json")])
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, redirect_stdout(output), patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ):
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret", "--env-file",
+                str(Path(directory) / "missing.env"), "report", "events", "CODE1234", "--fight", "7",
+            ])
+        envelope = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(envelope["pagination"], {"pages_fetched": 1, "truncated": False})
+
+    def test_events_cli_fixture_end_cursor_is_not_truncated(self):
+        client = SequenceClient([fixture("report-events-page-1.json")])
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, redirect_stdout(output), patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ):
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret", "--env-file",
+                str(Path(directory) / "missing.env"), "report", "events", "CODE1234", "--start-time", "0",
+                "--end-time", "200",
+            ])
+        envelope = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(envelope["pagination"], {"pages_fetched": 1, "truncated": False})
 
     def test_event_pagination_honors_max_pages_and_preserves_partial_pages(self):
         client = SequenceClient([

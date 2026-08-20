@@ -2,6 +2,7 @@ import argparse
 import base64
 import hashlib
 import json
+import math
 import os
 import re
 import sys
@@ -575,12 +576,21 @@ def iter_event_pages(client, code, variables, max_pages=EVENT_MAX_PAGES):
         raise ValueError("Event max pages must be a positive integer")
     request = dict(variables)
     fight_ids = request.get("fightIDs")
-    has_fight = isinstance(fight_ids, (list, tuple)) and bool(fight_ids)
+    if "fightIDs" in request and (
+        not isinstance(fight_ids, list) or not fight_ids or
+        any(not isinstance(fight_id, int) or isinstance(fight_id, bool) or fight_id < 1 for fight_id in fight_ids)
+    ):
+        raise ValueError("Report fight must be a positive integer")
+    has_fight = "fightIDs" in request
     has_window = request.get("startTime") is not None and request.get("endTime") is not None
     if not has_fight and not has_window:
         raise ValueError("Event download requires a fight ID or both startTime and endTime")
-    if has_fight and any(not isinstance(fight_id, int) or isinstance(fight_id, bool) or fight_id < 1 for fight_id in fight_ids):
-        raise ValueError("Report fight must be a positive integer")
+    for bound_name in ("startTime", "endTime"):
+        bound = request.get(bound_name)
+        if bound is not None and (
+            isinstance(bound, bool) or not isinstance(bound, (int, float)) or not math.isfinite(bound) or bound < 0
+        ):
+            raise ValueError("Event window bounds must be finite, numeric, and non-negative")
     if has_window and request["startTime"] > request["endTime"]:
         raise ValueError("Report start time must not exceed end time")
     limit = request.get("limit", EVENT_PAGE_LIMIT)
@@ -789,7 +799,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             except PublicReportError as error:
                 print(str(error), file=sys.stderr)
                 return 4
-            except (ApiError, KeyError, TypeError, OSError, RuntimeError, ValueError):
+            except RuntimeError as error:
+                print(str(error), file=sys.stderr)
+                return 4
+            except (ApiError, KeyError, TypeError, OSError, ValueError):
                 print("Warcraft Logs API response did not contain event data", file=sys.stderr)
                 return 4
             data = [event for page in pages for event in page["data"]]
