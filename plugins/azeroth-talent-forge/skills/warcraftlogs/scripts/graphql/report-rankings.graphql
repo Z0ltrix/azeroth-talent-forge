@@ -1,0 +1,9 @@
+query ReportRankings($code: String!, $allowUnlisted: Boolean!, $compare: RankingCompareType, $difficulty: Int, $encounterID: Int, $fightIDs: [Int], $playerMetric: ReportRankingMetricType, $timeframe: RankingTimeframeType) {
+  reportData {
+    report(code: $code, allowUnlisted: $allowUnlisted) {
+      visibility
+      archiveStatus { isArchived isAccessible archiveDate }
+      rankings(compare: $compare, difficulty: $difficulty, encounterID: $encounterID, fightIDs: $fightIDs, playerMetric: $playerMetric, timeframe: $timeframe)
+    }
+  }
+}

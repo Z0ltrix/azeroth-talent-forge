@@ -1,0 +1,18 @@
+{
+  "data": {
+    "reportData": {
+      "report": {
+        "code": "AbCd1234",
+        "title": "Public raid night",
+        "visibility": "public",
+        "startTime": 1720000000000,
+        "endTime": 1720003600000,
+        "revision": 2,
+        "archiveStatus": {"isArchived": false, "isAccessible": true, "archiveDate": null},
+        "zone": {"id": 38, "name": "Nerub-ar Palace"},
+        "owner": {"id": 10, "name": "Logger"},
+        "guild": {"id": 20, "name": "Fixture Guild"}
+      }
+    }
+  }
+}

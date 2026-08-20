@@ -1,0 +1,9 @@
+query ReportGraph($code: String!, $allowUnlisted: Boolean!, $dataType: GraphDataType!, $abilityID: Float, $death: Int, $difficulty: Int, $encounterID: Int, $endTime: Float, $fightIDs: [Int], $filterExpression: String, $hostilityType: HostilityType, $killType: KillType, $sourceAurasAbsent: String, $sourceAurasPresent: String, $sourceClass: String, $sourceID: Int, $sourceInstanceID: Int, $sourcePetType: String, $sourceSpec: String, $startTime: Float, $targetAurasAbsent: String, $targetAurasPresent: String, $targetClass: String, $targetID: Int, $targetInstanceID: Int, $targetPetType: String, $targetSpec: String, $translate: Boolean, $viewBy: ViewType, $wipeCutoff: Int) {
+  reportData {
+    report(code: $code, allowUnlisted: $allowUnlisted) {
+      visibility
+      archiveStatus { isArchived isAccessible archiveDate }
+      graph(dataType: $dataType, abilityID: $abilityID, death: $death, difficulty: $difficulty, encounterID: $encounterID, endTime: $endTime, fightIDs: $fightIDs, filterExpression: $filterExpression, hostilityType: $hostilityType, killType: $killType, sourceAurasAbsent: $sourceAurasAbsent, sourceAurasPresent: $sourceAurasPresent, sourceClass: $sourceClass, sourceID: $sourceID, sourceInstanceID: $sourceInstanceID, sourcePetType: $sourcePetType, sourceSpec: $sourceSpec, startTime: $startTime, targetAurasAbsent: $targetAurasAbsent, targetAurasPresent: $targetAurasPresent, targetClass: $targetClass, targetID: $targetID, targetInstanceID: $targetInstanceID, targetPetType: $targetPetType, targetSpec: $targetSpec, translate: $translate, viewBy: $viewBy, wipeCutoff: $wipeCutoff)
+    }
+  }
+}

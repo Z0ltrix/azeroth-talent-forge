@@ -1,0 +1,11 @@
+query ReportSummary($code: String!, $allowUnlisted: Boolean!) {
+  reportData {
+    report(code: $code, allowUnlisted: $allowUnlisted) {
+      code title visibility startTime endTime revision
+      archiveStatus { isArchived isAccessible archiveDate }
+      zone { id name }
+      owner { id name }
+      guild { id name }
+    }
+  }
+}

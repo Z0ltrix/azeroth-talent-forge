@@ -19,7 +19,23 @@ CLIENT_SECRET_ENV = "WARCRAFTLOGS_CLIENT_SECRET"
 TOKEN_URL = "https://www.warcraftlogs.com/oauth/token"
 GRAPHQL_URL = "https://www.warcraftlogs.com/api/v2/client"
 QUERY_NAME = re.compile(r"^[a-z0-9-]+$")
+REPORT_CODE = re.compile(r"^[A-Za-z0-9]{8,32}$")
 METADATA_TTL_SECONDS = 24 * 60 * 60
+REPORT_KINDS = ("summary", "fights", "master-data", "player-details", "table", "graph", "rankings")
+TABLE_DATA_TYPES = (
+    "Summary", "DamageDone", "DamageTaken", "Healing", "Casts", "Summons", "Buffs",
+    "Debuffs", "Deaths", "Interrupts", "Dispels", "Resources", "ResourcesGained", "Threat",
+)
+GRAPH_DATA_TYPES = (
+    "DamageDone", "DamageTaken", "Healing", "Casts", "Buffs", "Debuffs", "Deaths",
+    "Interrupts", "Dispels", "Resources", "ResourcesGained",
+)
+KILL_TYPES = ("All", "Encounters", "Kills", "Trash", "Wipes")
+HOSTILITY_TYPES = ("Friendlies", "Enemies")
+VIEW_TYPES = ("Source", "Target", "Ability")
+RANKING_COMPARE_TYPES = ("Rankings", "Parses")
+RANKING_TIMEFRAMES = ("Historical", "Today")
+RANKING_METRICS = ("bossdps", "dps", "hps", "playerspeed", "execution")
 
 
 class AuthenticationError(RuntimeError):
@@ -30,10 +46,57 @@ class ApiError(RuntimeError):
     pass
 
 
+class PublicReportError(RuntimeError):
+    pass
+
+
 @dataclass(frozen=True)
 class Credentials:
     client_id: str
     client_secret: str
+
+
+@dataclass(frozen=True)
+class ReportReference:
+    code: str
+    fight_id: Optional[int]
+
+
+def _fight_id(parameters) -> Optional[int]:
+    values = urllib.parse.parse_qs(parameters).get("fight", [])
+    if not values:
+        return None
+    try:
+        fight_id = int(values[-1])
+    except (TypeError, ValueError):
+        raise ValueError("Report fight must be a positive integer")
+    if fight_id < 1:
+        raise ValueError("Report fight must be a positive integer")
+    return fight_id
+
+
+def parse_report_reference(value) -> ReportReference:
+    if not isinstance(value, str) or not value:
+        raise ValueError("Invalid Warcraft Logs report reference")
+    if REPORT_CODE.fullmatch(value):
+        return ReportReference(value, None)
+    parsed = urllib.parse.urlsplit(value)
+    hostname = (parsed.hostname or "").rstrip(".").casefold()
+    if (
+        parsed.scheme not in ("http", "https")
+        or parsed.username is not None
+        or parsed.password is not None
+        or not (hostname == "warcraftlogs.com" or hostname.endswith(".warcraftlogs.com"))
+    ):
+        raise ValueError("Invalid Warcraft Logs report URL")
+    path = urllib.parse.unquote(parsed.path)
+    match = re.fullmatch(r"/reports/([A-Za-z0-9]{8,32})/?", path)
+    if not match:
+        raise ValueError("Invalid Warcraft Logs report URL")
+    fight_id = _fight_id(parsed.fragment)
+    if fight_id is None:
+        fight_id = _fight_id(parsed.query)
+    return ReportReference(match.group(1), fight_id)
 
 
 def load_dotenv(path: Path) -> Dict[str, str]:
@@ -367,6 +430,102 @@ def make_envelope(
     return result
 
 
+def _add_report_options(parser, window=False, translate=False) -> None:
+    parser.add_argument("reference", help="report code or official Warcraft Logs report URL")
+    parser.add_argument("--fight", type=int)
+    if window:
+        parser.add_argument("--start-time", type=float)
+        parser.add_argument("--end-time", type=float)
+    if translate:
+        parser.add_argument("--no-translate", dest="translate", action="store_false", default=True)
+
+
+def _add_json_report_options(parser) -> None:
+    _add_report_options(parser, window=True)
+    parser.add_argument("--difficulty", type=int)
+    parser.add_argument("--encounter-id", type=int)
+    parser.add_argument("--kill-type")
+
+
+def _enum(value, allowed, label) -> None:
+    if value is not None and value not in allowed:
+        raise ValueError("Invalid %s: %s" % (label, value))
+
+
+def report_request(args) -> tuple:
+    reference = parse_report_reference(args.reference)
+    fight_id = args.fight if args.fight is not None else reference.fight_id
+    if fight_id is not None and fight_id < 1:
+        raise ValueError("Report fight must be a positive integer")
+    start_time = getattr(args, "start_time", None)
+    end_time = getattr(args, "end_time", None)
+    if (start_time is not None and start_time < 0) or (end_time is not None and end_time < 0):
+        raise ValueError("Report window times must not be negative")
+    if start_time is not None and end_time is not None and start_time > end_time:
+        raise ValueError("Report start time must not exceed end time")
+    _enum(getattr(args, "kill_type", None), KILL_TYPES, "kill type")
+    _enum(
+        getattr(args, "data_type", None),
+        TABLE_DATA_TYPES if args.report_command == "table" else GRAPH_DATA_TYPES,
+        "data type",
+    )
+    _enum(getattr(args, "hostility_type", None), HOSTILITY_TYPES, "hostility type")
+    _enum(getattr(args, "view_by", None), VIEW_TYPES, "view type")
+    _enum(getattr(args, "compare", None), RANKING_COMPARE_TYPES, "ranking comparison")
+    _enum(getattr(args, "timeframe", None), RANKING_TIMEFRAMES, "ranking timeframe")
+    _enum(getattr(args, "player_metric", None), RANKING_METRICS, "ranking metric")
+
+    variables = {"code": reference.code, "allowUnlisted": False}
+    variable_names = {
+        "start_time": "startTime", "end_time": "endTime", "difficulty": "difficulty",
+        "encounter_id": "encounterID", "kill_type": "killType", "data_type": "dataType",
+        "ability_id": "abilityID", "death": "death", "filter_expression": "filterExpression",
+        "source_auras_absent": "sourceAurasAbsent", "source_auras_present": "sourceAurasPresent",
+        "source_class": "sourceClass", "source_id": "sourceID", "source_instance_id": "sourceInstanceID",
+        "source_pet_type": "sourcePetType", "source_spec": "sourceSpec",
+        "target_auras_absent": "targetAurasAbsent", "target_auras_present": "targetAurasPresent",
+        "target_class": "targetClass", "target_id": "targetID", "target_instance_id": "targetInstanceID",
+        "target_pet_type": "targetPetType", "target_spec": "targetSpec", "wipe_cutoff": "wipeCutoff",
+        "hostility_type": "hostilityType", "view_by": "viewBy", "compare": "compare",
+        "player_metric": "playerMetric", "timeframe": "timeframe", "translate": "translate",
+    }
+    for attribute, variable_name in variable_names.items():
+        value = getattr(args, attribute, None)
+        if value is not None:
+            variables[variable_name] = value
+    if fight_id is not None and args.report_command not in ("summary", "master-data"):
+        variables["fightIDs"] = [fight_id]
+
+    scope = {"report_code": reference.code}
+    if fight_id is not None:
+        scope["fight_id"] = fight_id
+    if start_time is not None:
+        scope["start_time"] = start_time
+    if end_time is not None:
+        scope["end_time"] = end_time
+    filters = {
+        variable_name: value
+        for attribute, variable_name in variable_names.items()
+        for value in (getattr(args, attribute, None),)
+        if value is not None and attribute not in ("start_time", "end_time")
+    }
+    return reference, variables, scope, filters
+
+
+def report_data(payload: Mapping[str, object], kind: str):
+    report = payload["data"]["reportData"]["report"]
+    if not isinstance(report, Mapping):
+        raise TypeError("Report was not an object")
+    archive_status = report.get("archiveStatus")
+    accessible = not isinstance(archive_status, Mapping) or archive_status.get("isAccessible") is not False
+    if str(report.get("visibility", "")).casefold() != "public" or not accessible:
+        raise PublicReportError("Report is not public or accessible")
+    if kind == "summary":
+        return dict(report)
+    field = {"master-data": "masterData", "player-details": "playerDetails"}.get(kind, kind)
+    return report[field]
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="warcraftlogs.py")
     parser.add_argument("--client-id")
@@ -385,12 +544,55 @@ def build_parser() -> argparse.ArgumentParser:
     metadata.add_argument("--expansion-id", type=int, default=11)
     metadata.add_argument("--ability-limit", type=int, default=100)
     metadata.add_argument("--ability-page", type=int, default=1)
+    report = subparsers.add_parser("report")
+    report_parsers = report.add_subparsers(dest="report_command")
+    summary = report_parsers.add_parser("summary")
+    _add_report_options(summary)
+    fights = report_parsers.add_parser("fights")
+    _add_report_options(fights, window=True, translate=True)
+    master_data = report_parsers.add_parser("master-data")
+    _add_report_options(master_data, translate=True)
+    player_details = report_parsers.add_parser("player-details")
+    _add_json_report_options(player_details)
+    player_details.add_argument("--no-translate", dest="translate", action="store_false", default=True)
+    for kind in ("table", "graph"):
+        command = report_parsers.add_parser(kind)
+        _add_json_report_options(command)
+        command.add_argument("--data-type", required=True)
+        command.add_argument("--ability-id", type=float)
+        command.add_argument("--death", type=int)
+        command.add_argument("--filter-expression")
+        command.add_argument("--source-auras-absent")
+        command.add_argument("--source-auras-present")
+        command.add_argument("--source-class")
+        command.add_argument("--source-id", type=int)
+        command.add_argument("--source-instance-id", type=int)
+        command.add_argument("--source-pet-type")
+        command.add_argument("--source-spec")
+        command.add_argument("--target-auras-absent")
+        command.add_argument("--target-auras-present")
+        command.add_argument("--target-class")
+        command.add_argument("--target-id", type=int)
+        command.add_argument("--target-instance-id", type=int)
+        command.add_argument("--target-pet-type")
+        command.add_argument("--target-spec")
+        command.add_argument("--hostility-type")
+        command.add_argument("--view-by")
+        command.add_argument("--wipe-cutoff", type=int)
+        command.add_argument("--no-translate", dest="translate", action="store_false", default=True)
+    rankings = report_parsers.add_parser("rankings")
+    _add_report_options(rankings)
+    rankings.add_argument("--difficulty", type=int)
+    rankings.add_argument("--encounter-id", type=int)
+    rankings.add_argument("--compare")
+    rankings.add_argument("--player-metric")
+    rankings.add_argument("--timeframe")
     return parser
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = build_parser().parse_args(argv)
-    if args.command not in ("rate-limit", "metadata"):
+    if args.command not in ("rate-limit", "metadata", "report"):
         return 0
     try:
         credentials = resolve_credentials(
@@ -404,6 +606,40 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(str(error), file=sys.stderr)
         return 2
     client = WarcraftLogsClient(credentials)
+    if args.command == "report":
+        if args.report_command not in REPORT_KINDS:
+            return 0
+        try:
+            unused, variables, scope, filters = report_request(args)
+        except ValueError as error:
+            print(str(error), file=sys.stderr)
+            return 2
+        try:
+            payload = client.execute("report-" + args.report_command, variables)
+            data = report_data(payload, args.report_command)
+        except AuthenticationError as error:
+            print(str(error), file=sys.stderr)
+            return 3
+        except PublicReportError as error:
+            print(str(error), file=sys.stderr)
+            return 4
+        except (ApiError, KeyError, TypeError, OSError, ValueError):
+            print("Warcraft Logs API response did not contain a public report", file=sys.stderr)
+            return 4
+        print(
+            json.dumps(
+                make_envelope(
+                    "report " + args.report_command,
+                    scope,
+                    filters,
+                    "single_report",
+                    data,
+                    errors=payload.get("errors"),
+                ),
+                ensure_ascii=True,
+            )
+        )
+        return 0
     if args.command == "metadata":
         resolver = MetadataResolver(client, no_cache=args.no_cache)
         try:

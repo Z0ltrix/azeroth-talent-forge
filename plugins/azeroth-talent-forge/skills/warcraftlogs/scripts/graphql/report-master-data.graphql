@@ -1,0 +1,13 @@
+query ReportMasterData($code: String!, $allowUnlisted: Boolean!, $translate: Boolean) {
+  reportData {
+    report(code: $code, allowUnlisted: $allowUnlisted) {
+      visibility
+      archiveStatus { isArchived isAccessible archiveDate }
+      masterData(translate: $translate) {
+        logVersion gameVersion lang
+        abilities { gameID icon name type }
+        actors { id gameID icon name petOwner server subType type }
+      }
+    }
+  }
+}

@@ -454,6 +454,277 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(result["cache"]["status"], "miss")
 
 
+class ReportReferenceTests(unittest.TestCase):
+    def test_raw_report_code(self):
+        self.assertEqual(
+            warcraftlogs.parse_report_reference("AbCd1234"),
+            warcraftlogs.ReportReference("AbCd1234", None),
+        )
+
+    def test_parse_report_url_with_fight_fragment(self):
+        result = warcraftlogs.parse_report_reference(
+            "https://www.warcraftlogs.com/reports/AbCd1234#fight=7&type=damage-done"
+        )
+        self.assertEqual(result.code, "AbCd1234")
+        self.assertEqual(result.fight_id, 7)
+
+    def test_parse_classic_localized_url_with_query_fight(self):
+        result = warcraftlogs.parse_report_reference(
+            "https://de.classic.warcraftlogs.com/reports/ZyXw9876?fight=12"
+        )
+        self.assertEqual(result, warcraftlogs.ReportReference("ZyXw9876", 12))
+
+    def test_rejects_lookalike_host_and_malformed_code(self):
+        for value in (
+            "https://warcraftlogs.com.evil.example/reports/AbCd1234",
+            "https://notwarcraftlogs.com/reports/AbCd1234",
+            "bad/code",
+            "short",
+        ):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                warcraftlogs.parse_report_reference(value)
+
+
+class ReportTests(unittest.TestCase):
+    def run_report(self, payloads, *arguments):
+        output = io.StringIO()
+        errors = io.StringIO()
+        client = FixtureClient(payloads)
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(warcraftlogs, "WarcraftLogsClient", return_value=client), patch.dict(
+                os.environ, {}, clear=True
+            ), redirect_stdout(output), redirect_stderr(errors):
+                exit_code = warcraftlogs.main(
+                    [
+                        "--client-id",
+                        "client-id",
+                        "--client-secret",
+                        "client-secret",
+                        "--env-file",
+                        str(Path(directory) / "missing.env"),
+                        "report",
+                    ]
+                    + list(arguments)
+                )
+        return exit_code, output.getvalue(), errors.getvalue(), client
+
+    def test_report_queries_select_consumed_object_fields(self):
+        summary = warcraftlogs.load_query("report-summary")
+        fights = warcraftlogs.load_query("report-fights")
+        master = warcraftlogs.load_query("report-master-data")
+
+        self.assertIn("archiveStatus { isArchived isAccessible archiveDate }", summary)
+        self.assertIn("zone { id name }", summary)
+        self.assertIn("owner { id name }", summary)
+        self.assertIn("guild { id name }", summary)
+        self.assertIn("gameZone { id name }", fights)
+        self.assertIn("keystoneAffixes { id name }", fights)
+        self.assertIn("abilities { gameID icon name type }", master)
+        self.assertIn("actors { id gameID icon name petOwner server subType type }", master)
+
+    def test_summary_fixture_emits_public_single_report(self):
+        exit_code, output, errors, client = self.run_report(
+            {"report-summary": fixture("report-summary.json")}, "summary", "AbCd1234"
+        )
+
+        result = json.loads(output)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(errors, "")
+        self.assertEqual(client.calls, ["report-summary"])
+        self.assertEqual(client.variables[0], {"code": "AbCd1234", "allowUnlisted": False})
+        self.assertEqual(result["command"], "report summary")
+        self.assertEqual(result["scope"], {"report_code": "AbCd1234"})
+        self.assertEqual(result["completeness"], "single_report")
+        self.assertEqual(result["data"]["zone"], {"id": 38, "name": "Nerub-ar Palace"})
+
+    def test_fights_fixture_keeps_empty_and_mythic_plus_fields(self):
+        exit_code, output, errors, client = self.run_report(
+            {"report-fights": fixture("report-fights.json")},
+            "fights",
+            "https://classic.warcraftlogs.com/reports/AbCd1234#fight=7",
+            "--fight",
+            "9",
+        )
+
+        result = json.loads(output)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(errors, "")
+        self.assertEqual(result["scope"], {"report_code": "AbCd1234", "fight_id": 9})
+        self.assertEqual(client.variables[0]["fightIDs"], [9])
+        self.assertEqual(result["data"][0]["keystoneLevel"], 12)
+        self.assertEqual(result["data"][0]["keystoneAffixes"], [])
+        self.assertEqual(result["data"][1]["friendlyPlayers"], [])
+
+    def test_fights_supports_empty_result_and_window(self):
+        payload = fixture("report-fights.json")
+        payload["data"]["reportData"]["report"]["fights"] = []
+        exit_code, output, errors, client = self.run_report(
+            {"report-fights": payload},
+            "fights",
+            "AbCd1234",
+            "--start-time",
+            "1000",
+            "--end-time",
+            "2000",
+            "--no-translate",
+        )
+
+        result = json.loads(output)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(errors, "")
+        self.assertEqual(result["data"], [])
+        self.assertEqual(result["scope"]["start_time"], 1000.0)
+        self.assertEqual(client.variables[0]["endTime"], 2000.0)
+        self.assertEqual(client.variables[0]["translate"], False)
+
+    def test_master_data_fixture_preserves_actors_and_abilities(self):
+        exit_code, output, errors, client = self.run_report(
+            {"report-master-data": fixture("report-master-data.json")},
+            "master-data",
+            "AbCd1234",
+        )
+
+        result = json.loads(output)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(errors, "")
+        self.assertEqual(result["data"]["abilities"][0]["gameID"], 20271)
+        self.assertEqual(result["data"]["actors"][0]["name"], "Tankadin")
+        self.assertEqual(client.variables[0]["translate"], True)
+
+    def test_json_report_commands_emit_fixture_data_and_window_scope(self):
+        cases = (
+            ("player-details", "report-player-details.json", {"players": [{"id": 1, "name": "Tankadin"}]}),
+            ("table", "report-table.json", {"entries": [{"name": "Tankadin", "total": 12345}]}),
+            ("graph", "report-graph.json", {"series": [{"name": "Tankadin", "data": [[0, 10]]}]}),
+        )
+        for kind, fixture_name, expected in cases:
+            arguments = [kind, "AbCd1234", "--start-time", "1000", "--end-time", "2000"]
+            if kind in ("table", "graph"):
+                arguments.extend(["--data-type", "DamageDone"])
+            with self.subTest(kind=kind):
+                exit_code, output, errors, client = self.run_report(
+                    {"report-" + kind: fixture(fixture_name)}, *arguments
+                )
+                result = json.loads(output)
+                self.assertEqual(exit_code, 0)
+                self.assertEqual(errors, "")
+                self.assertEqual(result["data"], expected)
+                self.assertEqual(
+                    result["scope"],
+                    {"report_code": "AbCd1234", "start_time": 1000.0, "end_time": 2000.0},
+                )
+                self.assertEqual(client.variables[0]["startTime"], 1000.0)
+                self.assertEqual(client.variables[0]["endTime"], 2000.0)
+
+    def test_rankings_fixture_uses_supported_typed_arguments(self):
+        exit_code, output, errors, client = self.run_report(
+            {"report-rankings": fixture("report-rankings.json")},
+            "rankings",
+            "AbCd1234",
+            "--fight",
+            "7",
+            "--compare",
+            "Rankings",
+            "--player-metric",
+            "bossdps",
+            "--timeframe",
+            "Historical",
+        )
+
+        result = json.loads(output)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(errors, "")
+        self.assertEqual(result["data"]["rankedCharacters"][0]["rankPercent"], 95.2)
+        self.assertEqual(client.variables[0]["fightIDs"], [7])
+        self.assertNotIn("startTime", client.variables[0])
+
+    def test_partial_graphql_errors_survive_report_envelope(self):
+        payload = fixture("report-table.json")
+        payload["errors"] = [
+            {
+                "message": "one actor was unavailable",
+                "path": ["reportData", "report", "table"],
+                "extensions": {"code": "PARTIAL", "unsafe": "discard"},
+            }
+        ]
+        exit_code, output, errors, unused = self.run_report(
+            {"report-table": payload}, "table", "AbCd1234", "--data-type", "DamageDone"
+        )
+
+        result = json.loads(output)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(errors, "")
+        self.assertTrue(result["partial"])
+        self.assertEqual(result["errors"][0]["extensions"], {"code": "PARTIAL"})
+
+    def test_table_passes_documented_typed_filters(self):
+        exit_code, output, errors, client = self.run_report(
+            {"report-table": fixture("report-table.json")},
+            "table",
+            "AbCd1234",
+            "--data-type",
+            "DamageDone",
+            "--death",
+            "2",
+            "--filter-expression",
+            "ability.id=20271",
+            "--source-class",
+            "Paladin",
+            "--source-instance-id",
+            "4",
+            "--target-auras-absent",
+            "1234.0",
+            "--wipe-cutoff",
+            "5",
+            "--no-translate",
+        )
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(output != "", True)
+        self.assertEqual(errors, "")
+        self.assertEqual(client.variables[0]["death"], 2)
+        self.assertEqual(client.variables[0]["filterExpression"], "ability.id=20271")
+        self.assertEqual(client.variables[0]["sourceClass"], "Paladin")
+        self.assertEqual(client.variables[0]["sourceInstanceID"], 4)
+        self.assertEqual(client.variables[0]["targetAurasAbsent"], "1234.0")
+        self.assertEqual(client.variables[0]["wipeCutoff"], 5)
+        self.assertEqual(client.variables[0]["translate"], False)
+
+    def test_rejects_non_public_or_inaccessible_report(self):
+        cases = (
+            ("private", {"visibility": "private"}),
+            ("unlisted", {"visibility": "unlisted"}),
+            ("archived", {"archiveStatus": {"isArchived": True, "isAccessible": False, "archiveDate": 1700000000000}}),
+        )
+        for label, changes in cases:
+            with self.subTest(label=label):
+                payload = fixture("report-summary.json")
+                payload["data"]["reportData"]["report"].update(changes)
+                exit_code, output, errors, unused = self.run_report(
+                    {"report-summary": payload}, "summary", "AbCd1234"
+                )
+                self.assertEqual(exit_code, 4)
+                self.assertEqual(output, "")
+                self.assertIn("public", errors.lower())
+
+    def test_invalid_enum_is_rejected_before_http(self):
+        exit_code, output, errors, client = self.run_report(
+            {}, "table", "AbCd1234", "--data-type", "DefinitelyNotADataType"
+        )
+
+        self.assertEqual(exit_code, 2)
+        self.assertEqual(output, "")
+        self.assertIn("data type", errors.lower())
+        self.assertEqual(client.calls, [])
+
+    def test_rankings_rejects_window_argument_it_does_not_send(self):
+        with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
+            warcraftlogs.build_parser().parse_args(
+                ["report", "rankings", "AbCd1234", "--start-time", "1000"]
+            )
+        self.assertEqual(raised.exception.code, 2)
+
+
 def fixture(name):
     return json.loads((Path(__file__).parent / "fixtures" / name).read_text(encoding="utf-8"))
 
@@ -462,7 +733,9 @@ class FixtureClient:
     def __init__(self, payloads):
         self.payloads = payloads
         self.calls = []
+        self.variables = []
 
     def execute(self, query_name, variables):
         self.calls.append(query_name)
+        self.variables.append(dict(variables))
         return self.payloads[query_name]

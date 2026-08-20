@@ -1,0 +1,15 @@
+query ReportFights($code: String!, $allowUnlisted: Boolean!, $endTime: Float, $fightIDs: [Int], $startTime: Float, $translate: Boolean) {
+  reportData {
+    report(code: $code, allowUnlisted: $allowUnlisted) {
+      visibility
+      archiveStatus { isArchived isAccessible archiveDate }
+      fights(endTime: $endTime, fightIDs: $fightIDs, startTime: $startTime, translate: $translate) {
+        id encounterID difficulty startTime endTime kill friendlyPlayers friendlySpecs
+        gameZone { id name }
+        inProgress
+        keystoneAffixes { id name }
+        keystoneLevel keystoneTime keystoneBonus
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "data": {
+    "reportData": {
+      "report": {
+        "visibility": "public",
+        "archiveStatus": {"isArchived": false, "isAccessible": true, "archiveDate": null},
+        "masterData": {
+          "logVersion": 22,
+          "gameVersion": 110005,
+          "lang": "en",
+          "abilities": [{"gameID": 20271, "icon": "spell_holy_righteousfury", "name": "Judgment", "type": 2}],
+          "actors": [{"id": 1, "gameID": 0, "icon": "Paladin-Protection", "name": "Tankadin", "petOwner": null, "server": "Area 52", "subType": "ProtectionPaladin", "type": "Player"}]
+        }
+      }
+    }
+  }
+}
