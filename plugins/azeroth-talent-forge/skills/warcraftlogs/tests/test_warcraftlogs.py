@@ -537,7 +537,7 @@ class ReportTests(unittest.TestCase):
         self.assertIn("owner { id name }", summary)
         self.assertIn("guild { id name }", summary)
         self.assertIn("gameZone { id name }", fights)
-        self.assertIn("keystoneAffixes { id name }", fights)
+        self.assertIn("keystoneAffixes", fights)
         self.assertIn("abilities { gameID icon name type }", master)
         self.assertIn("actors { id gameID icon name petOwner server subType type }", master)
 
@@ -571,7 +571,7 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(result["scope"], {"report_code": "AbCd1234", "fight_id": 9})
         self.assertEqual(client.variables[0]["fightIDs"], [9])
         self.assertEqual(result["data"][0]["keystoneLevel"], 12)
-        self.assertEqual(result["data"][0]["keystoneAffixes"], [])
+        self.assertEqual(result["data"][0]["keystoneAffixes"], [9])
         self.assertEqual(result["data"][1]["friendlyPlayers"], [])
 
     def test_fights_supports_empty_result_and_window(self):
@@ -986,6 +986,76 @@ class DiscoveryTests(unittest.TestCase):
             reasons,
             ["class_name", "spec_name", "role", "encounter", "key_min", "timed", "difficulty", "kill"],
         )
+
+    def test_report_fights_query_requests_scalar_keystone_affixes(self):
+        query = warcraftlogs.load_query("report-fights")
+        self.assertIn("keystoneAffixes", query)
+        self.assertNotIn("keystoneAffixes {", query)
+
+    def test_season_and_partition_are_rejected_before_discovery_query(self):
+        for option in ("--season", "--partition"):
+            client = FixtureClient({"guild-reports": fixture("find-guild-page-1.json")})
+            errors = io.StringIO()
+            with tempfile.TemporaryDirectory() as directory, patch.object(
+                warcraftlogs, "WarcraftLogsClient", return_value=client
+            ), patch.dict(os.environ, {}, clear=True), redirect_stderr(errors):
+                exit_code = warcraftlogs.main([
+                    "--client-id", "client-id", "--client-secret", "client-secret",
+                    "--env-file", str(Path(directory) / "missing.env"), "find", "guild",
+                    "--name", "Fixture Guild", "--server", "Area 52", "--region", "us",
+                    option, "1",
+                ])
+            self.assertEqual(exit_code, 2)
+            self.assertEqual(client.calls, [])
+            self.assertIn("cannot", errors.getvalue().lower())
+
+    def test_discovery_limit_is_between_one_and_one_hundred_before_execute(self):
+        for limit in (0, 101):
+            client = FixtureClient({"guild-reports": fixture("find-guild-page-1.json")})
+            with tempfile.TemporaryDirectory() as directory, patch.object(
+                warcraftlogs, "WarcraftLogsClient", return_value=client
+            ), patch.dict(os.environ, {}, clear=True), redirect_stderr(io.StringIO()):
+                exit_code = warcraftlogs.main([
+                    "--client-id", "client-id", "--client-secret", "client-secret",
+                    "--env-file", str(Path(directory) / "missing.env"), "find", "guild",
+                    "--name", "Fixture Guild", "--server", "Area 52", "--region", "us",
+                    "--limit", str(limit),
+                ])
+            self.assertEqual(exit_code, 2)
+            self.assertEqual(client.calls, [])
+
+    def test_keystone_timed_and_depleted_require_level_and_bonus(self):
+        filters = warcraftlogs.DiscoveryFilters(timed=True)
+        timed, timed_reasons = warcraftlogs.report_matches(
+            {}, [{"keystoneLevel": 10, "keystoneBonus": 1}], [], filters
+        )
+        self.assertTrue(timed)
+        self.assertEqual(timed_reasons, [])
+        depleted, depleted_reasons = warcraftlogs.report_matches(
+            {}, [{"keystoneLevel": 10, "keystoneBonus": 0}], [], warcraftlogs.DiscoveryFilters(depleted=True)
+        )
+        self.assertTrue(depleted)
+        self.assertEqual(depleted_reasons, [])
+        null_bonus, null_reasons = warcraftlogs.report_matches(
+            {}, [{"keystoneLevel": 10, "keystoneBonus": None}], [], filters
+        )
+        self.assertFalse(null_bonus)
+        self.assertEqual(null_reasons, ["timed"])
+
+    def test_character_filters_use_canonical_actor_name(self):
+        filters = warcraftlogs.DiscoveryFilters(class_name="Paladin")
+        report = {"code": "X"}
+        fights = [{"friendlyPlayers": [1, 2]}]
+        actors = [
+            {"id": 1, "name": "Tankadin", "subType": "ProtectionPaladin"},
+            {"id": 2, "name": "Otheradin", "subType": "ProtectionPaladin"},
+        ]
+        matched, reasons = warcraftlogs.report_matches(report, fights, actors, filters, "Tankadin")
+        self.assertTrue(matched)
+        self.assertEqual(reasons, [])
+        matched, reasons = warcraftlogs.report_matches(report, fights, actors, filters, "Missing")
+        self.assertFalse(matched)
+        self.assertIn("character_identity", reasons)
 
     def test_guild_discovery_pushes_direct_filters_and_skips_hydration(self):
         client = FixtureClient({"guild-reports": fixture("find-guild-page-1.json")})

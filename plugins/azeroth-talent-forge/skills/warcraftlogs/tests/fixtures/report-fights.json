@@ -16,7 +16,7 @@
             "friendlySpecs": [66],
             "gameZone": {"id": 2335, "name": "The Dawnbreaker"},
             "inProgress": false,
-            "keystoneAffixes": [],
+            "keystoneAffixes": [9],
             "keystoneLevel": 12,
             "keystoneTime": 1550000,
             "keystoneBonus": 2

@@ -174,19 +174,33 @@ def _actor_role_matches(actor, requested) -> bool:
 
 
 def _fight_status(fight) -> Tuple[bool, bool]:
-    if "timed" in fight or "depleted" in fight:
-        return bool(fight.get("timed")), bool(fight.get("depleted"))
+    level = fight.get("keystoneLevel")
     bonus = fight.get("keystoneBonus")
-    if bonus is not None:
-        return bonus >= 0, bonus < 0
-    return False, False
+    if level is None or bonus is None:
+        return False, False
+    if bonus in (1, 2, 3):
+        return True, False
+    return False, True
 
 
-def report_matches(report, fights, actors, filters: DiscoveryFilters) -> Tuple[bool, List[str]]:
+def report_matches(report, fights, actors, filters: DiscoveryFilters, character_name=None) -> Tuple[bool, List[str]]:
     """Return whether a discovered report matches, with stable filter-name reasons."""
     fights = _report_fights(fights)
     actors = _actor_candidates(fights, actors)
     reasons = []
+    if character_name is not None and any(
+        value is not None for value in (filters.class_name, filters.spec_name, filters.role)
+    ):
+        normalized_character = normalize_name(character_name)
+        canonical_actors = [
+            actor for actor in actors
+            if isinstance(actor.get("name"), str) and normalize_name(actor["name"]) == normalized_character
+        ]
+        if len(canonical_actors) != 1:
+            reasons.append("character_identity")
+            actors = []
+        else:
+            actors = canonical_actors
     if filters.class_name is not None and not any(_actor_field_matches(a, filters.class_name, ("className", "class", "subType")) for a in actors):
         reasons.append("class_name")
     if filters.spec_name is not None and not any(_actor_field_matches(a, filters.spec_name, ("specName", "spec", "subType")) for a in actors):
@@ -776,6 +790,8 @@ def _identity_variables(name, server, region) -> dict:
 
 def _discovery_filters(args) -> DiscoveryFilters:
     affixes = args.affixes if args.affixes else None
+    if args.season is not None or args.partition is not None:
+        raise ValueError("Discovery cannot establish a report-specific season or partition match")
     for bound_name in ("start_time", "end_time"):
         value = getattr(args, bound_name)
         if value is not None and (not math.isfinite(value) or value < 0):
@@ -798,8 +814,12 @@ def _filters_dict(filters: DiscoveryFilters) -> dict:
 def discover_reports(client, kind: str, identity: Mapping[str, str], filters: DiscoveryFilters, page: int, limit: int, max_pages: int = 1) -> dict:
     if kind not in ("character", "guild"):
         raise ValueError("Unknown discovery kind")
-    if page < 1 or limit < 1 or max_pages < 1:
-        raise ValueError("Discovery page, limit, and max pages must be positive")
+    if page < 1 or max_pages < 1:
+        raise ValueError("Discovery page and max pages must be positive")
+    if not 1 <= limit <= 100:
+        raise ValueError("Discovery limit must be between 1 and 100")
+    if filters.season is not None or filters.partition is not None:
+        raise ValueError("Discovery cannot establish a report-specific season or partition match")
     reports = []
     pages_fetched = 0
     current = page
@@ -846,7 +866,10 @@ def discover_reports(client, kind: str, identity: Mapping[str, str], filters: Di
             fights, actors = hydrate_discovery_report(client, str(report.get("code", "")), filters)
         else:
             fights, actors = [], []
-        is_match, reasons = report_matches(report, fights, actors, filters)
+        is_match, reasons = report_matches(
+            report, fights, actors, filters,
+            identity.get("name") if kind == "character" else None,
+        )
         if is_match:
             matched.append(dict(report))
         else:
@@ -1147,8 +1170,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         try:
             identity = _identity_variables(args.name, args.server, args.region)
             filters = _discovery_filters(args)
-            if args.page < 1 or args.limit < 1 or args.max_pages < 1:
-                raise ValueError("Discovery page, limit, and max pages must be positive")
+            if args.page < 1 or args.max_pages < 1:
+                raise ValueError("Discovery page and max pages must be positive")
+            if not 1 <= args.limit <= 100:
+                raise ValueError("Discovery limit must be between 1 and 100")
             result = discover_reports(
                 client, args.find_command, identity, filters, args.page, args.limit, args.max_pages
             )

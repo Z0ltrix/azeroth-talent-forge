@@ -7,7 +7,7 @@ query ReportFights($code: String!, $allowUnlisted: Boolean!, $endTime: Float, $f
         id encounterID difficulty startTime endTime kill friendlyPlayers friendlySpecs
         gameZone { id name }
         inProgress
-        keystoneAffixes { id name }
+        keystoneAffixes
         keystoneLevel keystoneTime keystoneBonus
       }
     }
