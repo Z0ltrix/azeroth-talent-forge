@@ -1,45 +1,46 @@
-# Task 1 report — Warcraft Logs API/agent-analysis RED tests
+# Task 1 report
 
 ## Status
 
-Complete. Test/fixture/report changes only; production tree untouched.
+Complete. Report-only correction; tests and production code unchanged.
 
-## Implemented contracts
+## Commit hash(es)
 
-- Added `test_api_contracts.py` and three required fixtures.
-- Added query-contract checks for fights, player details, events, table, and graph.
-- Added fight-time, combatant-field, cohort, JSONL shape, and output-preservation checks.
-- Corrected only the legacy `ReportFight.gameZone` assertion in `test_warcraftlogs.py`.
-- Cohort tests use existing `report_data` and `discover_global` interfaces. They cover group-only rejection, unique `matched_actor` shape, and ambiguous ranked-actor exclusion.
+- `cdcfba5cb4a71a674b26a1519661623166d1a029`
+- `15f700a21daf7e3cd748b6faf729f6bf5c9c5803`
+- `b22ff3e3783a5a600054ad4a1e7719ba4e698064`
+- `35db1a9becddf45f046953dddb920b891f7187ff`
 
-## Verification timeline
+## Focused/full test summary
 
-Round 1 review corrections removed the invented `warcraftlogs.agent_analysis` dependency and unrelated realm/report-fights assertions. The subsequent scoped re-review removed the remaining unrelated `subregion` assertion and added the ambiguous cohort case.
-
-Earlier verification entries from before those corrections are superseded and intentionally omitted; their counts and failure labels must not be used.
-
-Current focused command:
+Focused:
 
 ```text
 python -m unittest plugins.azeroth-talent-forge.skills.warcraftlogs.tests.test_api_contracts -v
 ```
 
-Result: `Ran 9 tests`; `7` failures. RED causes: group-only cohort exclusion, relative-to-absolute fight-time conversion, and five query-text contracts. Remaining checks pass. No import, setup, or fixture errors.
+`Ran 9 tests`; `7` expected RED failures. Failures cover group-only cohort exclusion, relative-to-absolute fight-time conversion, and five query-text contracts. No import, setup, or fixture errors.
 
-Current existing-suite command:
+Existing suite:
 
 ```text
 python -m unittest plugins.azeroth-talent-forge.skills.warcraftlogs.tests.test_warcraftlogs -q
 ```
 
-Result: `Ran 101 tests`; `100` pass and `1` fails. The sole failure is the task-introduced, Spec-required `gameZone` assertion against the unchanged production query.
+`Ran 101 tests`; `100` pass, `1` fails. The failure is the task-introduced, Spec-required `gameZone` assertion against unchanged production query text.
 
-Current full-suite command:
+Full suite:
 
 ```text
 python -m unittest discover -s plugins/azeroth-talent-forge/skills/warcraftlogs/tests -p "test_*.py"
 ```
 
-Result: `Ran 110 tests`; `102` pass and `8` fail: the `7` focused RED failures plus the one task-introduced `gameZone` assertion failure.
+`Ran 110 tests`; `102` pass, `8` fail: `7` focused RED failures plus the task-introduced `gameZone` assertion failure.
 
-`git diff --check` is clean for task changes. Unrelated pre-existing worktree modifications remain unstaged and were not changed.
+## Concerns
+
+Expected RED failures remain until production API/agent-analysis repairs land. Unrelated pre-existing worktree modifications were preserved and not staged.
+
+## Report path
+
+`.superpowers/sdd/2026-08-20-warcraftlogs-agent-analysis/task-1-report.md`
