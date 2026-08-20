@@ -81,3 +81,22 @@ python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py 
 
 Do not request whole-report events. A truncated or partial export remains
 usable only within its recorded scope and must carry its warnings/errors.
+
+## Opt-in live check
+
+The live schema/report check is disabled unless the explicit opt-in variable is
+set. It uses only a caller-provided public report and fight, and smoke calls
+remain bounded.
+
+```powershell
+$env:WARCRAFTLOGS_LIVE_CHECK = "1"
+$env:WARCRAFTLOGS_CLIENT_ID = "<client-id>"
+$env:WARCRAFTLOGS_CLIENT_SECRET = "<client-secret>"
+$env:WARCRAFTLOGS_TEST_REPORT = "REPORTCODE"
+$env:WARCRAFTLOGS_TEST_FIGHT = "123"
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs_live_check.py
+```
+
+Without `WARCRAFTLOGS_LIVE_CHECK=1`, the command reports `not enabled` and
+makes no network request. The check prints status/counts and sanitized API
+messages only; it never prints credentials or response payloads.
