@@ -35,14 +35,20 @@ python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py 
   `--start-time` and `--end-time`; use `--max-pages` and `--output` for controlled
   JSONL downloads. Do not request an unbounded whole-report event dump.
 - Character/guild discovery: `find character` or `find guild` with name, region,
-  and realm/server, then add supported class/spec/role, instance/season, key,
-  affix, timed/depleted, difficulty, kill/wipe, and time filters.
-- Cross-report discovery: `find global` requires an instance/zone or encounter.
-  It is ranking-based and always `completeness: "sampled"`, never an exhaustive
-  public-report search. Keep `--top` and `--max-pages` bounded.
-- Names and IDs: `metadata regions`, `realms`, `zones`, `encounters`, `seasons`,
-  `classes`, `specs`, `affixes`, or `abilities` resolve human input to API IDs.
-  `rate-limit` reports current API budget.
+  and realm/server, then add supported class/spec/role, instance/zone/encounter,
+  key, affix, timed/depleted, difficulty, kill/wipe, and time filters. These
+  report feeds cannot establish a report-specific season or partition, so the
+  script rejects `--season` and `--partition` for these two commands.
+- Cross-report discovery: `find global` requires an instance/zone or encounter
+  and supports the ranking filters exposed by the CLI, including class/spec,
+  role, partition, difficulty, key, affixes, kill/wipe, time, metric, and
+  leaderboard. It is ranking-based and always `completeness: "sampled"`, never
+  an exhaustive public-report search. Keep `--top` and `--max-pages` bounded.
+- Reference metadata: `metadata regions`, `realms`, `zones`, `encounters`,
+  `seasons`, `classes`, `specs`, `affixes`, and `abilities` list normalized API
+  names and IDs (with `realms` narrowed by region/name). Use these collections
+  to resolve human input before passing global discovery filters. `rate-limit`
+  reports current API budget.
 
 ## Analyze safely
 

@@ -1,4 +1,5 @@
 import io
+import ast
 import importlib.util
 import json
 import os
@@ -113,6 +114,45 @@ class PackagingTests(unittest.TestCase):
     ROOT = SCRIPT.parents[1]
     MANIFEST = SCRIPT.parents[3] / ".codex-plugin" / "plugin.json"
 
+    @staticmethod
+    def _read_narrow_yaml(path):
+        """Parse the package's deliberately small, mapping-only UI YAML."""
+        root = {}
+        stack = [(-1, root)]
+        for number, raw_line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if not raw_line.strip() or raw_line.lstrip().startswith("#"):
+                continue
+            indent = len(raw_line) - len(raw_line.lstrip(" "))
+            if "\t" in raw_line[:indent]:
+                raise AssertionError("tabs are not supported in UI YAML")
+            line = raw_line.strip()
+            if ":" not in line:
+                raise AssertionError("invalid UI YAML line %d" % number)
+            key, raw_value = (part.strip() for part in line.split(":", 1))
+            if not key or not raw_value and raw_value != "":
+                raise AssertionError("invalid UI YAML line %d" % number)
+            while stack[-1][0] >= indent:
+                stack.pop()
+            parent = stack[-1][1]
+            if key in parent:
+                raise AssertionError("duplicate UI YAML key %s" % key)
+            if raw_value == "":
+                value = {}
+                parent[key] = value
+                stack.append((indent, value))
+                continue
+            if raw_value in ("true", "false"):
+                value = raw_value == "true"
+            elif raw_value.startswith(("'", '"')):
+                try:
+                    value = ast.literal_eval(raw_value)
+                except (SyntaxError, ValueError) as error:
+                    raise AssertionError("invalid UI YAML scalar on line %d" % number) from error
+            else:
+                value = raw_value
+            parent[key] = value
+        return root
+
     def test_skill_frontmatter_declares_exact_runtime_name(self):
         skill = self.ROOT / "SKILL.md"
         self.assertTrue(skill.is_file())
@@ -133,10 +173,13 @@ class PackagingTests(unittest.TestCase):
     def test_ui_metadata_is_present_with_explicit_interface_fields(self):
         metadata = self.ROOT / "agents" / "openai.yaml"
         self.assertTrue(metadata.is_file())
-        text = metadata.read_text(encoding="utf-8")
-        self.assertIn("interface:", text)
-        self.assertIn("display_name:", text)
-        self.assertIn("default_prompt:", text)
+        document = self._read_narrow_yaml(metadata)
+        interface = document.get("interface")
+        self.assertIsInstance(interface, dict)
+        self.assertEqual(interface.get("display_name"), "Warcraft Logs")
+        self.assertTrue(interface.get("short_description"))
+        self.assertIn("$warcraftlogs", interface.get("default_prompt", ""))
+        self.assertIs(document.get("policy", {}).get("allow_implicit_invocation"), True)
 
     def test_all_bundled_query_documents_remain_loadable(self):
         query_dir = SCRIPT.parent / "graphql"
