@@ -708,27 +708,12 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(result["data"][0]["keystoneAffixes"], [9])
         self.assertEqual(result["data"][1]["friendlyPlayers"], [])
 
-    def test_fights_supports_empty_result_and_window(self):
-        payload = fixture("report-fights.json")
-        payload["data"]["reportData"]["report"]["fights"] = []
-        exit_code, output, errors, client = self.run_report(
-            {"report-fights": payload},
-            "fights",
-            "AbCd1234",
-            "--start-time",
-            "1000",
-            "--end-time",
-            "2000",
-            "--no-translate",
-        )
-
-        result = json.loads(output)
-        self.assertEqual(exit_code, 0)
-        self.assertEqual(errors, "")
-        self.assertEqual(result["data"], [])
-        self.assertEqual(result["scope"]["start_time"], 1000.0)
-        self.assertEqual(client.variables[0]["endTime"], 2000.0)
-        self.assertEqual(client.variables[0]["translate"], False)
+    def test_fights_rejects_report_relative_window(self):
+        with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
+            warcraftlogs.build_parser().parse_args(
+                ["report", "fights", "AbCd1234", "--start-time", "1000", "--end-time", "2000"]
+            )
+        self.assertEqual(raised.exception.code, 2)
 
     def test_master_data_fixture_preserves_actors_and_abilities(self):
         exit_code, output, errors, client = self.run_report(

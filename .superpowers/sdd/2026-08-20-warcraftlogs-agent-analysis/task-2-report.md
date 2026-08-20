@@ -49,3 +49,28 @@ actor-bound cohort filtering; no cohort behavior was changed here.
 - Live introspection/smoke validation was not run because no credentials or
   caller-provided public report were configured. `viewOptions` is typed as
   `Int` from the current published schema documentation.
+
+## Fix round 1 — reviewer findings
+
+### Findings addressed
+
+- Removed `--start-time` and `--end-time` from the `report fights` parser path;
+  event/table/graph/player-details report-relative windows remain exposed.
+- Added report-level `startTime` to `report-fights.graphql` while preserving
+  relative `ReportFight.startTime`/`endTime` fields.
+- Absolute fight derivation now requires numeric report `startTime` and raises
+  instead of defaulting missing metadata to zero.
+- Added focused tests for the fights parser/query contract and required report
+  start-time metadata; updated the obsolete full-suite window test to assert the
+  current contract.
+
+### Fix-round TDD evidence
+
+- RED: 3 failures after adding coverage: the two new reviewer-contract
+  failures (stale fights window and zero fallback) plus the pre-existing
+  out-of-scope cohort failure. The first query assertion was calibrated to
+  distinguish report-level `startTime` from nested fight/pull/phase fields.
+- GREEN: 10/11 focused tests pass; the sole failure remains the unchanged
+  Task 3 cohort test.
+- Full suite: 111/112 tests pass; the sole failure remains
+  `AgentAnalysisContractTests.test_cohort_match_requires_ranked_actor_and_returns_unique_match`.

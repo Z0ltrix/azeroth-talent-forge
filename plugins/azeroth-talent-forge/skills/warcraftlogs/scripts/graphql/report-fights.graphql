@@ -3,6 +3,7 @@ query ReportFights($code: String!, $allowUnlisted: Boolean!, $fightIDs: [Int], $
     report(code: $code, allowUnlisted: $allowUnlisted) {
       visibility
       archiveStatus { isArchived isAccessible archiveDate }
+      startTime
       fights(fightIDs: $fightIDs, translate: $translate) {
         id name encounterID difficulty startTime endTime kill inProgress
         gameZone { id name }

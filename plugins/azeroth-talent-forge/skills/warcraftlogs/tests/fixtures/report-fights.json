@@ -4,6 +4,7 @@
       "report": {
         "visibility": "public",
         "archiveStatus": {"isArchived": false, "isAccessible": true, "archiveDate": null},
+        "startTime": 1000000,
         "fights": [
           {
             "id": 9,

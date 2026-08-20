@@ -26,7 +26,7 @@ def build_parser() -> argparse.ArgumentParser:
     summary = report_parsers.add_parser("summary")
     _add_report_options(summary)
     fights = report_parsers.add_parser("fights")
-    _add_report_options(fights, window=True, translate=True)
+    _add_report_options(fights, translate=True)
     master_data = report_parsers.add_parser("master-data")
     _add_report_options(master_data, translate=True)
     player_details = report_parsers.add_parser("player-details")

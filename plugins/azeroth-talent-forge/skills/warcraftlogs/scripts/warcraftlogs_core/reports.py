@@ -187,7 +187,9 @@ def report_data(payload: Mapping[str, object], kind: str):
     field = {"master-data": "masterData", "player-details": "playerDetails"}.get(kind, kind)
     value = report[field]
     if kind == "fights" and isinstance(value, list):
-        report_start = report.get("startTime", 0)
+        report_start = report.get("startTime")
+        if isinstance(report_start, bool) or not isinstance(report_start, (int, float)):
+            raise ValueError("Report startTime is required for fight time derivation")
         return [
             dict(fight, startTime=report_start + fight["startTime"], endTime=report_start + fight["endTime"])
             for fight in value

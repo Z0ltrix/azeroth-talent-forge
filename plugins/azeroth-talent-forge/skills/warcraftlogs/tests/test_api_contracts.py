@@ -1,5 +1,6 @@
 import json
 import importlib.util
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -16,6 +17,14 @@ def fixture(name):
 
 
 class QueryContractTests(unittest.TestCase):
+    def test_fights_query_selects_report_start_time_and_exposes_no_report_window(self):
+        query = warcraftlogs.load_query("report-fights")
+        self.assertRegex(query, re.compile(r"archiveStatus \{[^\n]+\}\s+startTime"))
+
+        fights = warcraftlogs.build_parser().parse_args(["report", "fights", "CODE1234"])
+        self.assertFalse(hasattr(fights, "start_time"))
+        self.assertFalse(hasattr(fights, "end_time"))
+
     def test_fights_query_requests_agent_analysis_fields(self):
         query = warcraftlogs.load_query("report-fights")
 
@@ -54,6 +63,13 @@ class AgentAnalysisContractTests(unittest.TestCase):
         self.assertEqual(fights[0]["endTime"], 1_070_000)
         self.assertEqual(fights[1]["startTime"], 1_065_000)
         self.assertEqual(fights[1]["endTime"], 1_085_000)
+
+    def test_fight_time_derivation_requires_report_start_time(self):
+        payload = fixture("report-fights-rich.json")
+        del payload["data"]["reportData"]["report"]["startTime"]
+
+        with self.assertRaisesRegex(ValueError, "Report startTime"):
+            warcraftlogs.report_data(payload, "fights")
 
     def test_combatant_fields_are_preserved(self):
         payload = fixture("report-player-details-combatant.json")
