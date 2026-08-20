@@ -20,6 +20,17 @@ TOKEN_URL = "https://www.warcraftlogs.com/oauth/token"
 GRAPHQL_URL = "https://www.warcraftlogs.com/api/v2/client"
 QUERY_NAME = re.compile(r"^[a-z0-9-]+$")
 REPORT_CODE = re.compile(r"^[A-Za-z0-9]{8,32}$")
+REPORT_HOSTS = frozenset((
+    "warcraftlogs.com", "www.warcraftlogs.com", "classic.warcraftlogs.com",
+    "cn.warcraftlogs.com", "de.warcraftlogs.com", "es.warcraftlogs.com",
+    "fr.warcraftlogs.com", "it.warcraftlogs.com", "ko.warcraftlogs.com",
+    "pt.warcraftlogs.com", "ru.warcraftlogs.com", "tw.warcraftlogs.com",
+    "cn.classic.warcraftlogs.com", "de.classic.warcraftlogs.com",
+    "es.classic.warcraftlogs.com", "fr.classic.warcraftlogs.com",
+    "it.classic.warcraftlogs.com", "ko.classic.warcraftlogs.com",
+    "pt.classic.warcraftlogs.com", "ru.classic.warcraftlogs.com",
+    "tw.classic.warcraftlogs.com",
+))
 METADATA_TTL_SECONDS = 24 * 60 * 60
 REPORT_KINDS = ("summary", "fights", "master-data", "player-details", "table", "graph", "rankings")
 TABLE_DATA_TYPES = (
@@ -63,11 +74,13 @@ class ReportReference:
 
 
 def _fight_id(parameters) -> Optional[int]:
-    values = urllib.parse.parse_qs(parameters).get("fight", [])
-    if not values:
+    values = urllib.parse.parse_qs(parameters, keep_blank_values=True).get("fight")
+    if values is None:
         return None
+    if len(values) != 1 or not values[0]:
+        raise ValueError("Report fight must be a positive integer")
     try:
-        fight_id = int(values[-1])
+        fight_id = int(values[0])
     except (TypeError, ValueError):
         raise ValueError("Report fight must be a positive integer")
     if fight_id < 1:
@@ -82,11 +95,16 @@ def parse_report_reference(value) -> ReportReference:
         return ReportReference(value, None)
     parsed = urllib.parse.urlsplit(value)
     hostname = (parsed.hostname or "").rstrip(".").casefold()
+    try:
+        port = parsed.port
+    except ValueError:
+        raise ValueError("Invalid Warcraft Logs report URL")
     if (
         parsed.scheme not in ("http", "https")
         or parsed.username is not None
         or parsed.password is not None
-        or not (hostname == "warcraftlogs.com" or hostname.endswith(".warcraftlogs.com"))
+        or hostname not in REPORT_HOSTS
+        or port not in (None, 80 if parsed.scheme == "http" else 443)
     ):
         raise ValueError("Invalid Warcraft Logs report URL")
     path = urllib.parse.unquote(parsed.path)
@@ -517,7 +535,7 @@ def report_data(payload: Mapping[str, object], kind: str):
     if not isinstance(report, Mapping):
         raise TypeError("Report was not an object")
     archive_status = report.get("archiveStatus")
-    accessible = not isinstance(archive_status, Mapping) or archive_status.get("isAccessible") is not False
+    accessible = isinstance(archive_status, Mapping) and archive_status.get("isAccessible") is True
     if str(report.get("visibility", "")).casefold() != "public" or not accessible:
         raise PublicReportError("Report is not public or accessible")
     if kind == "summary":

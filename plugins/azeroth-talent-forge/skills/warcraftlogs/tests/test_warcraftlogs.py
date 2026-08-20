@@ -484,6 +484,25 @@ class ReportReferenceTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 warcraftlogs.parse_report_reference(value)
 
+    def test_rejects_non_official_or_non_default_port_report_urls(self):
+        for value in (
+            "https://foo.warcraftlogs.com/reports/AbCd1234",
+            "https://warcraftlogs.com:4444/reports/AbCd1234",
+            "https://warcraftlogs.com:bogus/reports/AbCd1234",
+        ):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                warcraftlogs.parse_report_reference(value)
+
+    def test_rejects_empty_or_duplicate_fight_values_in_query_or_fragment(self):
+        for value in (
+            "https://www.warcraftlogs.com/reports/AbCd1234?fight=",
+            "https://www.warcraftlogs.com/reports/AbCd1234#fight=",
+            "https://www.warcraftlogs.com/reports/AbCd1234?fight=7&fight=8",
+            "https://www.warcraftlogs.com/reports/AbCd1234#fight=7&fight=8",
+        ):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                warcraftlogs.parse_report_reference(value)
+
 
 class ReportTests(unittest.TestCase):
     def run_report(self, payloads, *arguments):
@@ -706,6 +725,26 @@ class ReportTests(unittest.TestCase):
                 self.assertEqual(exit_code, 4)
                 self.assertEqual(output, "")
                 self.assertIn("public", errors.lower())
+
+    def test_rejects_report_without_positive_archive_accessibility(self):
+        for label, changes in (
+            ("missing", {"archiveStatus": None}),
+            ("null", {"archiveStatus": None}),
+            ("missing-accessibility", {"archiveStatus": {"isArchived": False, "archiveDate": None}}),
+        ):
+            with self.subTest(label=label):
+                payload = fixture("report-summary.json")
+                report = payload["data"]["reportData"]["report"]
+                if label == "missing":
+                    del report["archiveStatus"]
+                else:
+                    report.update(changes)
+                exit_code, output, errors, unused = self.run_report(
+                    {"report-summary": payload}, "summary", "AbCd1234"
+                )
+                self.assertEqual(exit_code, 4)
+                self.assertEqual(output, "")
+                self.assertIn("accessible", errors.lower())
 
     def test_invalid_enum_is_rejected_before_http(self):
         exit_code, output, errors, client = self.run_report(
