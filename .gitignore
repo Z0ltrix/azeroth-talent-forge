@@ -5,3 +5,7 @@ docs/superpowers/
 .env
 .env.*
 !.env.example
+
+# Python runtime artifacts
+__pycache__/
+*.pyc
