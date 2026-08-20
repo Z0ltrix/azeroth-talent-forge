@@ -35,6 +35,10 @@ REPORT_HOSTS = frozenset((
 ))
 METADATA_TTL_SECONDS = 24 * 60 * 60
 REPORT_KINDS = ("summary", "fights", "master-data", "player-details", "table", "graph", "rankings")
+GLOBAL_TOP_MIN = 1
+GLOBAL_TOP_MAX = 100
+GLOBAL_MAX_PAGES = 5
+GLOBAL_WARNING = "Global discovery is ranking-based and not an exhaustive list of public reports."
 TABLE_DATA_TYPES = (
     "Summary", "DamageDone", "DamageTaken", "Healing", "Casts", "Summons", "Buffs",
     "Debuffs", "Deaths", "Interrupts", "Dispels", "Resources", "ResourcesGained", "Threat",
@@ -788,9 +792,9 @@ def _identity_variables(name, server, region) -> dict:
     }
 
 
-def _discovery_filters(args) -> DiscoveryFilters:
+def _discovery_filters(args, allow_partition=False) -> DiscoveryFilters:
     affixes = args.affixes if args.affixes else None
-    if args.season is not None or args.partition is not None:
+    if args.season is not None or (args.partition is not None and not allow_partition):
         raise ValueError("Discovery cannot establish a report-specific season or partition match")
     for bound_name in ("start_time", "end_time"):
         value = getattr(args, bound_name)
@@ -809,6 +813,87 @@ def _discovery_filters(args) -> DiscoveryFilters:
 
 def _filters_dict(filters: DiscoveryFilters) -> dict:
     return {field: getattr(filters, field) for field in _DISCOVERY_FILTER_FIELDS if getattr(filters, field) is not None}
+
+
+def _positive_id(value, label):
+    if value is None:
+        return None
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        raise ValueError("Global %s must be a numeric metadata ID" % label)
+    if parsed < 1:
+        raise ValueError("Global %s must be positive" % label)
+    return parsed
+
+
+def _global_world(client, expansion_id):
+    return _normalize_world(client.execute("metadata-world", {"expansionId": expansion_id}))
+
+
+def _resolve_global_metadata_id(value, records, label):
+    if value is None:
+        return None
+    try:
+        return _positive_id(value, label)
+    except ValueError:
+        return select_named(records, value, label)["id"]
+
+
+def _global_filters(args, client=None) -> DiscoveryFilters:
+    if not args.zone and not args.instance and not args.encounter:
+        raise ValueError("Global discovery requires a zone, instance, or encounter")
+    if args.zone and args.instance:
+        raise ValueError("Global discovery accepts either zone or instance, not both")
+    values = {
+        "class_name": args.class_name, "spec_name": args.spec_name, "role": args.role,
+        "instance": None, "zone": None, "encounter": None, "partition": None,
+        "difficulty": args.difficulty, "key_min": args.key_min, "key_max": args.key_max,
+        "affixes": args.affixes if args.affixes else None, "timed": args.timed,
+        "depleted": args.depleted, "kill": args.kill, "wipe": args.wipe,
+        "start_time": args.start_time, "end_time": args.end_time,
+        "season": None,
+    }
+    world = None
+    if client is not None and any(
+        value is not None and not str(value).isdigit()
+        for value in (args.zone, args.instance, args.encounter, args.partition)
+    ):
+        world = _global_world(client, args.expansion_id)
+    selected_zone = None
+    if args.zone:
+        values["zone"] = _resolve_global_metadata_id(
+            args.zone, world["zones"] if world else [], "zone"
+        )
+        selected_zone = next((z for z in (world or {}).get("zones", []) if z.get("id") == values["zone"]), None)
+    if args.instance:
+        values["instance"] = _resolve_global_metadata_id(
+            args.instance, world["zones"] if world else [], "instance"
+        )
+        selected_zone = next((z for z in (world or {}).get("zones", []) if z.get("id") == values["instance"]), None)
+    if args.encounter:
+        encounter_records = selected_zone.get("encounters", []) if selected_zone else [
+            encounter for zone in (world or {}).get("zones", []) for encounter in zone.get("encounters", [])
+        ]
+        values["encounter"] = _resolve_global_metadata_id(args.encounter, encounter_records, "encounter")
+    elif selected_zone and len(selected_zone.get("encounters", [])) == 1:
+        values["encounter"] = selected_zone["encounters"][0].get("id")
+    if args.partition:
+        partition_records = selected_zone.get("partitions", []) if selected_zone else [
+            partition for zone in (world or {}).get("zones", []) for partition in zone.get("partitions", [])
+        ]
+        values["partition"] = _resolve_global_metadata_id(args.partition, partition_records, "partition")
+    for bound_name in ("start_time", "end_time"):
+        value = values[bound_name]
+        if value is not None and (not math.isfinite(value) or value < 0):
+            raise ValueError("Discovery time bounds must be finite and non-negative")
+    if values["start_time"] is not None and values["end_time"] is not None and values["start_time"] > values["end_time"]:
+        raise ValueError("Discovery start time must not exceed end time")
+    if values["key_min"] is not None and values["key_min"] < 0 or values["key_max"] is not None and values["key_max"] < 0:
+        raise ValueError("Key bounds must be non-negative")
+    if values["key_min"] is not None and values["key_max"] is not None and values["key_min"] > values["key_max"]:
+        raise ValueError("Key minimum must not exceed key maximum")
+    return DiscoveryFilters(**values)
 
 
 def discover_reports(client, kind: str, identity: Mapping[str, str], filters: DiscoveryFilters, page: int, limit: int, max_pages: int = 1) -> dict:
@@ -893,6 +978,285 @@ def discover_reports(client, kind: str, identity: Mapping[str, str], filters: Di
             "truncated": has_more and pages_fetched >= max_pages,
         },
     }
+
+
+def _ranking_value(value):
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except (TypeError, ValueError):
+            raise TypeError("Encounter rankings JSON was invalid")
+    return value
+
+
+def _ranking_page(payload: Mapping[str, object]) -> Tuple[list, dict]:
+    value = payload["data"]["worldData"]["encounter"]
+    if not isinstance(value, Mapping):
+        raise TypeError("Encounter rankings were not an object")
+    raw = value.get("fightRankings")
+    if raw is None:
+        raw = value.get("characterRankings")
+    raw = _ranking_value(raw)
+    if isinstance(raw, list):
+        return [item for item in raw if isinstance(item, Mapping)], {}
+    if not isinstance(raw, Mapping):
+        raise TypeError("Encounter rankings were not JSON")
+    rows = raw.get("rankings", raw.get("data", []))
+    if not isinstance(rows, list):
+        raise TypeError("Encounter ranking rows were not a list")
+    pagination = {
+        "current_page": raw.get("current_page", raw.get("currentPage", raw.get("page"))),
+        "last_page": raw.get("last_page", raw.get("lastPage")),
+        "has_more_pages": bool(raw.get("has_more_pages", raw.get("hasMorePages", False))),
+    }
+    return [item for item in rows if isinstance(item, Mapping)], pagination
+
+
+def _ranking_candidate(row: Mapping[str, object]) -> Optional[dict]:
+    report = row.get("report")
+    report = report if isinstance(report, Mapping) else {}
+    code = (
+        row.get("reportCode") or row.get("reportID") or row.get("reportId") or
+        row.get("report_code") or report.get("code") or report.get("id")
+    )
+    fight_id = row.get("fightID", row.get("fightId", row.get("fight_id")))
+    if fight_id is None and isinstance(row.get("fight"), Mapping):
+        fight_id = row["fight"].get("id")
+    if code is None:
+        return None
+    result = dict(row)
+    result["report_code"] = str(code)
+    if fight_id is not None:
+        try:
+            result["fight_id"] = int(fight_id)
+        except (TypeError, ValueError):
+            return None
+    else:
+        result["fight_id"] = None
+    return result
+
+
+def _ranking_direct_match(candidate: Mapping[str, object], filters: DiscoveryFilters) -> Tuple[bool, list, list]:
+    """Match ranking-provided fields and report which fields still need hydration."""
+    missing = []
+    reasons = []
+    checks = (
+        ("class_name", filters.class_name, ("className", "class")),
+        ("spec_name", filters.spec_name, ("specName", "spec")),
+        ("role", filters.role, ("role",)),
+        ("instance", filters.instance, ("zoneID", "zoneId")),
+        ("zone", filters.zone, ("gameZoneID", "gameZoneId")),
+        ("encounter", filters.encounter, ("encounterID", "encounterId")),
+        ("partition", filters.partition, ("partition", "partitionID")),
+        ("difficulty", filters.difficulty, ("difficulty",)),
+        ("key_min", filters.key_min, ("keystoneLevel", "keyLevel")),
+        ("key_max", filters.key_max, ("keystoneLevel", "keyLevel")),
+        ("timed", filters.timed, ("timed",)),
+        ("depleted", filters.depleted, ("depleted",)),
+        ("kill", filters.kill, ("kill",)),
+        ("wipe", filters.wipe, ("wipe",)),
+        ("affixes", filters.affixes, ("affixes", "keystoneAffixes")),
+        ("start_time", filters.start_time, ("startTime",)),
+        ("end_time", filters.end_time, ("endTime",)),
+    )
+    for name, requested, fields in checks:
+        if requested is None:
+            continue
+        values = [candidate[field] for field in fields if field in candidate]
+        if not values:
+            missing.append(name)
+            continue
+        value = values[0]
+        if name == "class_name" and _casefold(value) != _casefold(requested):
+            reasons.append(name)
+        elif name == "spec_name" and _casefold(value) != _casefold(requested):
+            reasons.append(name)
+        elif name == "role" and _casefold(value) != _casefold(requested):
+            reasons.append(name)
+        elif name in ("instance", "zone", "encounter", "partition", "difficulty") and value != requested:
+            reasons.append(name)
+        elif name == "key_min" and (not isinstance(value, (int, float)) or value < requested):
+            reasons.append(name)
+        elif name == "key_max" and (not isinstance(value, (int, float)) or value > requested):
+            reasons.append(name)
+        elif name in ("timed", "depleted", "kill", "wipe") and bool(value) != requested:
+            reasons.append(name)
+        elif name == "start_time" and value < requested:
+            reasons.append(name)
+        elif name == "end_time" and value > requested:
+            reasons.append(name)
+        elif name == "affixes" and requested and not all(
+            any(_casefold(item.get("name") if isinstance(item, Mapping) else item) == _casefold(wanted) or item == wanted
+                for item in (value if isinstance(value, list) else [value]))
+            for wanted in requested
+        ):
+            reasons.append(name)
+    return not reasons, missing, reasons
+
+
+def _filters_without(filters: DiscoveryFilters, names) -> DiscoveryFilters:
+    values = {field: getattr(filters, field) for field in _DISCOVERY_FILTER_FIELDS}
+    for name in names:
+        values[name] = None
+    return DiscoveryFilters(**values)
+
+
+def _dedupe_global_candidates(rows: Sequence[Mapping[str, object]]) -> list:
+    result = []
+    seen = set()
+    for row in rows:
+        candidate = _ranking_candidate(row)
+        if candidate is None:
+            continue
+        key = (candidate["report_code"], candidate.get("fight_id"))
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(candidate)
+    return result
+
+
+def make_global_result(rows, sample_size, filters, ranking_basis="encounter_rankings", **metadata) -> dict:
+    if not isinstance(sample_size, int) or isinstance(sample_size, bool) or sample_size < 0:
+        raise ValueError("Global top must be a non-negative integer")
+    candidates = _dedupe_global_candidates(rows)
+    data = candidates[:sample_size]
+    truncated = bool(metadata.get("truncated", len(candidates) > sample_size))
+    result = make_envelope(
+        "find global",
+        {"ranking_basis": ranking_basis},
+        filters,
+        "sampled",
+        data,
+        pagination={
+            "pages_fetched": int(metadata.get("pages_fetched", 1)),
+            "truncated": truncated,
+        },
+        warnings=[GLOBAL_WARNING],
+    )
+    result.update({
+        "ranking_basis": ranking_basis,
+        "requested_top": sample_size,
+        "source_rows": int(metadata.get("source_rows", len(rows))),
+        "unique_candidates": int(metadata.get("unique_candidates", len(candidates))),
+        "hydrated_candidates": int(metadata.get("hydrated_candidates", 0)),
+        "excluded_candidates": int(metadata.get("excluded_candidates", 0)),
+        "returned_candidates": int(metadata.get("returned_candidates", len(data))),
+        "pages_fetched": int(metadata.get("pages_fetched", 1)),
+        "truncated": truncated,
+    })
+    if metadata.get("exclusion_reasons"):
+        result["exclusion_reasons"] = dict(metadata["exclusion_reasons"])
+    if metadata.get("errors"):
+        result["partial"] = True
+        result["errors"] = sanitize_graphql_errors(metadata["errors"])
+    return result
+
+
+def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_pages: int = 1,
+                    metric=None, leaderboard=None, server_region=None, server_slug=None,
+                    expansion_id=11) -> dict:
+    if not isinstance(top, int) or isinstance(top, bool) or not GLOBAL_TOP_MIN <= top <= GLOBAL_TOP_MAX:
+        raise ValueError("Global top must be between 1 and 100")
+    if (
+        not isinstance(page, int) or isinstance(page, bool) or page < 1 or
+        not isinstance(max_pages, int) or isinstance(max_pages, bool) or
+        max_pages < 1 or max_pages > GLOBAL_MAX_PAGES
+    ):
+        raise ValueError("Global page and max pages must be between 1 and 5")
+    if filters.encounter is None:
+        world = _global_world(client, expansion_id)
+        zone_id = filters.zone if filters.zone is not None else filters.instance
+        encounters = [
+            encounter["id"]
+            for zone in world["zones"]
+            if zone_id is None or zone.get("id") == zone_id
+            for encounter in zone.get("encounters", [])
+        ]
+        if not encounters:
+            raise ValueError("Global discovery could not resolve an encounter for the requested zone")
+        parts = []
+        for encounter in encounters:
+            values = {field: getattr(filters, field) for field in _DISCOVERY_FILTER_FIELDS}
+            values["encounter"] = encounter
+            parts.append(discover_global(
+                client, DiscoveryFilters(**values), top, page, max_pages,
+                metric=metric, leaderboard=leaderboard,
+                server_region=server_region, server_slug=server_slug, expansion_id=expansion_id,
+            ))
+        rows = [row for part in parts for row in part["data"]]
+        return make_global_result(
+            rows, top, _filters_dict(filters),
+            source_rows=sum(part["source_rows"] for part in parts),
+            unique_candidates=len(_dedupe_global_candidates(rows)),
+            hydrated_candidates=sum(part["hydrated_candidates"] for part in parts),
+            excluded_candidates=sum(part["excluded_candidates"] for part in parts),
+            returned_candidates=min(len(_dedupe_global_candidates(rows)), top),
+            pages_fetched=sum(part["pages_fetched"] for part in parts),
+            truncated=any(part["truncated"] for part in parts),
+        )
+    variables = {"encounterID": filters.encounter, "page": page}
+    variables.update(filters.direct_variables())
+    for field, value in (
+        ("className", filters.class_name), ("specName", filters.spec_name), ("role", filters.role),
+        ("difficulty", filters.difficulty), ("partition", filters.partition),
+        ("metric", metric), ("leaderboard", leaderboard),
+        ("serverRegion", server_region), ("serverSlug", server_slug),
+    ):
+        if value is not None:
+            variables[field] = value
+    rows = []
+    pages_fetched = 0
+    has_more = False
+    current_page = page
+    hydrated_count = 0
+    exclusion_reasons = {}
+    errors = []
+    while pages_fetched < max_pages and len(rows) < top:
+        variables["page"] = current_page
+        payload = client.execute("encounter-rankings", variables)
+        errors.extend(payload.get("errors", []) if isinstance(payload, Mapping) else [])
+        page_rows, pagination = _ranking_page(payload)
+        rows.extend(page_rows)
+        pages_fetched += 1
+        has_more = pagination.get("has_more_pages", False)
+        if not has_more or not page_rows:
+            break
+        current_page = (pagination.get("current_page") or current_page) + 1
+    candidates = _dedupe_global_candidates(rows)
+    matched = []
+    for candidate in candidates:
+        direct_match, missing, direct_reasons = _ranking_direct_match(candidate, filters)
+        if not direct_match:
+            for reason in direct_reasons:
+                exclusion_reasons[reason] = exclusion_reasons.get(reason, 0) + 1
+            continue
+        if missing:
+            hydrated_count += 1
+            fights, actors = hydrate_discovery_report(client, candidate["report_code"], _filters_without(filters, set(_DISCOVERY_FILTER_FIELDS) - set(missing)))
+            hydrated_filters = _filters_without(filters, set(_DISCOVERY_FILTER_FIELDS) - set(missing))
+            report = dict(candidate)
+            is_match, reasons = report_matches(report, fights, actors, hydrated_filters)
+            if not is_match:
+                for reason in reasons:
+                    exclusion_reasons[reason] = exclusion_reasons.get(reason, 0) + 1
+                continue
+        matched.append(candidate)
+    truncated = has_more and pages_fetched >= max_pages or len(candidates) > top
+    return make_global_result(
+        matched,
+        top,
+        _filters_dict(filters),
+        source_rows=len(rows),
+        unique_candidates=len(candidates),
+        hydrated_candidates=hydrated_count,
+        excluded_candidates=len(candidates) - len(matched),
+        returned_candidates=min(len(matched), top),
+        pages_fetched=pages_fetched,
+        truncated=truncated,
+        exclusion_reasons=exclusion_reasons,
+        errors=errors,
+    )
 
 
 EVENT_PAGE_LIMIT = 10000
@@ -1145,6 +1509,33 @@ def build_parser() -> argparse.ArgumentParser:
 
     add_discovery_parser(find_parsers.add_parser("character"))
     add_discovery_parser(find_parsers.add_parser("guild"))
+    global_find = find_parsers.add_parser("global")
+    global_scope = global_find.add_mutually_exclusive_group(required=True)
+    global_scope.add_argument("--zone")
+    global_scope.add_argument("--instance")
+    global_scope.add_argument("--encounter", "--encounter-id", dest="encounter")
+    global_find.add_argument("--expansion-id", type=int, default=11)
+    global_find.add_argument("--page", type=int, default=1)
+    global_find.add_argument("--top", type=int, default=100)
+    global_find.add_argument("--max-pages", type=int, default=1)
+    global_find.add_argument("--class-name", "--class", dest="class_name")
+    global_find.add_argument("--spec-name", "--spec", dest="spec_name")
+    global_find.add_argument("--role")
+    global_find.add_argument("--partition")
+    global_find.add_argument("--difficulty", type=int)
+    global_find.add_argument("--key-min", type=int)
+    global_find.add_argument("--key-max", type=int)
+    global_find.add_argument("--affixes", "--affix", dest="affixes", action="append")
+    global_find.add_argument("--timed", action="store_true", default=None)
+    global_find.add_argument("--depleted", action="store_true", default=None)
+    global_find.add_argument("--kill", action="store_true", default=None)
+    global_find.add_argument("--wipe", action="store_true", default=None)
+    global_find.add_argument("--start-time", type=float)
+    global_find.add_argument("--end-time", type=float)
+    global_find.add_argument("--metric")
+    global_find.add_argument("--leaderboard")
+    global_find.add_argument("--server-region")
+    global_find.add_argument("--server-slug")
     return parser
 
 
@@ -1165,6 +1556,30 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 2
     client = WarcraftLogsClient(credentials)
     if args.command == "find":
+        if args.find_command == "global":
+            try:
+                filters = _global_filters(args, client)
+                if not 1 <= args.top <= GLOBAL_TOP_MAX:
+                    raise ValueError("Global top must be between 1 and 100")
+                if args.page < 1 or args.max_pages < 1 or args.max_pages > GLOBAL_MAX_PAGES:
+                    raise ValueError("Global page and max pages must be between 1 and 5")
+                result = discover_global(
+                    client, filters, args.top, args.page, args.max_pages,
+                    metric=args.metric, leaderboard=args.leaderboard,
+                    server_region=args.server_region, server_slug=args.server_slug,
+                    expansion_id=args.expansion_id,
+                )
+            except AuthenticationError as error:
+                print(str(error), file=sys.stderr)
+                return 3
+            except ValueError as error:
+                print(str(error), file=sys.stderr)
+                return 2
+            except (ApiError, KeyError, TypeError, OSError):
+                print("Warcraft Logs API response did not contain global discovery data", file=sys.stderr)
+                return 4
+            print(json.dumps(result, ensure_ascii=True))
+            return 0
         if args.find_command not in ("character", "guild"):
             return 0
         try:

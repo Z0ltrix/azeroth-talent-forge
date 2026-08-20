@@ -1,0 +1,9 @@
+{
+  "data": {
+    "worldData": {
+      "encounter": {
+        "fightRankings": "{\"rankings\":[{\"rank\":1,\"reportID\":\"AbCd1234\",\"fightID\":9,\"class\":\"Paladin\",\"spec\":\"Protection\",\"role\":\"tank\",\"difficulty\":8,\"partition\":42},{\"rank\":2,\"reportID\":\"AbCd1234\",\"fightID\":9,\"class\":\"Paladin\",\"spec\":\"Protection\",\"role\":\"tank\",\"difficulty\":8,\"partition\":42},{\"rank\":3,\"reportID\":\"EfGh5678\",\"fightID\":4,\"class\":\"Mage\",\"spec\":\"Fire\",\"role\":\"dps\",\"difficulty\":8,\"partition\":42}],\"page\":1,\"hasMorePages\":false}"
+      }
+    }
+  }
+}

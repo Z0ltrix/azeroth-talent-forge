@@ -1,0 +1,8 @@
+query EncounterRankings($encounterID: Int!, $zoneID: Int, $className: String, $specName: String, $role: String, $difficulty: Int, $partition: Int, $page: Int, $serverRegion: String, $serverSlug: String, $metric: String, $leaderboard: String) {
+  worldData {
+    encounter(id: $encounterID) {
+      fightRankings(zoneID: $zoneID, className: $className, specName: $specName, role: $role, difficulty: $difficulty, partition: $partition, page: $page, serverRegion: $serverRegion, serverSlug: $serverSlug, metric: $metric, leaderboard: $leaderboard)
+      characterRankings(zoneID: $zoneID, className: $className, specName: $specName, role: $role, difficulty: $difficulty, partition: $partition, page: $page, serverRegion: $serverRegion, serverSlug: $serverSlug, metric: $metric, leaderboard: $leaderboard)
+    }
+  }
+}

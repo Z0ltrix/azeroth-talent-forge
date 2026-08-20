@@ -970,6 +970,106 @@ class EventTests(unittest.TestCase):
 
 
 class DiscoveryTests(unittest.TestCase):
+    def test_global_results_are_always_sampled(self):
+        envelope = warcraftlogs.make_global_result([], sample_size=0, filters={"encounter": 123})
+        self.assertEqual(envelope["completeness"], "sampled")
+        self.assertIn("ranking_basis", envelope["scope"])
+        self.assertEqual(envelope["scope"]["ranking_basis"], "encounter_rankings")
+        self.assertEqual(envelope["requested_top"], 0)
+        self.assertEqual(envelope["source_rows"], 0)
+        self.assertEqual(envelope["unique_candidates"], 0)
+        self.assertEqual(envelope["returned_candidates"], 0)
+        self.assertIn(
+            "Global discovery is ranking-based and not an exhaustive list of public reports.",
+            envelope["warnings"],
+        )
+
+    def test_global_rankings_query_exposes_documented_encounter_arguments(self):
+        query = warcraftlogs.load_query("encounter-rankings")
+        for value in (
+            "$encounterID", "$zoneID", "$className", "$specName", "$role",
+            "$difficulty", "$partition", "$page", "$serverRegion", "$serverSlug",
+            "$metric", "$leaderboard", "fightRankings", "characterRankings",
+        ):
+            self.assertIn(value, query)
+
+    def test_global_cli_requires_zone_instance_or_encounter(self):
+        with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
+            warcraftlogs.build_parser().parse_args(["find", "global"])
+        self.assertEqual(raised.exception.code, 2)
+
+    def test_global_cli_extracts_candidates_dedupes_and_hydrates_derived_filters(self):
+        client = FixtureClient({
+            "encounter-rankings": fixture("global-rankings-page-1.json"),
+            "report-fights": fixture("report-fights.json"),
+            "report-master-data": fixture("report-master-data.json"),
+        })
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ), patch.dict(os.environ, {}, clear=True), redirect_stdout(output):
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret", "--env-file",
+                str(Path(directory) / "missing.env"), "find", "global", "--encounter", "2902",
+                "--class-name", "Paladin", "--spec-name", "Protection", "--role", "tank",
+                "--partition", "42", "--difficulty", "8", "--key-min", "12", "--top", "2",
+                "--page", "1",
+            ])
+        result = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(client.calls, ["encounter-rankings", "report-fights"])
+        self.assertEqual(client.variables[0]["encounterID"], 2902)
+        self.assertEqual(client.variables[0]["className"], "Paladin")
+        self.assertEqual(client.variables[0]["specName"], "Protection")
+        self.assertEqual(client.variables[0]["role"], "tank")
+        self.assertEqual(client.variables[0]["partition"], 42)
+        self.assertEqual(client.variables[0]["difficulty"], 8)
+        self.assertEqual(result["completeness"], "sampled")
+        self.assertEqual(result["source_rows"], 3)
+        self.assertEqual(result["unique_candidates"], 2)
+        self.assertEqual(result["hydrated_candidates"], 1)
+        self.assertEqual(result["returned_candidates"], 1)
+        self.assertEqual(result["data"][0]["report_code"], "AbCd1234")
+        self.assertEqual(result["data"][0]["fight_id"], 9)
+
+    def test_global_cli_bounds_top_and_page_before_execute(self):
+        for option, value in (("--top", "0"), ("--top", "101"), ("--page", "0")):
+            client = FixtureClient({"encounter-rankings": fixture("global-rankings-page-1.json")})
+            with tempfile.TemporaryDirectory() as directory, patch.object(
+                warcraftlogs, "WarcraftLogsClient", return_value=client
+            ), patch.dict(os.environ, {}, clear=True), redirect_stderr(io.StringIO()):
+                exit_code = warcraftlogs.main([
+                    "--client-id", "client-id", "--client-secret", "client-secret", "--env-file",
+                    str(Path(directory) / "missing.env"), "find", "global", "--encounter", "2902",
+                    option, value,
+                ])
+            self.assertEqual(exit_code, 2)
+            self.assertEqual(client.calls, [])
+
+    def test_global_empty_fixture_keeps_sample_contract(self):
+        client = FixtureClient({"encounter-rankings": fixture("global-rankings-empty.json")})
+        result = warcraftlogs.discover_global(
+            client, warcraftlogs.DiscoveryFilters(encounter=2902), top=10, page=1
+        )
+        self.assertEqual(result["data"], [])
+        self.assertEqual(result["completeness"], "sampled")
+        self.assertEqual(result["source_rows"], 0)
+        self.assertEqual(result["unique_candidates"], 0)
+        self.assertEqual(result["pages_fetched"], 1)
+
+    def test_global_zone_name_resolves_through_metadata(self):
+        client = FixtureClient({
+            "metadata-world": fixture("metadata-world.json"),
+            "encounter-rankings": fixture("global-rankings-empty.json"),
+        })
+        args = warcraftlogs.build_parser().parse_args(["find", "global", "--zone", "Midnight Dungeon"])
+        filters = warcraftlogs._global_filters(args, client)
+        result = warcraftlogs.discover_global(client, filters, top=1, page=1)
+        self.assertEqual(filters.zone, 1300)
+        self.assertEqual(filters.encounter, 2902)
+        self.assertEqual(client.variables[0], {"expansionId": 11})
+        self.assertEqual(result["completeness"], "sampled")
+
     def test_report_matches_returns_deterministic_derived_exclusion_reasons(self):
         filters = warcraftlogs.DiscoveryFilters(
             class_name="Paladin", spec_name="Protection", role="tank",
