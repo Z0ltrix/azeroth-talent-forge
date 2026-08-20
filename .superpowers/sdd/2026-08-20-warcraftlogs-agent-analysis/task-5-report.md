@@ -90,3 +90,19 @@ Exact fix-round checks:
 - `git diff --check`: passed.
 - `quick_validate.py`: remains blocked by missing `yaml` unless the
   environment changes.
+
+## Fix round 2
+
+Finding addressed: the staged routing bullet no longer describes summary or
+master-data as selected-fight payloads. It now identifies rich fights,
+player-details, and bounded events as per-fight retrieval, while preserving
+summary/master-data as optional report-wide context and retaining the staged
+discover → fights → details → local evaluation workflow.
+
+Exact fix-round checks:
+
+- Focused documentation test: passed, 1 test.
+- Full Warcraft Logs unittest module: passed, 108 tests.
+- `git diff --check`: passed.
+- `quick_validate.py`: remains blocked by missing `yaml` unless the
+  environment changes.

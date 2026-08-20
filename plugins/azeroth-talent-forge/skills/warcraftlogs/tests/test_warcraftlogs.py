@@ -215,7 +215,7 @@ class PackagingTests(unittest.TestCase):
         scenarios = (root / "tests" / "skill-pressure-scenarios.md").read_text(encoding="utf-8")
         prompt = (root / "agents" / "openai.yaml").read_text(encoding="utf-8")
 
-        for phrase in ("discover", "fights", "details", "local evaluation", "matched_actor", "sampled", "truncation", "errors"):
+        for phrase in ("discover", "fights", "details", "local evaluation", "matched_actor", "sampled", "truncation", "errors", "report-wide", "fight-specific"):
             self.assertIn(phrase, skill.lower())
         for phrase in ("absolute-start-time", "time-mode", "--output", "--max-pages"):
             self.assertIn(phrase, cli)

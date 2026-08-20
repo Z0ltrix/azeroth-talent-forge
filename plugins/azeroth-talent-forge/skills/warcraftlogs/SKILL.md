@@ -31,9 +31,11 @@ report match is not a run match.
   milliseconds and use `report fights --absolute-start-time ...
   --absolute-end-time ... --time-mode started`. Preserve the selected fight
   IDs and the chosen time mode.
-- For each selected fight, retrieve only the needed summary, master data,
-  player details, table/graph, rankings, and bounded events. Use `--output`
-  for substantial payloads and inspect the receipt.
+- For each selected fight, retrieve rich fights, player-details, and bounded
+  events scoped to that fight. Use table/graph/rankings only as needed within
+  their supported scope. Summary and master-data are optional report-wide
+  context, not fight-specific data. Use `--output` for substantial payloads
+  and inspect the receipt.
 - Before local evaluation, inspect `scope`, `filters`, `completeness`,
   `pagination.truncated`, `warnings`, and `errors`. Never turn partial or
   sampled data into an exhaustive claim.
