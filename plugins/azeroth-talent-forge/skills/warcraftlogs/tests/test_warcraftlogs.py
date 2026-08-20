@@ -1135,6 +1135,14 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(result["requested_top"], 2)
         self.assertIn(warcraftlogs.GLOBAL_WARNING, result["warnings"])
 
+    def test_global_ranking_candidates_accept_nested_report_fight_id_and_dedupe(self):
+        rows, pagination = warcraftlogs._ranking_page(fixture("global-rankings-nested-report.json"))
+
+        self.assertFalse(pagination["has_more_pages"])
+        candidates = warcraftlogs._dedupe_global_candidates(rows)
+        self.assertEqual([(item["report_code"], item["fight_id"]) for item in candidates], [("Nested001", 5)])
+        self.assertEqual(warcraftlogs._invalid_ranking_key(rows[2]), ("report", "Nested002", "missing-fight"))
+
     def test_global_partial_hydration_failure_is_sampled(self):
         client = FixtureClient({
             "metadata-world": fixture("metadata-world.json"),

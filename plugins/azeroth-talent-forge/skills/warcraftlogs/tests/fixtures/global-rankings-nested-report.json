@@ -1,0 +1,9 @@
+{
+  "data": {
+    "worldData": {
+      "encounter": {
+        "fightRankings": "{\"rankings\":[{\"rank\":1,\"report\":{\"code\":\"Nested001\",\"fightID\":5}},{\"rank\":2,\"report\":{\"code\":\"Nested001\",\"fightID\":5}},{\"rank\":3,\"report\":{\"code\":\"Nested002\"}}],\"page\":1,\"hasMorePages\":false}"
+      }
+    }
+  }
+}

@@ -1091,6 +1091,8 @@ def _ranking_candidate(row: Mapping[str, object]) -> Optional[dict]:
     fight_id = row.get("fightID", row.get("fightId", row.get("fight_id")))
     if fight_id is None and isinstance(row.get("fight"), Mapping):
         fight_id = row["fight"].get("id")
+    if fight_id is None:
+        fight_id = report.get("fightID", report.get("fightId", report.get("fight_id")))
     if code is None:
         return None
     result = dict(row)
@@ -1193,6 +1195,8 @@ def _invalid_ranking_key(row: Mapping[str, object]):
     fight_id = row.get("fightID", row.get("fightId", row.get("fight_id")))
     if fight_id is None and isinstance(row.get("fight"), Mapping):
         fight_id = row["fight"].get("id")
+    if fight_id is None:
+        fight_id = report.get("fightID", report.get("fightId", report.get("fight_id")))
     if code is not None and fight_id is None:
         return ("report", str(code), "missing-fight")
     if code is not None:
