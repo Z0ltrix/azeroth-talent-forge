@@ -1,5 +1,4 @@
 """Metadata normalization, selection, and cache-backed resolution."""
-
 import hashlib
 import json
 import os
@@ -7,9 +6,9 @@ import re
 import time
 from pathlib import Path
 from typing import List, Mapping, Optional
+from .models import normalize_name
 
 METADATA_TTL_SECONDS = 24 * 60 * 60
-
 
 def normalize_rate_limit(payload: Mapping[str, object]) -> dict:
     value = payload["data"]["rateLimitData"]
@@ -19,22 +18,15 @@ def normalize_rate_limit(payload: Mapping[str, object]) -> dict:
         "points_reset_in": value["pointsResetIn"],
     }
 
-
-def normalize_name(value) -> str:
-    if not isinstance(value, str):
-        raise ValueError("Name must be a string")
-    return re.sub(r"[\s-]+", " ", value.casefold()).strip()
-
-
 def select_named(items, name, kind) -> dict:
     exact = [item for item in items if isinstance(item, Mapping) and item.get("name") == name]
     if len(exact) == 1:
         return dict(exact[0])
     normalized = normalize_name(name)
     matches = [
-        item for item in items
-        if isinstance(item, Mapping) and isinstance(item.get("name"), str)
-        and normalize_name(item["name"]) == normalized
+        item
+        for item in items
+        if isinstance(item, Mapping) and isinstance(item.get("name"), str) and normalize_name(item["name"]) == normalized
     ]
     if len(matches) == 1:
         return dict(matches[0])
@@ -75,8 +67,11 @@ def _normalize_world(payload: Mapping[str, object]) -> dict:
         zone["encounters"] = _records(zone.get("encounters", []), ("id", "name"))
         zone["partitions"] = _records(zone.get("partitions", []), ("id", "name"))
         zones.append(zone)
-    return {"regions": _records(world["regions"], ("id", "name", "slug")),
-            "expansions": _records(world["expansions"], ("id", "name")), "zones": zones}
+    return {
+        "regions": _records(world["regions"], ("id", "name", "slug")),
+        "expansions": _records(world["expansions"], ("id", "name")),
+        "zones": zones,
+    }
 
 
 def _normalize_game(payload: Mapping[str, object]) -> dict:
@@ -87,8 +82,11 @@ def _normalize_game(payload: Mapping[str, object]) -> dict:
     for game_class in _records(game["classes"], ("id", "name", "slug", "specs")):
         game_class["specs"] = _records(game_class.get("specs", []), ("id", "name", "slug"))
         classes.append(game_class)
-    return {"classes": classes, "affixes": _records(game["affixes"], ("id", "name")),
-            "abilities": _records(game["abilities"]["data"], ("id", "name"))}
+    return {
+        "classes": classes,
+        "affixes": _records(game["affixes"], ("id", "name")),
+        "abilities": _records(game["abilities"]["data"], ("id", "name")),
+    }
 
 
 def _normalize_realm(payload: Mapping[str, object]) -> dict:
@@ -96,7 +94,11 @@ def _normalize_realm(payload: Mapping[str, object]) -> dict:
     if not isinstance(world, Mapping) or not isinstance(world["server"], Mapping):
         raise TypeError("Realm metadata was not an object")
     server = world["server"]
-    result = {field: server[field] for field in ("id", "name", "normalizedName", "slug") if field in server}
+    result = {
+        field: server[field]
+        for field in ("id", "name", "normalizedName", "slug")
+        if field in server
+    }
     for field in ("region", "subregion"):
         if field in server:
             result[field] = _records([server[field]], ("id", "name", "slug"))[0]
@@ -134,9 +136,14 @@ class MetadataResolver:
             self.cache.mkdir(parents=True, exist_ok=True)
             fetched_at = self.now()
             temporary = cache_path.with_suffix(cache_path.suffix + ".tmp")
-            temporary.write_text(json.dumps({"variables": dict(variables), "payload": payload,
-                                              "fetched_at": fetched_at, "expires_at": fetched_at + METADATA_TTL_SECONDS},
-                                             ensure_ascii=True, separators=(",", ":")), encoding="utf-8")
+            temporary.write_text(
+                json.dumps(
+                    {"variables": dict(variables), "payload": payload, "fetched_at": fetched_at, "expires_at": fetched_at + METADATA_TTL_SECONDS},
+                    ensure_ascii=True,
+                    separators=(",", ":"),
+                ),
+                encoding="utf-8",
+            )
             temporary.replace(cache_path)
         return payload, {"status": "bypassed" if self.no_cache else "miss"}
 
