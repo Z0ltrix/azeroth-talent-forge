@@ -1,0 +1,10 @@
+query GuildReports($guildName: String!, $guildServerSlug: String!, $guildServerRegion: String!, $startTime: Float, $endTime: Float, $zoneID: Int, $gameZoneID: Int, $limit: Int, $page: Int) {
+  reportData {
+    reports(guildName: $guildName, guildServerSlug: $guildServerSlug, guildServerRegion: $guildServerRegion, startTime: $startTime, endTime: $endTime, zoneID: $zoneID, gameZoneID: $gameZoneID, limit: $limit, page: $page) {
+      data { code title startTime endTime zone { id name } gameZone { id name } guild { name } }
+      current_page
+      last_page
+      has_more_pages
+    }
+  }
+}

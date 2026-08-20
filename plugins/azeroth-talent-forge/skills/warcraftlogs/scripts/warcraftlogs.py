@@ -14,7 +14,7 @@ import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Mapping, Optional, Sequence
+from typing import Dict, List, Mapping, Optional, Sequence, Tuple
 
 CLIENT_ID_ENV = "WARCRAFTLOGS_CLIENT_ID"
 CLIENT_SECRET_ENV = "WARCRAFTLOGS_CLIENT_SECRET"
@@ -73,6 +73,176 @@ class Credentials:
 class ReportReference:
     code: str
     fight_id: Optional[int]
+
+
+@dataclass(frozen=True)
+class DiscoveryFilters:
+    class_name: Optional[str] = None
+    spec_name: Optional[str] = None
+    role: Optional[str] = None
+    instance: Optional[int] = None
+    zone: Optional[int] = None
+    encounter: Optional[int] = None
+    season: Optional[int] = None
+    partition: Optional[int] = None
+    key_min: Optional[int] = None
+    key_max: Optional[int] = None
+    affixes: Optional[Sequence[object]] = None
+    timed: Optional[bool] = None
+    depleted: Optional[bool] = None
+    difficulty: Optional[int] = None
+    kill: Optional[bool] = None
+    wipe: Optional[bool] = None
+    start_time: Optional[float] = None
+    end_time: Optional[float] = None
+
+    @property
+    def needs_hydration(self) -> bool:
+        return any(getattr(self, field) is not None for field in (
+            "class_name", "spec_name", "role", "encounter", "season", "partition",
+            "key_min", "key_max", "affixes", "timed", "depleted", "difficulty", "kill", "wipe",
+        ))
+
+    def direct_variables(self) -> dict:
+        variables = {}
+        if self.start_time is not None:
+            variables["startTime"] = self.start_time
+        if self.end_time is not None:
+            variables["endTime"] = self.end_time
+        if self.instance is not None:
+            variables["zoneID"] = self.instance
+        if self.zone is not None:
+            variables["gameZoneID"] = self.zone
+        return variables
+
+
+_DISCOVERY_FILTER_FIELDS = (
+    "class_name", "spec_name", "role", "instance", "zone", "encounter", "season", "partition",
+    "key_min", "key_max", "affixes", "timed", "depleted", "difficulty", "kill", "wipe",
+    "start_time", "end_time",
+)
+
+
+def _casefold(value) -> str:
+    return str(value).casefold() if value is not None else ""
+
+
+def _items(value) -> list:
+    return value if isinstance(value, list) else []
+
+
+def _report_fights(fights) -> list:
+    if isinstance(fights, Mapping):
+        fights = fights.get("fights", fights.get("data", []))
+    return _items(fights)
+
+
+def _actor_candidates(fights, actors) -> list:
+    if isinstance(actors, Mapping):
+        actors = actors.get("actors", [])
+    actors = _items(actors)
+    ids = {player for fight in _report_fights(fights) for player in _items(fight.get("friendlyPlayers"))}
+    if ids:
+        selected = [actor for actor in actors if actor.get("id") in ids]
+        if selected:
+            return selected
+    return actors
+
+
+def _actor_field_matches(actor, requested, fields) -> bool:
+    wanted = _casefold(requested)
+    for field in fields:
+        value = actor.get(field)
+        if isinstance(value, Mapping):
+            value = value.get("name") or value.get("slug") or value.get("id")
+        if wanted and wanted in _casefold(value):
+            return True
+    return False
+
+
+def _actor_role_matches(actor, requested) -> bool:
+    if _actor_field_matches(actor, requested, ("role", "roles")):
+        return True
+    if _casefold(requested) not in ("tank", "healer", "dps", "damage"):
+        return False
+    subtype = _casefold(actor.get("subType") or actor.get("specName") or actor.get("spec"))
+    if _casefold(requested) == "tank":
+        return any(value in subtype for value in ("protection", "guardian", "blood", "vengeance", "brewmaster"))
+    if _casefold(requested) == "healer":
+        return any(value in subtype for value in ("holy", "discipline", "restoration", "mistweaver", "preservation", "devotion"))
+    return subtype != "" and not any(value in subtype for value in ("protection", "guardian", "blood", "vengeance", "brewmaster", "holy", "discipline", "restoration", "mistweaver", "preservation", "devotion"))
+
+
+def _fight_status(fight) -> Tuple[bool, bool]:
+    if "timed" in fight or "depleted" in fight:
+        return bool(fight.get("timed")), bool(fight.get("depleted"))
+    bonus = fight.get("keystoneBonus")
+    if bonus is not None:
+        return bonus >= 0, bonus < 0
+    return False, False
+
+
+def report_matches(report, fights, actors, filters: DiscoveryFilters) -> Tuple[bool, List[str]]:
+    """Return whether a discovered report matches, with stable filter-name reasons."""
+    fights = _report_fights(fights)
+    actors = _actor_candidates(fights, actors)
+    reasons = []
+    if filters.class_name is not None and not any(_actor_field_matches(a, filters.class_name, ("className", "class", "subType")) for a in actors):
+        reasons.append("class_name")
+    if filters.spec_name is not None and not any(_actor_field_matches(a, filters.spec_name, ("specName", "spec", "subType")) for a in actors):
+        reasons.append("spec_name")
+    if filters.role is not None and not any(_actor_role_matches(a, filters.role) for a in actors):
+        reasons.append("role")
+    if filters.instance is not None and not any(
+        report.get("zoneID", report.get("zone", {}).get("id") if isinstance(report.get("zone"), Mapping) else None) == filters.instance
+        for unused in (0,)
+    ):
+        reasons.append("instance")
+    if filters.zone is not None and not any(
+        report.get("gameZoneID", report.get("gameZone", {}).get("id") if isinstance(report.get("gameZone"), Mapping) else None) == filters.zone
+        for unused in (0,)
+    ):
+        reasons.append("zone")
+    if filters.encounter is not None and not any(f.get("encounterID") == filters.encounter for f in fights):
+        reasons.append("encounter")
+    if filters.season is not None and not any(f.get("season") == filters.season or report.get("season") == filters.season for f in fights):
+        reasons.append("season")
+    if filters.partition is not None and not any(f.get("partition") == filters.partition or report.get("partition") == filters.partition for f in fights):
+        reasons.append("partition")
+    levels = [f.get("keystoneLevel") for f in fights if isinstance(f.get("keystoneLevel"), (int, float))]
+    if filters.key_min is not None and not any(level >= filters.key_min for level in levels):
+        reasons.append("key_min")
+    if filters.key_max is not None and not any(level <= filters.key_max for level in levels):
+        reasons.append("key_max")
+    if filters.affixes:
+        affix_values = [
+            value for fight in fights for value in _items(fight.get("keystoneAffixes"))
+        ]
+        def has_affix(requested):
+            return any(
+                (isinstance(requested, int) and isinstance(value, Mapping) and value.get("id") == requested)
+                or (_casefold(requested) == _casefold(value.get("name") if isinstance(value, Mapping) else value))
+                for value in affix_values
+            )
+        if not all(has_affix(value) for value in filters.affixes):
+            reasons.append("affixes")
+    timed_values = [_fight_status(f)[0] for f in fights]
+    depleted_values = [_fight_status(f)[1] for f in fights]
+    if filters.timed is not None and (not timed_values or filters.timed not in timed_values):
+        reasons.append("timed")
+    if filters.depleted is not None and (not depleted_values or filters.depleted not in depleted_values):
+        reasons.append("depleted")
+    if filters.difficulty is not None and not any(f.get("difficulty") == filters.difficulty for f in fights):
+        reasons.append("difficulty")
+    if filters.kill is not None and not any(f.get("kill") is filters.kill for f in fights):
+        reasons.append("kill")
+    if filters.wipe is not None and not any((f.get("kill") is False) is filters.wipe for f in fights):
+        reasons.append("wipe")
+    if filters.start_time is not None and (report.get("endTime") is None or report.get("endTime") < filters.start_time):
+        reasons.append("start_time")
+    if filters.end_time is not None and (report.get("startTime") is None or report.get("startTime") > filters.end_time):
+        reasons.append("end_time")
+    return not reasons, reasons
 
 
 def _fight_id(parameters) -> Optional[int]:
@@ -546,6 +716,162 @@ def report_data(payload: Mapping[str, object], kind: str):
     return report[field]
 
 
+def _pagination_data(payload: Mapping[str, object], path: Sequence[str]) -> Tuple[dict, list, dict]:
+    value = payload
+    for key in path:
+        value = value[key]
+    if not isinstance(value, Mapping):
+        raise TypeError("Report pagination was not an object")
+    data = value.get("data")
+    if not isinstance(data, list):
+        raise TypeError("Report pagination data was not a list")
+    pagination = {
+        "current_page": value.get("current_page", value.get("currentPage")),
+        "last_page": value.get("last_page", value.get("lastPage")),
+        "has_more_pages": value.get("has_more_pages", value.get("hasMorePages", False)),
+    }
+    return dict(value), list(data), pagination
+
+
+def _public_report_payload(payload: Mapping[str, object], field: str):
+    report = payload["data"]["reportData"]["report"]
+    if not isinstance(report, Mapping):
+        raise TypeError("Report was not an object")
+    value = report.get(field)
+    if field == "fights":
+        return _items(value)
+    if field == "masterData":
+        return dict(value) if isinstance(value, Mapping) else {"actors": []}
+    return value
+
+
+def hydrate_discovery_report(client, code: str, filters: DiscoveryFilters) -> Tuple[list, list]:
+    """Fetch only the report data needed by derived discovery filters."""
+    if not filters.needs_hydration:
+        return [], []
+    common = {"code": code, "allowUnlisted": False, "translate": True}
+    fights = []
+    actors = []
+    if filters.needs_hydration:
+        fights = _public_report_payload(client.execute("report-fights", common), "fights")
+    if filters.class_name is not None or filters.spec_name is not None or filters.role is not None:
+        master = _public_report_payload(client.execute("report-master-data", common), "masterData")
+        actors = _items(master.get("actors")) if isinstance(master, Mapping) else []
+    return fights, actors
+
+
+def _identity_variables(name, server, region) -> dict:
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError("Character or guild name is required")
+    if not isinstance(server, str) or not server.strip():
+        raise ValueError("Server is required")
+    if not isinstance(region, str) or not region.strip():
+        raise ValueError("Region is required")
+    return {
+        "name": name.strip(),
+        "serverSlug": normalize_name(server).replace(" ", "-"),
+        "serverRegion": region.strip().casefold(),
+    }
+
+
+def _discovery_filters(args) -> DiscoveryFilters:
+    affixes = args.affixes if args.affixes else None
+    for bound_name in ("start_time", "end_time"):
+        value = getattr(args, bound_name)
+        if value is not None and (not math.isfinite(value) or value < 0):
+            raise ValueError("Discovery time bounds must be finite and non-negative")
+    if args.start_time is not None and args.end_time is not None and args.start_time > args.end_time:
+        raise ValueError("Discovery start time must not exceed end time")
+    if args.key_min is not None and args.key_min < 0 or args.key_max is not None and args.key_max < 0:
+        raise ValueError("Key bounds must be non-negative")
+    if args.key_min is not None and args.key_max is not None and args.key_min > args.key_max:
+        raise ValueError("Key minimum must not exceed key maximum")
+    return DiscoveryFilters(
+        **{field: getattr(args, field) for field in _DISCOVERY_FILTER_FIELDS}
+    )
+
+
+def _filters_dict(filters: DiscoveryFilters) -> dict:
+    return {field: getattr(filters, field) for field in _DISCOVERY_FILTER_FIELDS if getattr(filters, field) is not None}
+
+
+def discover_reports(client, kind: str, identity: Mapping[str, str], filters: DiscoveryFilters, page: int, limit: int, max_pages: int = 1) -> dict:
+    if kind not in ("character", "guild"):
+        raise ValueError("Unknown discovery kind")
+    if page < 1 or limit < 1 or max_pages < 1:
+        raise ValueError("Discovery page, limit, and max pages must be positive")
+    reports = []
+    pages_fetched = 0
+    current = page
+    last_page = None
+    has_more = False
+    character = None
+    if kind == "character":
+        character_payload = client.execute("character", identity)
+        character = character_payload["data"]["characterData"]["character"]
+        if not isinstance(character, Mapping):
+            raise TypeError("Character identity was not found")
+    while pages_fetched < max_pages:
+        variables = dict(identity)
+        variables.update(filters.direct_variables())
+        variables.update({"limit": limit, "page": current})
+        if kind == "character":
+            variables.pop("startTime", None)
+            variables.pop("endTime", None)
+            variables.pop("zoneID", None)
+            variables.pop("gameZoneID", None)
+            payload = client.execute("character-reports", variables)
+            _, page_reports, pagination = _pagination_data(payload, ("data", "characterData", "character", "recentReports"))
+        else:
+            variables["guildName"] = variables.pop("name")
+            variables["guildServerSlug"] = variables.pop("serverSlug")
+            variables["guildServerRegion"] = variables.pop("serverRegion")
+            payload = client.execute("guild-reports", variables)
+            _, page_reports, pagination = _pagination_data(payload, ("data", "reportData", "reports"))
+        reports.extend(page_reports)
+        pages_fetched += 1
+        last_page = pagination["last_page"]
+        has_more = bool(pagination["has_more_pages"])
+        current = (pagination["current_page"] or current) + 1
+        if not has_more:
+            break
+    matched = []
+    exclusion_reasons = {}
+    hydrated_count = 0
+    for report in reports:
+        if not isinstance(report, Mapping):
+            continue
+        if filters.needs_hydration:
+            hydrated_count += 1
+            fights, actors = hydrate_discovery_report(client, str(report.get("code", "")), filters)
+        else:
+            fights, actors = [], []
+        is_match, reasons = report_matches(report, fights, actors, filters)
+        if is_match:
+            matched.append(dict(report))
+        else:
+            for reason in reasons:
+                exclusion_reasons[reason] = exclusion_reasons.get(reason, 0) + 1
+    return {
+        "data": matched,
+        "candidate_count": len(reports),
+        "hydrated_count": hydrated_count,
+        "matched_count": len(matched),
+        "excluded_count": len(reports) - len(matched),
+        "exclusion_reasons": exclusion_reasons,
+        "character": dict(character) if character is not None else None,
+        "pagination": {
+            "requested_page": page,
+            "current_page": page if pages_fetched == 1 and last_page is None else current - 1,
+            "last_page": last_page,
+            "has_more_pages": has_more,
+            "pages_fetched": pages_fetched,
+            "limit": limit,
+            "truncated": has_more and pages_fetched >= max_pages,
+        },
+    }
+
+
 EVENT_PAGE_LIMIT = 10000
 EVENT_MAX_PAGES = 5
 
@@ -765,12 +1091,43 @@ def build_parser() -> argparse.ArgumentParser:
     rankings.add_argument("--compare")
     rankings.add_argument("--player-metric")
     rankings.add_argument("--timeframe")
+    find = subparsers.add_parser("find")
+    find_parsers = find.add_subparsers(dest="find_command")
+
+    def add_discovery_parser(command):
+        command.add_argument("--name", required=True)
+        command.add_argument("--server", required=True)
+        command.add_argument("--region", required=True)
+        command.add_argument("--page", type=int, default=1)
+        command.add_argument("--limit", type=int, default=100)
+        command.add_argument("--max-pages", type=int, default=1)
+        command.add_argument("--class-name", "--class", dest="class_name")
+        command.add_argument("--spec-name", "--spec", dest="spec_name")
+        command.add_argument("--role")
+        command.add_argument("--instance", type=int)
+        command.add_argument("--zone", type=int)
+        command.add_argument("--encounter", "--encounter-id", dest="encounter", type=int)
+        command.add_argument("--season", type=int)
+        command.add_argument("--partition", type=int)
+        command.add_argument("--key-min", type=int)
+        command.add_argument("--key-max", type=int)
+        command.add_argument("--affixes", "--affix", dest="affixes", action="append")
+        command.add_argument("--timed", action="store_true", default=None)
+        command.add_argument("--depleted", action="store_true", default=None)
+        command.add_argument("--difficulty", type=int)
+        command.add_argument("--kill", action="store_true", default=None)
+        command.add_argument("--wipe", action="store_true", default=None)
+        command.add_argument("--start-time", type=float)
+        command.add_argument("--end-time", type=float)
+
+    add_discovery_parser(find_parsers.add_parser("character"))
+    add_discovery_parser(find_parsers.add_parser("guild"))
     return parser
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = build_parser().parse_args(argv)
-    if args.command not in ("rate-limit", "metadata", "report"):
+    if args.command not in ("rate-limit", "metadata", "report", "find"):
         return 0
     try:
         credentials = resolve_credentials(
@@ -784,6 +1141,44 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(str(error), file=sys.stderr)
         return 2
     client = WarcraftLogsClient(credentials)
+    if args.command == "find":
+        if args.find_command not in ("character", "guild"):
+            return 0
+        try:
+            identity = _identity_variables(args.name, args.server, args.region)
+            filters = _discovery_filters(args)
+            if args.page < 1 or args.limit < 1 or args.max_pages < 1:
+                raise ValueError("Discovery page, limit, and max pages must be positive")
+            result = discover_reports(
+                client, args.find_command, identity, filters, args.page, args.limit, args.max_pages
+            )
+        except AuthenticationError as error:
+            print(str(error), file=sys.stderr)
+            return 3
+        except ValueError as error:
+            print(str(error), file=sys.stderr)
+            return 2
+        except (ApiError, KeyError, TypeError, OSError):
+            print("Warcraft Logs API response did not contain discovery data", file=sys.stderr)
+            return 4
+        scope = {
+            "name": identity["name"],
+            "server": identity["serverSlug"],
+            "region": identity["serverRegion"],
+        }
+        if result.get("character") is not None:
+            scope["character"] = result["character"].get("name")
+        envelope = make_envelope(
+            "find " + args.find_command, scope, _filters_dict(filters), "api_collection",
+            result["data"], pagination=result["pagination"],
+            candidate_count=result["candidate_count"],
+            hydrated_count=result["hydrated_count"],
+            matched_count=result["matched_count"],
+            excluded_count=result["excluded_count"],
+            exclusion_reasons=result["exclusion_reasons"],
+        )
+        print(json.dumps(envelope, ensure_ascii=True))
+        return 0
     if args.command == "report":
         if args.report_command == "events":
             try:

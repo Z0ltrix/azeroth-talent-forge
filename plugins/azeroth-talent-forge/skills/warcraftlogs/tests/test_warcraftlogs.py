@@ -969,6 +969,90 @@ class EventTests(unittest.TestCase):
         self.assertEqual(records[1], {"type": "event", "event": {"timestamp": 100}})
 
 
+class DiscoveryTests(unittest.TestCase):
+    def test_report_matches_returns_deterministic_derived_exclusion_reasons(self):
+        filters = warcraftlogs.DiscoveryFilters(
+            class_name="Paladin", spec_name="Protection", role="tank",
+            encounter=2902, difficulty=10, key_min=15, timed=True, kill=True,
+        )
+        matched, reasons = warcraftlogs.report_matches(
+            {"code": "NOPE"},
+            [{"encounterID": 1, "difficulty": 3, "kill": False, "keystoneLevel": 12}],
+            [{"subType": "FireMage", "type": "Player"}],
+            filters,
+        )
+        self.assertFalse(matched)
+        self.assertEqual(
+            reasons,
+            ["class_name", "spec_name", "role", "encounter", "key_min", "timed", "difficulty", "kill"],
+        )
+
+    def test_guild_discovery_pushes_direct_filters_and_skips_hydration(self):
+        client = FixtureClient({"guild-reports": fixture("find-guild-page-1.json")})
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ), patch.dict(os.environ, {}, clear=True), redirect_stdout(output):
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret",
+                "--env-file", str(Path(directory) / "missing.env"), "find", "guild",
+                "--name", "Fixture Guild", "--server", "Area 52", "--region", "us",
+                "--zone", "2335", "--start-time", "1000", "--end-time", "2000",
+                "--page", "2", "--limit", "25",
+            ])
+        result = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(client.calls, ["guild-reports"])
+        self.assertEqual(client.variables[0]["guildName"], "Fixture Guild")
+        self.assertEqual(client.variables[0]["guildServerSlug"], "area-52")
+        self.assertEqual(client.variables[0]["guildServerRegion"], "us")
+        self.assertEqual(client.variables[0]["gameZoneID"], 2335)
+        self.assertEqual(client.variables[0]["startTime"], 1000.0)
+        self.assertEqual(client.variables[0]["endTime"], 2000.0)
+        self.assertEqual(client.variables[0]["page"], 2)
+        self.assertEqual(client.variables[0]["limit"], 25)
+        self.assertEqual(result["hydrated_count"], 0)
+        self.assertEqual(result["pagination"]["current_page"], 2)
+        self.assertEqual(result["completeness"], "api_collection")
+
+    def test_character_discovery_requires_all_identity_inputs(self):
+        with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
+            warcraftlogs.build_parser().parse_args(["find", "character", "--name", "Tankadin"])
+        self.assertEqual(raised.exception.code, 2)
+
+    def test_character_discovery_uses_canonical_identity_and_report_page(self):
+        payload = fixture("find-character-page-1.json")
+        client = FixtureClient({"character": payload, "character-reports": payload})
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ), patch.dict(os.environ, {}, clear=True), redirect_stdout(output):
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret",
+                "--env-file", str(Path(directory) / "missing.env"), "find", "character",
+                "--name", "Tankadin", "--server", "Area 52", "--region", "US",
+            ])
+        result = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(client.calls, ["character", "character-reports"])
+        self.assertEqual(client.variables[1], {
+            "name": "Tankadin", "serverSlug": "area-52", "serverRegion": "us", "limit": 100, "page": 1,
+        })
+        self.assertEqual(result["data"][0]["code"], "Char1234")
+
+    def test_derived_filter_hydrates_fights_and_master_data(self):
+        client = FixtureClient({
+            "report-fights": fixture("report-fights.json"),
+            "report-master-data": fixture("report-master-data.json"),
+        })
+        fights, actors = warcraftlogs.hydrate_discovery_report(
+            client, "AbCd1234", warcraftlogs.DiscoveryFilters(class_name="Paladin")
+        )
+        self.assertEqual(client.calls, ["report-fights", "report-master-data"])
+        self.assertEqual(fights[0]["id"], 9)
+        self.assertEqual(actors[0]["name"], "Tankadin")
+
+
 def fixture(name):
     return json.loads((Path(__file__).parent / "fixtures" / name).read_text(encoding="utf-8"))
 

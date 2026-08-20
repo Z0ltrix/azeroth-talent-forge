@@ -1,0 +1,10 @@
+query Character($name: String!, $serverSlug: String!, $serverRegion: String!) {
+  characterData {
+    character(name: $name, serverSlug: $serverSlug, serverRegion: $serverRegion) {
+      name
+      classID
+      server { name slug region { name slug } }
+      guild { name }
+    }
+  }
+}
