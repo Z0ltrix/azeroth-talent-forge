@@ -42,6 +42,22 @@ class FakeOpener:
         return FakeResponse(response)
 
 
+class ReadErrorResponse:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        return False
+
+    def read(self):
+        raise OSError("read failed")
+
+
+class ReadErrorOpener:
+    def __call__(self, request):
+        return ReadErrorResponse()
+
+
 class CredentialTests(unittest.TestCase):
     def test_cli_over_dotenv_over_environment_per_field(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -249,3 +265,64 @@ class TransportTests(unittest.TestCase):
         self.assertEqual(exit_code, 2)
         self.assertEqual(output.getvalue(), "")
         self.assertIn("Missing credential", errors.getvalue())
+
+    def test_rate_limit_command_maps_oauth_response_read_error_to_auth_exit_code(self):
+        output = io.StringIO()
+        errors = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory:
+            missing_env = str(Path(directory) / "missing.env")
+            with patch.dict(os.environ, {}, clear=True), patch.object(
+                warcraftlogs.urllib.request, "urlopen", ReadErrorOpener()
+            ), redirect_stdout(output), redirect_stderr(errors):
+                exit_code = warcraftlogs.main(
+                    [
+                        "--client-id",
+                        "client-id",
+                        "--client-secret",
+                        "client-secret",
+                        "--env-file",
+                        missing_env,
+                        "rate-limit",
+                    ]
+                )
+
+        self.assertEqual(exit_code, 3)
+        self.assertEqual(output.getvalue(), "")
+        self.assertIn("OAuth authentication failed", errors.getvalue())
+
+    def test_rate_limit_command_escapes_unicode_graphql_errors_for_ascii_output(self):
+        opener = FakeOpener(
+            [
+                {"access_token": "test-token", "expires_in": 3600},
+                {
+                    "data": {
+                        "rateLimitData": {
+                            "limitPerHour": 3600,
+                            "pointsSpentThisHour": 12.5,
+                            "pointsResetIn": 1800,
+                        }
+                    },
+                    "errors": [{"message": "unicode error \u2603", "extensions": {"code": "PARTIAL"}}],
+                },
+            ]
+        )
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory:
+            missing_env = str(Path(directory) / "missing.env")
+            with patch.dict(os.environ, {}, clear=True), patch.object(
+                warcraftlogs.urllib.request, "urlopen", opener
+            ), redirect_stdout(output):
+                exit_code = warcraftlogs.main(
+                    [
+                        "--client-id",
+                        "client-id",
+                        "--client-secret",
+                        "client-secret",
+                        "--env-file",
+                        missing_env,
+                        "rate-limit",
+                    ]
+                )
+
+        self.assertEqual(exit_code, 0)
+        self.assertTrue(output.getvalue().isascii())

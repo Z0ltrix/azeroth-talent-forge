@@ -128,6 +128,8 @@ class WarcraftLogsClient:
                 self.sleep(int(retry_after) if retry_after and retry_after.isdigit() else 0)
             except urllib.error.URLError:
                 raise ApiError("Network request failed")
+            except OSError:
+                raise ApiError("Response read failed")
         raise ApiError("HTTP request failed")
 
     def access_token(self) -> str:
@@ -259,7 +261,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 data,
                 errors=payload.get("errors"),
             ),
-            ensure_ascii=False,
+            ensure_ascii=True,
         )
     )
     return 0
