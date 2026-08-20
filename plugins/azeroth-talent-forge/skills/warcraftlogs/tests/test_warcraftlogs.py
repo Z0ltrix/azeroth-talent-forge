@@ -206,6 +206,28 @@ class PackagingTests(unittest.TestCase):
         for name in names:
             self.assertTrue(warcraftlogs.load_query(name).strip())
 
+    def test_skill_documents_describe_staged_bounded_actor_bound_workflow(self):
+        root = self.ROOT
+        skill = (root / "SKILL.md").read_text(encoding="utf-8")
+        cli = (root / "references" / "cli.md").read_text(encoding="utf-8")
+        discovery = (root / "references" / "discovery.md").read_text(encoding="utf-8")
+        reports = (root / "references" / "reports.md").read_text(encoding="utf-8")
+        scenarios = (root / "tests" / "skill-pressure-scenarios.md").read_text(encoding="utf-8")
+        prompt = (root / "agents" / "openai.yaml").read_text(encoding="utf-8")
+
+        for phrase in ("discover", "fights", "details", "local evaluation", "matched_actor", "sampled", "truncation", "errors"):
+            self.assertIn(phrase, skill.lower())
+        for phrase in ("absolute-start-time", "time-mode", "--output", "--max-pages"):
+            self.assertIn(phrase, cli)
+        for phrase in ("absolute-start-time", "started", "timezone", "same-spec/key"):
+            self.assertIn(phrase, discovery + reports)
+        for phrase in ("combatant", "fight-id", "event-limit", "sampled"):
+            self.assertIn(phrase, reports + discovery)
+        for phrase in ("stale events", "report-level-only", "whole-report", "exhaustive global"):
+            self.assertIn(phrase, scenarios.lower())
+        self.assertIn("local run evaluation", prompt.lower())
+        self.assertIn("comparable public-log cohorts", prompt.lower())
+
 
 class TransportTests(unittest.TestCase):
     def test_query_loader_rejects_path_traversal(self):

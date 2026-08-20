@@ -33,6 +33,22 @@ Use `--help` at each level for the exact flags:
 python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report events --help
 ```
 
+For a local “today” window, calculate the timezone boundaries first, then pass
+absolute epoch milliseconds to fight selection. This example uses the local
+PowerShell timezone and includes fights that started today:
+
+```powershell
+$day = (Get-Date).Date
+$start = [DateTimeOffset]::new($day).ToUnixTimeMilliseconds()
+$end = [DateTimeOffset]::new($day.AddDays(1)).ToUnixTimeMilliseconds()
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report fights REPORTCODE --absolute-start-time $start --absolute-end-time $end --time-mode started --output today-fights.json
+```
+
+`--start-time` and `--end-time` remain report-relative bounds for event,
+table, graph, and player-detail calls. `report fights` uses absolute bounds and
+`--time-mode {started,overlap,completed}`. A receipt from `--output` gives the
+path, record count, page count, and truncation; read it before evaluation.
+
 ## JSON response
 
 Commands emit one JSON envelope to stdout. Inspect these fields before drawing
@@ -56,3 +72,12 @@ can still exit `0`; inspect its `errors` and `completeness`.
 `report events --output FILE` writes the envelope first, followed by event
 records as JSONL. Retain the first record when passing the export to analysis:
 it establishes fight/time bounds and truncation status.
+
+Use a fight ID and a page limit for a bounded export:
+
+```powershell
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report events REPORTCODE --fight-id 123 --event-limit 5000 --max-pages 3 --output run-123-events.jsonl
+```
+
+Do not request whole-report events. A truncated or partial export remains
+usable only within its recorded scope and must carry its warnings/errors.

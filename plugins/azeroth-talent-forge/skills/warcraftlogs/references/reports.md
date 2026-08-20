@@ -20,6 +20,25 @@ official host and a positive fight ID.
 The report must be public and positively accessible. Do not infer data from a
 missing or inaccessible archive status.
 
+## One-file-per-run details
+
+After `report fights` identifies a fight, keep each run's details in its own
+file so local evaluation can preserve provenance. The `--fight` selector and
+`--output` path are intentionally repeated per command:
+
+```powershell
+$report = "REPORTCODE"
+$fight = 123
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report summary $report --fight $fight --output "run-$fight-summary.json"
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report fights $report --fight $fight --output "run-$fight-fight.json"
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report master-data $report --fight $fight --output "run-$fight-master-data.json"
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report player-details $report --fight $fight --output "run-$fight-player-details.json"
+```
+
+Player details request combatant information by default. Preserve gear, stats,
+spec, talent-tree, and talent payloads; do not flatten them before local
+evaluation.
+
 ## Events
 
 Events require either `--fight-id` (or a fight in the report URL) or both
@@ -27,6 +46,13 @@ Events require either `--fight-id` (or a fight in the report URL) or both
 
 ```powershell
 python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report events REPORT --fight-id 3 --max-pages 2 --output events.jsonl
+```
+
+For a stricter bounded export, add `--event-limit` and retain the first JSONL
+envelope record:
+
+```powershell
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report events REPORTCODE --fight-id 123 --event-limit 5000 --max-pages 3 --output run-123-events.jsonl
 ```
 
 `--max-pages` and the requested window are coverage limits, not defaults to
@@ -40,3 +66,8 @@ limit, and rejects a non-advancing pagination cursor instead of looping.
 3. Request a single fight or time window with `events`.
 4. Check the envelope's scope, pagination, warnings, and errors before making
    performance claims.
+
+Use the local run files to resolve the target actor and compute comparisons.
+Global ranking candidates are a bounded sample; require actor-bound
+`matched_actor` evidence and retain exclusions, hydration counts, and
+`pagination.truncated` alongside any same-spec/key result.

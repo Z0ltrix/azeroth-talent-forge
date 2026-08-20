@@ -23,6 +23,25 @@ sampled global ranking discovery, metadata lookup, and bounded combat-log analys
 
 ## Route requests
 
+Use this staged workflow for analysis: discover candidate reports, fetch rich
+fights, fetch details for selected fights, then perform local evaluation. A
+report match is not a run match.
+
+- For “today,” convert the user's timezone window to absolute epoch
+  milliseconds and use `report fights --absolute-start-time ...
+  --absolute-end-time ... --time-mode started`. Preserve the selected fight
+  IDs and the chosen time mode.
+- For each selected fight, retrieve only the needed summary, master data,
+  player details, table/graph, rankings, and bounded events. Use `--output`
+  for substantial payloads and inspect the receipt.
+- Before local evaluation, inspect `scope`, `filters`, `completeness`,
+  `pagination.truncated`, `warnings`, and `errors`. Never turn partial or
+  sampled data into an exhaustive claim.
+- Global cohort results are sampled. Require every returned candidate to carry
+  actor-bound `matched_actor` evidence for the ranked player; a match from
+  another group member does not satisfy class/spec/role filters. Record the
+  sample size, exclusions, hydration counts, and truncation in conclusions.
+
 Run from the repository root, or use an absolute script path:
 
 ```powershell

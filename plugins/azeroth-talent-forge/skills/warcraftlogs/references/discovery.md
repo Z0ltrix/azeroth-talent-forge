@@ -23,6 +23,23 @@ affix, timed/depleted, difficulty, kill/wipe, and time.
 python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py find character --name Name --server Blackhand --region EU --class Mage --limit 25 --max-pages 1
 ```
 
+For today's runs, discover the character's bounded report candidates, then
+select fights by absolute time. Convert the user's local timezone window to
+epoch milliseconds; report dates alone do not select individual
+runs:
+
+```powershell
+$day = (Get-Date).Date
+$start = [DateTimeOffset]::new($day).ToUnixTimeMilliseconds()
+$end = [DateTimeOffset]::new($day.AddDays(1)).ToUnixTimeMilliseconds()
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py find character --name Ratelka --server Blackhand --region EU --limit 25 --max-pages 1 --start-time $start --end-time $end
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report fights REPORTCODE --absolute-start-time $start --absolute-end-time $end --time-mode started --output today-fights.json
+```
+
+Use `overlap` when the question is whether any part of a fight intersects the
+window, or `completed` when completion must be inside it. Keep the report
+relative and fight absolute scopes distinct in notes and output.
+
 These feeds cannot prove a report-specific season or partition match, so
 `--season` and `--partition` are rejected rather than silently filtering.
 
@@ -51,3 +68,14 @@ adapter.
 - `--top` is a local sample limit, never a raid-size filter.
 - Stop at the requested number of matching candidates; do not treat excluded
   candidates as matches.
+
+For same-spec/key comparison, keep the cohort bounded and label it sampled:
+
+```powershell
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py find global --zone "The Dawnbreaker" --class-name Warrior --spec-name Protection --role tank --key-min 12 --key-max 12 --top 25 --max-pages 2 --metric dps --server-region EU
+```
+
+The candidate's `matched_actor` must be the ranked player whose class/spec/role
+was tested. Compare only the returned candidates, and report source rows,
+hydrated candidates, exclusions, pages, and truncation; this is not an
+exhaustive leaderboard or population estimate.
