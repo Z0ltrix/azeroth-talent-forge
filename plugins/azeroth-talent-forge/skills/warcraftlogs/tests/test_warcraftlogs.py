@@ -1011,7 +1011,8 @@ class EventTests(unittest.TestCase):
             records = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
         envelope = json.loads(output.getvalue())
         self.assertEqual(exit_code, 0)
-        self.assertEqual(envelope["pagination"], {"pages_fetched": 1, "truncated": True})
+        self.assertEqual(envelope["pages_fetched"], 1)
+        self.assertTrue(envelope["truncated"])
         self.assertEqual(records[0]["metadata"]["pagination"], {"pages_fetched": 1, "truncated": True})
         self.assertEqual(records[1]["event"]["timestamp"], 100)
 
@@ -1104,9 +1105,47 @@ class EventTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(errors.getvalue(), "")
         self.assertEqual(envelope["command"], "report events")
-        self.assertEqual(envelope["data"], [{"timestamp": 100}])
+        self.assertEqual(envelope["records_written"], 1)
+        self.assertEqual(envelope["output"], str(path))
+        self.assertNotIn("data", envelope)
         self.assertEqual(records[0]["type"], "metadata")
         self.assertEqual(records[1], {"type": "event", "event": {"timestamp": 100}})
+
+    def test_report_output_is_atomic_and_stdout_is_receipt(self):
+        client = FixtureClient({"report-summary": fixture("report-summary.json")})
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, redirect_stdout(output), redirect_stderr(io.StringIO()), patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ):
+            path = Path(directory) / "report.json"
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret", "--env-file",
+                str(Path(directory) / "missing.env"), "report", "summary", "CODE1234", "--output", str(path),
+            ])
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        receipt = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(payload["command"], "report summary")
+        self.assertEqual(receipt, {
+            "command": "report summary",
+            "output": str(path),
+            "records_written": 1,
+            "pages_fetched": 1,
+            "truncated": False,
+        })
+
+    def test_output_parent_must_exist_before_network_access(self):
+        client = FixtureClient({"report-summary": fixture("report-summary.json")})
+        with tempfile.TemporaryDirectory() as directory, redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()), patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ):
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret", "--env-file",
+                str(Path(directory) / "missing.env"), "report", "summary", "CODE1234",
+                "--output", str(Path(directory) / "missing" / "report.json"),
+            ])
+        self.assertEqual(exit_code, 2)
+        self.assertEqual(client.calls, [])
 
 
 class DiscoveryTests(unittest.TestCase):

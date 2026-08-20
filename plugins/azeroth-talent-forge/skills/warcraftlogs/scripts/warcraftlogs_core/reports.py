@@ -93,9 +93,53 @@ def make_envelope(
     return result
 
 
+def _validate_output_path(path) -> Path:
+    destination = Path(path)
+    if not destination.parent.is_dir():
+        raise ValueError("Output directory must already exist")
+    if destination.exists() and destination.is_dir():
+        raise ValueError("Output path must be a file")
+    return destination
+
+
+def output_receipt(command, path, records_written, pagination, errors=None) -> dict:
+    receipt = {
+        "command": command,
+        "output": str(path),
+        "records_written": records_written,
+        "pages_fetched": pagination.get("pages_fetched", 0),
+        "truncated": bool(pagination.get("truncated", False)),
+    }
+    if errors:
+        receipt["errors"] = sanitize_graphql_errors(errors)
+    return receipt
+
+
+def write_json_atomic(path, payload) -> None:
+    destination = _validate_output_path(path)
+    temporary_name = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=str(destination.parent),
+            prefix=destination.name + ".", suffix=".tmp", delete=False,
+        ) as temporary:
+            temporary_name = temporary.name
+            json.dump(payload, temporary, ensure_ascii=False, separators=(",", ":"))
+            temporary.write("\n")
+        os.replace(temporary_name, str(destination))
+        temporary_name = None
+    finally:
+        if temporary_name:
+            try:
+                os.unlink(temporary_name)
+            except OSError:
+                pass
+
+
 def _add_report_options(parser, window=False, translate=False, absolute_window=False) -> None:
     parser.add_argument("reference", help="report code or official Warcraft Logs report URL")
     parser.add_argument("--fight", type=int)
+    parser.add_argument("--output")
     if window:
         parser.add_argument("--start-time", type=float)
         parser.add_argument("--end-time", type=float)
@@ -367,8 +411,7 @@ def iter_event_pages(client, code, variables, max_pages=EVENT_MAX_PAGES):
 
 
 def write_event_jsonl(path, metadata, events):
-    destination = Path(path)
-    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination = _validate_output_path(path)
     temporary_name = None
     try:
         with tempfile.NamedTemporaryFile(
@@ -383,6 +426,62 @@ def write_event_jsonl(path, metadata, events):
         temporary_name = None
     finally:
         if temporary_name:
+            try:
+                os.unlink(temporary_name)
+            except OSError:
+                pass
+
+
+def export_event_pages(path, metadata, pages, max_pages, end_time=None):
+    destination = _validate_output_path(path)
+    spool_name = None
+    pages_fetched = 0
+    records_written = 0
+    errors = []
+    last_cursor = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=str(destination.parent),
+            prefix=destination.name + ".events.", suffix=".tmp", delete=False,
+        ) as spool:
+            spool_name = spool.name
+            for page in pages:
+                pages_fetched += 1
+                last_cursor = page["nextPageTimestamp"]
+                errors.extend(page.get("errors", []))
+                for event in page["data"]:
+                    spool.write(json.dumps({"type": "event", "event": event}, ensure_ascii=False, separators=(",", ":")) + "\n")
+                    records_written += 1
+        truncated = bool(
+            pages_fetched and last_cursor is not None and
+            (end_time is None or last_cursor < end_time) and pages_fetched >= max_pages
+        )
+        pagination = {"pages_fetched": pages_fetched, "truncated": truncated}
+        final_metadata = dict(metadata)
+        final_metadata["pagination"] = pagination
+        if errors:
+            final_metadata["partial"] = True
+            final_metadata["errors"] = sanitize_graphql_errors(errors)
+        temporary_name = None
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=str(destination.parent),
+            prefix=destination.name + ".", suffix=".tmp", delete=False,
+        ) as temporary:
+            temporary_name = temporary.name
+            temporary.write(json.dumps({"type": "metadata", "metadata": final_metadata}, ensure_ascii=False, separators=(",", ":")) + "\n")
+            with open(spool_name, "r", encoding="utf-8") as spool:
+                for line in spool:
+                    temporary.write(line)
+        os.replace(temporary_name, str(destination))
+        temporary_name = None
+        return records_written, pagination, errors
+    finally:
+        if spool_name:
+            try:
+                os.unlink(spool_name)
+            except OSError:
+                pass
+        if "temporary_name" in locals() and temporary_name:
             try:
                 os.unlink(temporary_name)
             except OSError:

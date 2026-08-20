@@ -189,6 +189,29 @@ def discovery_actors(candidates):
 
 
 class JsonlContractTests(unittest.TestCase):
+    def test_json_output_failure_preserves_existing_destination(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "report.json"
+            path.write_text("old destination\n", encoding="utf-8")
+
+            with self.assertRaises(TypeError):
+                warcraftlogs.write_json_atomic(path, {"ok": object()})
+
+            self.assertEqual(path.read_text(encoding="utf-8"), "old destination\n")
+
+    def test_output_receipt_is_compact_and_reports_counts(self):
+        receipt = warcraftlogs.output_receipt(
+            "report summary", "/tmp/report.json", 1, {"pages_fetched": 1, "truncated": False}
+        )
+
+        self.assertEqual(receipt, {
+            "command": "report summary",
+            "output": "/tmp/report.json",
+            "records_written": 1,
+            "pages_fetched": 1,
+            "truncated": False,
+        })
+
     def test_jsonl_is_metadata_plus_one_record_per_event_without_embedded_events(self):
         metadata = {"report_code": "Rich001", "pagination": {"pages_fetched": 1}}
         events = fixture("report-events-single-page.json")["data"]["reportData"]["report"]["events"]["data"]

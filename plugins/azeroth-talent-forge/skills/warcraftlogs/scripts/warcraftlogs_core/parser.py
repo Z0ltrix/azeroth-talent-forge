@@ -67,7 +67,6 @@ def build_parser() -> argparse.ArgumentParser:
     events.add_argument("--use-ability-ids", action="store_true", default=None)
     events.add_argument("--event-limit", type=int, default=EVENT_PAGE_LIMIT)
     events.add_argument("--max-pages", type=int, default=EVENT_MAX_PAGES)
-    events.add_argument("--output")
     rankings = report_parsers.add_parser("rankings")
     _add_report_options(rankings)
     rankings.add_argument("--difficulty", type=int)

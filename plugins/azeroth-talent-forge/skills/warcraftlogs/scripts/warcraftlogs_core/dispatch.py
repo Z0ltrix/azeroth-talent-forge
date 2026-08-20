@@ -9,6 +9,7 @@ from .transport import WarcraftLogsClient
 from .metadata import MetadataResolver, normalize_rate_limit
 from .models import *
 from .reports import *
+from .reports import _validate_output_path
 from .discovery import *
 from .discovery import _identity_variables, _discovery_filters, _filters_dict, _global_filters, _expansion_variables
 from .parser import build_parser
@@ -99,9 +100,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if args.report_command == "events":
             try:
                 unused, variables, scope, filters = event_request(args)
+                if args.output:
+                    _validate_output_path(args.output)
             except ValueError as error:
                 print(str(error), file=sys.stderr)
                 return 2
+            if args.output:
+                try:
+                    metadata = make_envelope(
+                        "report events", scope, filters, "api_collection", None,
+                    )
+                    metadata.pop("data", None)
+                    records_written, pagination, unused_errors = export_event_pages(
+                        args.output, metadata, iter_event_pages(client, unused.code, variables, args.max_pages),
+                        args.max_pages, args.end_time,
+                    )
+                except AuthenticationError as error:
+                    print(str(error), file=sys.stderr)
+                    return 3
+                except (ApiError, KeyError, TypeError, OSError, ValueError, RuntimeError):
+                    print("Could not write event output file", file=sys.stderr)
+                    return 4
+                print(json.dumps(output_receipt("report events", args.output, records_written, pagination, unused_errors), ensure_ascii=True))
+                return 0
             try:
                 pages = list(iter_event_pages(client, unused.code, variables, args.max_pages))
             except AuthenticationError as error:
@@ -129,18 +150,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "report events", scope, filters, "api_collection", data,
                 pagination=pagination, errors=errors,
             )
-            try:
-                if args.output:
-                    write_event_jsonl(args.output, envelope, data)
-            except OSError:
-                print("Could not write event output file", file=sys.stderr)
-                return 4
             print(json.dumps(envelope, ensure_ascii=True))
             return 0
         if args.report_command not in REPORT_KINDS:
             return 0
         try:
             unused, variables, scope, filters = report_request(args)
+            if args.output:
+                _validate_output_path(args.output)
         except ValueError as error:
             print(str(error), file=sys.stderr)
             return 2
@@ -162,19 +179,24 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         except (ApiError, KeyError, TypeError, OSError, ValueError):
             print("Warcraft Logs API response did not contain a public report", file=sys.stderr)
             return 4
-        print(
-            json.dumps(
-                make_envelope(
-                    "report " + args.report_command,
-                    scope,
-                    filters,
-                    "single_report",
-                    data,
-                    errors=payload.get("errors"),
-                ),
-                ensure_ascii=True,
-            )
+        envelope = make_envelope(
+            "report " + args.report_command,
+            scope,
+            filters,
+            "single_report",
+            data,
+            errors=payload.get("errors"),
         )
+        if args.output:
+            try:
+                _validate_output_path(args.output)
+                write_json_atomic(args.output, envelope)
+            except (OSError, TypeError, ValueError):
+                print("Could not write report output file", file=sys.stderr)
+                return 4
+            print(json.dumps(output_receipt("report " + args.report_command, args.output, 1, envelope["pagination"], payload.get("errors")), ensure_ascii=True))
+            return 0
+        print(json.dumps(envelope, ensure_ascii=True))
         return 0
     if args.command == "metadata":
         resolver = MetadataResolver(client, no_cache=args.no_cache)
