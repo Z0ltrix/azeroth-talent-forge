@@ -20,6 +20,14 @@ class FoundationImportTests(unittest.TestCase):
         self.assertTrue(hasattr(models, "Credentials"))
         self.assertTrue(hasattr(transport, "load_query"))
 
+    def test_metadata_and_reports_service_modules_exist(self):
+        from warcraftlogs_core import metadata, reports
+
+        self.assertTrue(hasattr(metadata, "MetadataResolver"))
+        self.assertTrue(hasattr(metadata, "normalize_name"))
+        self.assertTrue(hasattr(reports, "parse_report_reference"))
+        self.assertTrue(hasattr(reports, "iter_event_pages"))
+
 SCRIPT = Path(__file__).parents[1] / "scripts" / "warcraftlogs.py"
 SPEC = importlib.util.spec_from_file_location("warcraftlogs_cli", SCRIPT)
 warcraftlogs = importlib.util.module_from_spec(SPEC)
