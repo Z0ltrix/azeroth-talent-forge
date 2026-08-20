@@ -1,7 +1,7 @@
 query ReportEvents(
   $code: String!
   $allowUnlisted: Boolean!
-  $fightIDs: [Int!]
+  $fightIDs: [Int]
   $startTime: Float
   $endTime: Float
   $dataType: EventDataType

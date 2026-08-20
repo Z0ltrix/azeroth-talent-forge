@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from typing import Optional, Sequence
 from .credentials import resolve_credentials
-from .transport import WarcraftLogsClient
+from .transport import WarcraftLogsClient, sanitize_graphql_errors
 from .metadata import MetadataResolver, normalize_rate_limit
 from .models import *
 from .reports import *
@@ -13,6 +13,13 @@ from .reports import _validate_output_path
 from .discovery import *
 from .discovery import _identity_variables, _discovery_filters, _filters_dict, _global_filters, _expansion_variables
 from .parser import build_parser
+
+def _print_graphql_error_or_fallback(payload, fallback):
+    errors = sanitize_graphql_errors(payload.get("errors")) if isinstance(payload, Mapping) else []
+    if errors and errors[0].get("message"):
+        print("GraphQL error: " + str(errors[0]["message"]), file=sys.stderr)
+    else:
+        print(fallback, file=sys.stderr)
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = build_parser().parse_args(argv)
@@ -167,6 +174,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         except ValueError as error:
             print(str(error), file=sys.stderr)
             return 2
+        payload = {}
+        warnings = []
         try:
             payload = client.execute("report-" + args.report_command, variables)
             data = report_data(
@@ -175,6 +184,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 getattr(args, "absolute_start_time", None),
                 getattr(args, "absolute_end_time", None),
                 getattr(args, "time_mode", None) or "started",
+                warnings=warnings,
             )
         except AuthenticationError as error:
             print(str(error), file=sys.stderr)
@@ -183,7 +193,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             print(str(error), file=sys.stderr)
             return 4
         except (ApiError, KeyError, TypeError, OSError, ValueError):
-            print("Warcraft Logs API response did not contain a public report", file=sys.stderr)
+            _print_graphql_error_or_fallback(payload, "Warcraft Logs API response did not contain a public report")
             return 4
         envelope = make_envelope(
             "report " + args.report_command,
@@ -191,6 +201,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             filters,
             "single_report",
             data,
+            warnings=warnings,
             errors=payload.get("errors"),
         )
         if args.output:
@@ -252,7 +263,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             print(str(error), file=sys.stderr)
             return 2
         except (ApiError, KeyError, TypeError, OSError):
-            print("Warcraft Logs API response did not contain metadata", file=sys.stderr)
+            payload = getattr(resolver, "last_payload", None)
+            _print_graphql_error_or_fallback(payload, "Warcraft Logs API response did not contain metadata")
             return 4
         print(
             json.dumps(
@@ -269,18 +281,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
         )
         return 0
+    payload = {}
     try:
         payload = client.execute("rate-limit", {})
     except AuthenticationError as error:
         print(str(error), file=sys.stderr)
         return 3
     except (ApiError, OSError, ValueError):
-        print("Warcraft Logs API request failed", file=sys.stderr)
+        _print_graphql_error_or_fallback(payload, "Warcraft Logs API request failed")
         return 4
     try:
         data = normalize_rate_limit(payload)
     except (KeyError, TypeError):
-        print("Warcraft Logs API response did not contain rate limit data", file=sys.stderr)
+        _print_graphql_error_or_fallback(payload, "Warcraft Logs API response did not contain rate limit data")
         return 4
     print(
         json.dumps(

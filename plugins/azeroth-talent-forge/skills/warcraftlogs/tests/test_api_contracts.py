@@ -41,6 +41,8 @@ class QueryContractTests(unittest.TestCase):
 
     def test_events_query_uses_current_filter_contract(self):
         query = warcraftlogs.load_query("report-events")
+        self.assertIn("$fightIDs: [Int]", query)
+        self.assertNotIn("$fightIDs: [Int!]", query)
         self.assertIn("$abilityID: Float", query)
         self.assertIn("hostilityType", query)
         self.assertNotIn("hostility:", query)
@@ -49,6 +51,9 @@ class QueryContractTests(unittest.TestCase):
         for name in ("report-table", "report-graph"):
             with self.subTest(name=name):
                 query = warcraftlogs.load_query(name)
+                expected_type = "TableDataType" if name == "report-table" else "GraphDataType"
+                self.assertIn("$dataType: %s" % expected_type, query)
+                self.assertNotIn("$dataType: %s!" % expected_type, query)
                 for field in ("sourcePetType", "sourceSpec", "targetPetType", "targetSpec"):
                     self.assertNotIn(field, query)
 
@@ -56,18 +61,18 @@ class QueryContractTests(unittest.TestCase):
 class AgentAnalysisContractTests(unittest.TestCase):
     def test_select_fights_supports_started_overlap_and_completed_absolute_windows(self):
         fights = [
-            {"id": 1, "startTime": 86_340_000, "endTime": 86_399_000},
-            {"id": 2, "startTime": 86_399_000, "endTime": 86_501_000},
-            {"id": 3, "startTime": 86_500_000, "endTime": 86_560_000},
+            {"id": 1, "startTime": 100, "endTime": 200},
+            {"id": 2, "startTime": 150, "endTime": 250},
+            {"id": 3, "startTime": 300, "endTime": 400},
         ]
 
-        started = warcraftlogs.select_fights(fights, 0, 86_399_000, 86_500_000, "started")
-        overlap = warcraftlogs.select_fights(fights, 0, 86_399_000, 86_500_000, "overlap")
-        completed = warcraftlogs.select_fights(fights, 0, 86_399_000, 86_500_000, "completed")
+        started = warcraftlogs.select_fights(fights, 0, 200, 350, "started")
+        overlap = warcraftlogs.select_fights(fights, 0, 200, 350, "overlap")
+        completed = warcraftlogs.select_fights(fights, 0, 200, 350, "completed")
 
-        self.assertEqual([fight["id"] for fight in started], [2, 3])
-        self.assertEqual([fight["id"] for fight in overlap], [1, 2])
-        self.assertEqual([fight["id"] for fight in completed], [1])
+        self.assertEqual([fight["id"] for fight in started], [3])
+        self.assertEqual([fight["id"] for fight in overlap], [2, 3])
+        self.assertEqual([fight["id"] for fight in completed], [2])
 
     def test_select_fights_skips_invalid_timestamps_and_rejects_invalid_mode(self):
         fights = [
@@ -88,10 +93,26 @@ class AgentAnalysisContractTests(unittest.TestCase):
 
         fights = warcraftlogs.report_data(payload, "fights")
 
-        self.assertEqual(fights[0]["startTime"], 1_010_000)
-        self.assertEqual(fights[0]["endTime"], 1_070_000)
-        self.assertEqual(fights[1]["startTime"], 1_065_000)
-        self.assertEqual(fights[1]["endTime"], 1_085_000)
+        self.assertEqual(fights[0]["startTime"], 10_000)
+        self.assertEqual(fights[0]["endTime"], 70_000)
+        self.assertEqual(fights[0]["absoluteStartTime"], 1_010_000)
+        self.assertEqual(fights[0]["absoluteEndTime"], 1_070_000)
+        self.assertEqual(fights[1]["startTime"], 65_000)
+        self.assertEqual(fights[1]["endTime"], 85_000)
+        self.assertEqual(fights[1]["absoluteStartTime"], 1_065_000)
+        self.assertEqual(fights[1]["absoluteEndTime"], 1_085_000)
+
+    def test_report_data_warns_when_skipping_invalid_fight_timestamps(self):
+        payload = fixture("report-fights-rich.json")
+        payload["data"]["reportData"]["report"]["fights"].append(
+            {"id": 13, "startTime": None, "endTime": 5}
+        )
+        warnings = []
+
+        warcraftlogs.report_data(payload, "fights", warnings=warnings)
+
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("fight 13", warnings[0])
 
     def test_fight_time_derivation_requires_report_start_time(self):
         payload = fixture("report-fights-rich.json")

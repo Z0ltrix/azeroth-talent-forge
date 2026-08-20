@@ -25,7 +25,9 @@ sampled global ranking discovery, metadata lookup, and bounded combat-log analys
 
 Use this staged workflow for analysis: discover candidate reports, fetch rich
 fights, fetch details for selected fights, then perform local evaluation. A
-report match is not a run match.
+report match is not a run match. When the user asks for a performance
+comparison or an explanation of a run, read [Local run evaluation](references/evaluation.md)
+for the target-actor, cohort, metric, and provenance recipe.
 
 - For “today,” convert the user's timezone window to absolute epoch
   milliseconds and use `report fights --absolute-start-time ...
@@ -95,3 +97,6 @@ Read only the reference needed for the request:
   bounded event exports, tables, graphs, and rankings.
 - [Discovery and metadata](references/discovery.md): character/guild/global
   searches, supported filters, sampling, and ID lookup.
+- [Local run evaluation](references/evaluation.md): target-actor resolution,
+  comparable cohorts, local metrics, percentiles, missing data, and reporting
+  provenance.

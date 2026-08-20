@@ -212,6 +212,7 @@ class PackagingTests(unittest.TestCase):
         cli = (root / "references" / "cli.md").read_text(encoding="utf-8")
         discovery = (root / "references" / "discovery.md").read_text(encoding="utf-8")
         reports = (root / "references" / "reports.md").read_text(encoding="utf-8")
+        evaluation = (root / "references" / "evaluation.md").read_text(encoding="utf-8")
         scenarios = (root / "tests" / "skill-pressure-scenarios.md").read_text(encoding="utf-8")
         prompt = (root / "agents" / "openai.yaml").read_text(encoding="utf-8")
 
@@ -223,6 +224,9 @@ class PackagingTests(unittest.TestCase):
             self.assertIn(phrase, discovery + reports)
         for phrase in ("combatant", "--fight", "event-limit", "sampled"):
             self.assertIn(phrase, reports + discovery)
+        for phrase in ("target actor", "median", "quartile", "percentile", "derived locally", "missing data", "view mapping", "n < 5", "damagedone"):
+            self.assertIn(phrase, evaluation.lower())
+        self.assertIn("evaluation.md", skill)
         for phrase in ("stale events", "report-level-only", "whole-report", "exhaustive global"):
             self.assertIn(phrase, scenarios.lower())
         self.assertIn("local run evaluation", prompt.lower())
@@ -422,6 +426,32 @@ class TransportTests(unittest.TestCase):
         self.assertEqual(result["completeness"], "api_collection")
         self.assertTrue(result["partial"])
 
+    def test_rate_limit_command_preserves_errors_only_graphql_message(self):
+        output = io.StringIO()
+        errors = io.StringIO()
+        client = FixtureClient({"rate-limit": {"errors": [{"message": "rate limit unavailable", "extensions": {"secret": "discard"}}]}})
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(warcraftlogs, "WarcraftLogsClient", return_value=client), patch.dict(
+                os.environ, {}, clear=True
+            ), redirect_stdout(output), redirect_stderr(errors):
+                exit_code = warcraftlogs.main(
+                    [
+                        "--client-id",
+                        "client-id",
+                        "--client-secret",
+                        "client-secret",
+                        "--env-file",
+                        str(Path(directory) / "missing.env"),
+                        "rate-limit",
+                    ]
+                )
+
+        self.assertEqual(exit_code, 4)
+        self.assertEqual(output.getvalue(), "")
+        self.assertIn("GraphQL error: rate limit unavailable", errors.getvalue())
+        self.assertNotIn("did not contain rate limit data", errors.getvalue())
+        self.assertNotIn("discard", errors.getvalue())
+
     def test_rate_limit_command_returns_configuration_error_without_credentials(self):
         output = io.StringIO()
         errors = io.StringIO()
@@ -530,7 +560,7 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(result["name"], "Area 52")
         self.assertEqual(result["normalizedName"], "area-52")
         self.assertEqual(result["region"], {"id": 1, "name": "US", "slug": "us"})
-        self.assertEqual(result["subregion"], {"id": 1, "name": "North America", "slug": "na"})
+        self.assertEqual(result["subregion"], {"id": 1, "name": "North America"})
         self.assertEqual(provenance["status"], "miss")
 
     def test_metadata_queries_select_pagination_data_and_realm_object_fields(self):
@@ -619,6 +649,33 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(result["completeness"], "api_collection")
         self.assertEqual(result["data"], [{"id": 2, "name": "Paladin", "slug": "paladin"}])
         self.assertEqual(result["cache"]["status"], "miss")
+
+    def test_metadata_command_preserves_errors_only_graphql_message(self):
+        output = io.StringIO()
+        errors = io.StringIO()
+        client = FixtureClient({"metadata-game": {"errors": [{"message": "metadata unavailable", "extensions": {"secret": "discard"}}]}})
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(warcraftlogs, "WarcraftLogsClient", return_value=client), patch.dict(
+                os.environ, {"LOCALAPPDATA": directory}, clear=True
+            ), redirect_stdout(output), redirect_stderr(errors):
+                exit_code = warcraftlogs.main(
+                    [
+                        "--client-id",
+                        "client-id",
+                        "--client-secret",
+                        "client-secret",
+                        "--env-file",
+                        str(Path(directory) / "missing.env"),
+                        "metadata",
+                        "classes",
+                    ]
+                )
+
+        self.assertEqual(exit_code, 4)
+        self.assertEqual(output.getvalue(), "")
+        self.assertIn("GraphQL error: metadata unavailable", errors.getvalue())
+        self.assertNotIn("did not contain metadata", errors.getvalue())
+        self.assertNotIn("discard", errors.getvalue())
 
 
 class ReportReferenceTests(unittest.TestCase):
@@ -722,6 +779,18 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(result["scope"], {"report_code": "AbCd1234"})
         self.assertEqual(result["completeness"], "single_report")
         self.assertEqual(result["data"]["zone"], {"id": 38, "name": "Nerub-ar Palace"})
+
+    def test_errors_only_report_response_preserves_sanitized_graphql_message(self):
+        exit_code, output, errors, unused = self.run_report(
+            {"report-table": {"errors": [{"message": "Cannot query field dataType", "path": ["reportData", "report", "table"], "extensions": {"code": "GRAPHQL_VALIDATION", "secret": "discard"}}]}},
+            "table", "AbCd1234", "--data-type", "DamageDone"
+        )
+
+        self.assertEqual(exit_code, 4)
+        self.assertEqual(output, "")
+        self.assertIn("Cannot query field dataType", errors)
+        self.assertNotIn("did not contain a public report", errors)
+        self.assertNotIn("secret", errors)
 
     def test_report_wide_commands_drop_compatibility_fight_scope(self):
         cases = (
@@ -1241,10 +1310,12 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(explicit_client.variables, [{"expansionId": 11}])
 
     def test_global_results_are_always_sampled(self):
-        envelope = warcraftlogs.make_global_result([], sample_size=0, filters={"encounter": 123})
+        envelope = warcraftlogs.make_global_result([], sample_size=0, filters={"encounter": 123}, metric="playerspeed")
         self.assertEqual(envelope["completeness"], "sampled")
         self.assertIn("ranking_basis", envelope["scope"])
         self.assertEqual(envelope["scope"]["ranking_basis"], "encounter_rankings")
+        self.assertEqual(envelope["scope"]["metric"], "playerspeed")
+        self.assertEqual(envelope["ranking_metric"], "playerspeed")
         self.assertEqual(envelope["requested_top"], 0)
         self.assertEqual(envelope["source_rows"], 0)
         self.assertEqual(envelope["unique_candidates"], 0)
@@ -1348,6 +1419,45 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(len(client.calls), 2)
         self.assertEqual(result["unique_candidates"], 2)
         self.assertEqual([item["report_code"] for item in result["data"]], ["AbCd1234", "EfGh5678"])
+
+    def test_global_fetches_later_pages_after_filtered_first_page(self):
+        class FilteredPages:
+            def __init__(self):
+                self.calls = []
+                self.pages = [
+                    {"data": {"worldData": {"encounter": {"fightRankings": json.dumps({
+                        "rankings": [{"reportID": "Excluded001", "fightID": 1, "class": "Mage", "role": "dps"}],
+                        "page": 1, "hasMorePages": True,
+                    })}}}},
+                    {"data": {"worldData": {"encounter": {"fightRankings": json.dumps({
+                        "rankings": [{"reportID": "Allowed001", "fightID": 2, "class": "Paladin", "role": "tank"}],
+                        "page": 2, "hasMorePages": False,
+                    })}}}},
+                ]
+
+            def execute(self, query_name, variables):
+                self.calls.append((query_name, dict(variables)))
+                if query_name == "encounter-rankings":
+                    return self.pages.pop(0)
+                if query_name == "report-fights":
+                    return {"data": {"reportData": {"report": {
+                        "visibility": "public",
+                        "archiveStatus": {"isAccessible": True},
+                        "fights": [{"id": 2, "gameZone": {"id": 2335}, "friendlyPlayers": [1]}],
+                    }}}}
+                if query_name == "report-master-data":
+                    return fixture("report-master-data.json")
+                raise AssertionError(query_name)
+
+        client = FilteredPages()
+        result = warcraftlogs.discover_global(
+            client,
+            warcraftlogs.DiscoveryFilters(encounter=2902, zone=2335, class_name="Paladin", role="tank"),
+            top=1, page=1, max_pages=2,
+        )
+
+        self.assertEqual([item["report_code"] for item in result["data"]], ["Allowed001"])
+        self.assertEqual(len([call for call in client.calls if call[0] == "encounter-rankings"]), 2)
 
     def test_global_top_is_local_sample_bound_not_raid_size_filter(self):
         class RankingClient:
@@ -1559,9 +1669,9 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(result["source_rows"], 3)
         self.assertEqual(result["unique_candidates"], 2)
         self.assertEqual(result["hydrated_candidates"], 1)
-        self.assertEqual(result["returned_candidates"], 0)
-        self.assertEqual(result["data"], [])
-        self.assertGreaterEqual(result["exclusion_reasons"].get("actor_identity", 0), 1)
+        self.assertEqual(result["returned_candidates"], 1)
+        self.assertEqual(result["data"][0]["matched_actor"]["name"], "Tankadin")
+        self.assertEqual(result["data"][0]["matched_actor"]["match_source"], "unique_group_match")
 
     def test_global_cli_bounds_top_and_page_before_execute(self):
         for option, value in (("--top", "0"), ("--top", "101"), ("--page", "0")):

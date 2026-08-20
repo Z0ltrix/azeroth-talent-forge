@@ -238,7 +238,7 @@ def report_request(args) -> tuple:
     return reference, variables, scope, filters
 
 
-def select_fights(fights, report_start_ms, start_ms=None, end_ms=None, mode="started") -> list:
+def select_fights(fights, report_start_ms, start_ms=None, end_ms=None, mode="started", warnings=None) -> list:
     if mode not in ("started", "overlap", "completed"):
         raise ValueError("Invalid fight time mode")
     if isinstance(report_start_ms, bool) or not isinstance(report_start_ms, (int, float)):
@@ -257,21 +257,23 @@ def select_fights(fights, report_start_ms, start_ms=None, end_ms=None, mode="sta
             isinstance(start, bool) or not isinstance(start, (int, float)) or
             isinstance(end, bool) or not isinstance(end, (int, float)) or end < start
         ):
+            if warnings is not None:
+                warnings.append("Skipped fight %s because its relative timestamps are invalid" % fight.get("id", "unknown"))
             continue
         absolute_start = report_start_ms + start
         absolute_end = report_start_ms + end
         if mode == "started":
-            matches = (start_ms is None or absolute_start >= start_ms) and (end_ms is None or absolute_start <= end_ms)
+            matches = (start_ms is None or absolute_start >= start_ms) and (end_ms is None or absolute_start < end_ms)
         elif mode == "overlap":
-            matches = (start_ms is None or absolute_end >= start_ms) and (end_ms is None or absolute_start < end_ms)
+            matches = (start_ms is None or absolute_end > start_ms) and (end_ms is None or absolute_start < end_ms)
         else:
-            matches = (start_ms is None or absolute_end >= start_ms) and (end_ms is None or absolute_end <= end_ms)
+            matches = (start_ms is None or absolute_end > start_ms) and (end_ms is None or absolute_end < end_ms)
         if matches:
-            selected.append(dict(fight, startTime=absolute_start, endTime=absolute_end))
+            selected.append(dict(fight, absoluteStartTime=absolute_start, absoluteEndTime=absolute_end))
     return selected
 
 
-def report_data(payload: Mapping[str, object], kind: str, absolute_start=None, absolute_end=None, time_mode="started"):
+def report_data(payload: Mapping[str, object], kind: str, absolute_start=None, absolute_end=None, time_mode="started", warnings=None):
     report = payload["data"]["reportData"]["report"]
     if not isinstance(report, Mapping):
         raise TypeError("Report was not an object")
@@ -287,7 +289,7 @@ def report_data(payload: Mapping[str, object], kind: str, absolute_start=None, a
         report_start = report.get("startTime")
         if isinstance(report_start, bool) or not isinstance(report_start, (int, float)):
             raise ValueError("Report startTime is required for fight time derivation")
-        return select_fights(value, report_start, absolute_start, absolute_end, time_mode)
+        return select_fights(value, report_start, absolute_start, absolute_end, time_mode, warnings=warnings)
     return value
 
 

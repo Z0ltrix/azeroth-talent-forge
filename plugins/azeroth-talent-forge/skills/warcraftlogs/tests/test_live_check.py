@@ -93,6 +93,7 @@ class LiveCheckSafetyTests(unittest.TestCase):
         self.assertEqual(events["limit"], 100)
         self.assertNotIn("startTime", events)
         self.assertNotIn("endTime", events)
+        self.assertEqual(client.variables["report-fights"]["fightIDs"], [42])
 
     def test_validator_rejects_missing_argument_used_by_smoke_call(self):
         schema = complete_schema_fixture()
@@ -170,9 +171,9 @@ def complete_schema_fixture():
     schema = live_check.required_schema_fixture()
     schema["contracts"]["playerDetails"]["translate"] = "Boolean"
     schema["contracts"]["playerDetails"]["fightIDs"] = "[Int]"
-    schema["contracts"]["events"]["fightIDs"] = "[Int!]"
-    schema["contracts"]["table"].update({"fightIDs": "[Int]", "dataType": "TableDataType!"})
-    schema["contracts"]["graph"].update({"fightIDs": "[Int]", "dataType": "GraphDataType!"})
+    schema["contracts"]["events"]["fightIDs"] = "[Int]"
+    schema["contracts"]["table"].update({"fightIDs": "[Int]", "dataType": "TableDataType"})
+    schema["contracts"]["graph"].update({"fightIDs": "[Int]", "dataType": "GraphDataType"})
     return schema
 
 

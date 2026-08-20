@@ -112,6 +112,7 @@ class MetadataResolver:
         self.no_cache = no_cache
         self.now = now or time.time
         self.errors = []
+        self.last_payload = None
 
     def _cache_path(self, query_name: str, variables: Mapping[str, object]) -> Path:
         encoded = json.dumps(dict(variables), sort_keys=True, separators=(",", ":")).encode("utf-8")
@@ -124,6 +125,7 @@ class MetadataResolver:
                 cached = json.loads(cache_path.read_text(encoding="utf-8"))
                 if isinstance(cached, Mapping) and cached["expires_at"] > self.now() and isinstance(cached["payload"], Mapping):
                     payload = cached["payload"]
+                    self.last_payload = payload
                     self.errors = payload.get("errors", [])
                     return payload, {"status": "hit"}
             except (KeyError, TypeError, ValueError, OSError):
@@ -131,6 +133,7 @@ class MetadataResolver:
         payload = self.client.execute(query_name, variables)
         if not isinstance(payload, Mapping):
             raise TypeError("Metadata response was not an object")
+        self.last_payload = payload
         self.errors = payload.get("errors", [])
         if not self.no_cache:
             self.cache.mkdir(parents=True, exist_ok=True)

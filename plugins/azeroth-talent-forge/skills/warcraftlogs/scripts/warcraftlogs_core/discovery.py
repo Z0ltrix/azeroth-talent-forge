@@ -429,6 +429,11 @@ def _resolve_ranked_actor(candidate: Mapping[str, object], fights, actors, filte
         return ranked[0], "ranked_group_member"
     if any("ranked" in actor for actor in actors):
         return None, "missing" if not ranked else "ambiguous"
+    unique = [actor for actor in actors if satisfies(actor)]
+    if len(unique) == 1:
+        return unique[0], "unique_group_match"
+    if len(unique) > 1:
+        return None, "ambiguous"
     return None, "group_only"
 
 
@@ -469,15 +474,18 @@ def _invalid_ranking_key(row: Mapping[str, object]):
     return ("row", json.dumps(dict(row), sort_keys=True, ensure_ascii=True))
 
 
-def make_global_result(rows, sample_size, filters, ranking_basis="encounter_rankings", **metadata) -> dict:
+def make_global_result(rows, sample_size, filters, ranking_basis="encounter_rankings", metric=None, **metadata) -> dict:
     if not isinstance(sample_size, int) or isinstance(sample_size, bool) or sample_size < 0:
         raise ValueError("Global top must be a non-negative integer")
     candidates = _dedupe_global_candidates(rows)
     data = candidates[:sample_size]
     truncated = bool(metadata.get("truncated", len(candidates) > sample_size))
+    scope = {"ranking_basis": ranking_basis}
+    if metric is not None:
+        scope["metric"] = metric
     result = make_envelope(
         "find global",
-        {"ranking_basis": ranking_basis},
+        scope,
         filters,
         "sampled",
         data,
@@ -498,6 +506,8 @@ def make_global_result(rows, sample_size, filters, ranking_basis="encounter_rank
         "pages_fetched": int(metadata.get("pages_fetched", 1)),
         "truncated": truncated,
     })
+    if metric is not None:
+        result["ranking_metric"] = metric
     if metadata.get("exclusion_reasons"):
         result["exclusion_reasons"] = dict(metadata["exclusion_reasons"])
     if metadata.get("errors"):
@@ -523,7 +533,7 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
         try:
             world = _global_world(client, expansion_id)
         except Exception as error:
-            return make_global_result([], top, _filters_dict(filters), errors=[{"message": str(error)}])
+            return make_global_result([], top, _filters_dict(filters), metric=metric, errors=[{"message": str(error)}])
         zone_id = filters.zone if filters.zone is not None else filters.instance
         encounters = [
             encounter["id"]
@@ -553,6 +563,7 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
             returned_candidates=min(len(_dedupe_global_candidates(rows)), top),
             pages_fetched=sum(part["pages_fetched"] for part in parts),
             truncated=any(part["truncated"] for part in parts),
+            metric=metric,
             errors=child_errors,
         )
     zone_id = filters.zone or filters.instance
@@ -564,7 +575,7 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
                 if any(item.get("id") == filters.encounter for item in zone.get("encounters", []))
             )
         except Exception as error:
-            return make_global_result([], top, _filters_dict(filters), errors=[{"message": str(error)}])
+            return make_global_result([], top, _filters_dict(filters), metric=metric, errors=[{"message": str(error)}])
     variables = {
         "encounterID": filters.encounter,
         "zoneID": zone_id,
@@ -585,7 +596,7 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
     hydrated_count = 0
     exclusion_reasons = {}
     errors = []
-    while pages_fetched < max_pages and len(_dedupe_global_candidates(rows)) < top:
+    while pages_fetched < max_pages and (pages_fetched == 0 or has_more):
         variables["page"] = current_page
         try:
             payload = client.execute("encounter-rankings", variables)
@@ -619,10 +630,11 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
                 exclusion_reasons[reason] = exclusion_reasons.get(reason, 0) + 1
             processed_exclusions += 1
             continue
-        if missing:
+        actor_filters_requested = any(getattr(filters, field) is not None for field in ("class_name", "spec_name", "role"))
+        if missing or (actor_filters_requested and _ranking_actor(candidate) is None):
             hydrated_count += 1
             hydration_fields = set(missing)
-            if any(getattr(filters, field) is not None for field in ("class_name", "spec_name", "role")):
+            if actor_filters_requested:
                 hydration_fields.update(("class_name", "spec_name", "role"))
             try:
                 fights, actors = hydrate_discovery_report(
@@ -643,7 +655,7 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
             hydrated_filters = _filters_without(filters, set(_DISCOVERY_FILTER_FIELDS) - hydration_fields)
             report = dict(candidate)
             matched_actor, actor_source = _resolve_ranked_actor(candidate, fights, actors, filters)
-            if any(getattr(filters, field) is not None for field in ("class_name", "spec_name", "role")):
+            if actor_filters_requested:
                 if matched_actor is None:
                     exclusion_reasons["actor_identity"] = exclusion_reasons.get("actor_identity", 0) + 1
                     processed_exclusions += 1
@@ -681,6 +693,7 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
         truncated=truncated,
         exclusion_reasons=exclusion_reasons,
         errors=errors,
+        metric=metric,
     )
 
 

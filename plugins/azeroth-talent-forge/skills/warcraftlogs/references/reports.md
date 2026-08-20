@@ -42,6 +42,11 @@ python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py 
 python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report player-details $report --fight $fight --output "run-$fight-player-details.json"
 ```
 
+Fight results preserve Warcraft Logs' report-relative `startTime` and
+`endTime` and add `absoluteStartTime` and `absoluteEndTime` for local calendar
+and duration analysis. Invalid fight timestamps are excluded with a warning;
+inspect `warnings` before evaluating the run set.
+
 Player details request combatant information by default. Preserve gear, stats,
 spec, talent-tree, and talent payloads; do not flatten them before local
 evaluation.
