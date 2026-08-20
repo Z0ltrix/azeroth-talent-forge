@@ -63,3 +63,14 @@ envelope and do not claim coverage beyond its bounded time/fight scope.
 Use `--no-cache` when fresh metadata is required. Prefer fixture-backed or
 bounded commands during development and keep the API query documents under
 `scripts/graphql/` maintainable and reviewable.
+
+## Detailed reference
+
+Read only the reference needed for the request:
+
+- [CLI and output contract](references/cli.md): credential setup, shared flags,
+  envelopes, exit codes, cache, and JSONL.
+- [Reports and combat events](references/reports.md): report command selection,
+  bounded event exports, tables, graphs, and rankings.
+- [Discovery and metadata](references/discovery.md): character/guild/global
+  searches, supported filters, sampling, and ID lookup.
