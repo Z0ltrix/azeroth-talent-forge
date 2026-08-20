@@ -35,7 +35,7 @@ class FakeOpener:
         self.responses = list(responses)
         self.requests = []
 
-    def __call__(self, request):
+    def __call__(self, request, **kwargs):
         self.requests.append(request)
         response = self.responses.pop(0)
         if isinstance(response, BaseException):
@@ -193,6 +193,41 @@ class TransportTests(unittest.TestCase):
     def test_query_loader_rejects_path_traversal(self):
         with self.assertRaisesRegex(ValueError, "query name"):
             warcraftlogs.load_query("../secret")
+
+    def test_default_opener_receives_bounded_timeout(self):
+        opener = patch.object(
+            warcraftlogs.urllib.request,
+            "urlopen",
+            return_value=FakeResponse({"ok": True}),
+        )
+        with opener as mocked_urlopen:
+            client = warcraftlogs.WarcraftLogsClient(
+                warcraftlogs.Credentials("client-id", "client-secret")
+            )
+
+            self.assertEqual(client._open_json(object()), {"ok": True})
+
+        mocked_urlopen.assert_called_once_with(
+            unittest.mock.ANY, timeout=30
+        )
+
+    def test_injected_opener_keeps_single_argument_contract(self):
+        opener = FakeOpener([{"ok": True}])
+        client = warcraftlogs.WarcraftLogsClient(
+            warcraftlogs.Credentials("client-id", "client-secret"), opener=opener
+        )
+
+        self.assertEqual(client._open_json(object()), {"ok": True})
+        self.assertEqual(len(opener.requests), 1)
+
+    def test_transport_timeout_is_sanitized_to_api_error(self):
+        client = warcraftlogs.WarcraftLogsClient(
+            warcraftlogs.Credentials("client-id", "client-secret"),
+            opener=FakeOpener([TimeoutError("timed out")]),
+        )
+
+        with self.assertRaisesRegex(warcraftlogs.ApiError, "Response read failed"):
+            client._open_json(object())
 
     def test_rate_limit_fixture_normalizes_output(self):
         payload = json.loads((Path(__file__).parent / "fixtures" / "rate-limit.json").read_text())

@@ -34,6 +34,7 @@ REPORT_HOSTS = frozenset((
     "tw.classic.warcraftlogs.com",
 ))
 METADATA_TTL_SECONDS = 24 * 60 * 60
+HTTP_TIMEOUT_SECONDS = 30
 REPORT_KINDS = ("summary", "fights", "master-data", "player-details", "table", "graph", "rankings")
 GLOBAL_TOP_MIN = 1
 GLOBAL_TOP_MAX = 100
@@ -395,7 +396,11 @@ def sanitize_graphql_errors(errors) -> List[dict]:
 class WarcraftLogsClient:
     def __init__(self, credentials: Credentials, opener=None, sleep=None):
         self.credentials = credentials
-        self.opener = opener or urllib.request.urlopen
+        self.opener = (
+            opener
+            if opener is not None
+            else lambda request: urllib.request.urlopen(request, timeout=HTTP_TIMEOUT_SECONDS)
+        )
         self.sleep = sleep or time.sleep
         self._token = None
         self._token_expires_at = 0.0
