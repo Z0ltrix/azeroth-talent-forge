@@ -114,6 +114,28 @@ class LiveCheckSafetyTests(unittest.TestCase):
         self.assertIn("Report.playerDetails.fightIDs", output.getvalue())
         self.assertEqual([call[0] for call in client.calls], ["__introspection__"])
 
+    def test_validator_requires_translate_for_fights_and_player_details(self):
+        for field in ("fights", "playerDetails"):
+            with self.subTest(field=field):
+                schema = complete_schema_fixture()
+                del schema["contracts"][field]["translate"]
+                client = FakeClient(schema)
+                output = io.StringIO()
+                environment = {
+                    "WARCRAFTLOGS_LIVE_CHECK": "1",
+                    "WARCRAFTLOGS_CLIENT_ID": "client-id",
+                    "WARCRAFTLOGS_CLIENT_SECRET": "client-secret",
+                    "WARCRAFTLOGS_TEST_REPORT": "Public001",
+                    "WARCRAFTLOGS_TEST_FIGHT": "42",
+                }
+
+                with contextlib.redirect_stdout(output):
+                    status = live_check.run(environment, client=client)
+
+                self.assertNotEqual(status, 0)
+                self.assertIn("Report.%s.translate" % field, output.getvalue())
+                self.assertEqual([call[0] for call in client.calls], ["__introspection__"])
+
     def test_top_level_graphql_errors_are_sanitized(self):
         secret = "graphql-secret-value"
         client = FakeClient(complete_schema_fixture(), graphql_error=(
@@ -146,6 +168,7 @@ class LiveCheckSafetyTests(unittest.TestCase):
 
 def complete_schema_fixture():
     schema = live_check.required_schema_fixture()
+    schema["contracts"]["playerDetails"]["translate"] = "Boolean"
     schema["contracts"]["playerDetails"]["fightIDs"] = "[Int]"
     schema["contracts"]["events"]["fightIDs"] = "[Int!]"
     schema["contracts"]["table"].update({"fightIDs": "[Int]", "dataType": "TableDataType!"})

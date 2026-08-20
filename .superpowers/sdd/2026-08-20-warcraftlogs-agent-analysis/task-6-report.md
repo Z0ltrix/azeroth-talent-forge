@@ -60,3 +60,15 @@ Addressed the two scoped review findings with TDD.
   while excluding the secret, extensions, and payload details.
 - Existing payload-style `ApiError` sanitization test remains covered without
   network access.
+
+## Fix round 2
+
+Addressed the remaining `translate` contract finding with TDD.
+
+- RED against parent: fake introspection subtests removing either
+  `Report.fights.translate` or `Report.playerDetails.translate` still returned
+  success.
+- Added `translate: Boolean` to the exact expected schema argument map for both
+  fields and aligned the local fake schema fixture. Smoke behavior and query
+  documents were unchanged.
+- Focused live-check suite after GREEN: 7 tests passed.

@@ -51,7 +51,7 @@ def required_schema_fixture():
     """Small fake-client schema used by local tests; live responses use __type."""
     return {"contracts": {
         "fights": {"fightIDs": "[Int]", "translate": "Boolean"},
-        "playerDetails": {"fightIDs": "[Int]", "includeCombatantInfo": "Boolean"},
+        "playerDetails": {"fightIDs": "[Int]", "includeCombatantInfo": "Boolean", "translate": "Boolean"},
         "events": {"fightIDs": "[Int!]", "abilityID": "Float", "hostilityType": "HostilityType", "limit": "Int"},
         "table": {"fightIDs": "[Int]", "dataType": "TableDataType!", "viewOptions": "Int"},
         "graph": {"fightIDs": "[Int]", "dataType": "GraphDataType!", "viewOptions": "Int"},
@@ -97,8 +97,8 @@ def validate_schema(client):
         payload = client.execute("__introspection__", {})
     fields = _schema_fields(payload)
     expected = {
-        "fights": {"fightIDs": "[Int]"},
-        "playerDetails": {"fightIDs": "[Int]", "includeCombatantInfo": "Boolean"},
+        "fights": {"fightIDs": "[Int]", "translate": "Boolean"},
+        "playerDetails": {"fightIDs": "[Int]", "includeCombatantInfo": "Boolean", "translate": "Boolean"},
         "events": {"fightIDs": "[Int!]", "abilityID": "Float", "hostilityType": "HostilityType", "limit": "Int"},
         "table": {"fightIDs": "[Int]", "dataType": "TableDataType!"},
         "graph": {"fightIDs": "[Int]", "dataType": "GraphDataType!"},
