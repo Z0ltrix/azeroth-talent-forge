@@ -10,6 +10,16 @@ from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
+
+class FoundationImportTests(unittest.TestCase):
+    def test_foundation_modules_and_cli_exist(self):
+        from warcraftlogs_core import cli, credentials, models, transport
+
+        self.assertTrue(hasattr(cli, "main"))
+        self.assertTrue(hasattr(credentials, "resolve_credentials"))
+        self.assertTrue(hasattr(models, "Credentials"))
+        self.assertTrue(hasattr(transport, "load_query"))
+
 SCRIPT = Path(__file__).parents[1] / "scripts" / "warcraftlogs.py"
 SPEC = importlib.util.spec_from_file_location("warcraftlogs_cli", SCRIPT)
 warcraftlogs = importlib.util.module_from_spec(SPEC)
