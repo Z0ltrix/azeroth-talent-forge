@@ -1,11 +1,11 @@
-query EncounterRankings($encounterID: Int!, $zoneID: Int!, $difficulty: Int, $partition: Int, $page: Int, $serverRegion: String, $serverSlug: String, $metric: FightRankingMetricType, $leaderboard: LeaderboardRank, $bracket: Int, $filter: String, $size: Int, $hardModeLevel: Int, $includeOtherPlayers: Boolean) {
+query EncounterRankings($encounterID: Int!, $zoneID: Int!, $difficulty: Int, $partition: Int, $page: Int, $serverRegion: String, $serverSlug: String, $metric: FightRankingMetricType, $bracket: Int, $filter: String, $size: Int, $includeOtherPlayers: Boolean) {
   worldData {
     zone(id: $zoneID) {
       id
       encounters { id name }
     }
     encounter(id: $encounterID) {
-      fightRankings(bracket: $bracket, difficulty: $difficulty, filter: $filter, page: $page, partition: $partition, serverRegion: $serverRegion, serverSlug: $serverSlug, size: $size, leaderboard: $leaderboard, hardModeLevel: $hardModeLevel, metric: $metric, includeOtherPlayers: $includeOtherPlayers)
+      fightRankings(bracket: $bracket, difficulty: $difficulty, filter: $filter, page: $page, partition: $partition, serverRegion: $serverRegion, serverSlug: $serverSlug, size: $size, metric: $metric, includeOtherPlayers: $includeOtherPlayers)
     }
   }
 }

@@ -1240,6 +1240,8 @@ def make_global_result(rows, sample_size, filters, ranking_basis="encounter_rank
 def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_pages: int = 1,
                     metric=None, leaderboard=None, server_region=None, server_slug=None,
                     expansion_id=None) -> dict:
+    if leaderboard is not None:
+        raise ValueError("Global leaderboard filtering is not supported by the public Warcraft Logs API")
     if not isinstance(top, int) or isinstance(top, bool) or not GLOBAL_TOP_MIN <= top <= GLOBAL_TOP_MAX:
         raise ValueError("Global top must be between 1 and 100")
     if (
@@ -1691,6 +1693,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     raise ValueError("Global top must be between 1 and 100")
                 if args.page < 1 or args.max_pages < 1 or args.max_pages > GLOBAL_MAX_PAGES:
                     raise ValueError("Global page and max pages must be between 1 and 5")
+                if args.leaderboard is not None:
+                    raise ValueError("Global leaderboard filtering is not supported by the public Warcraft Logs API")
                 filters = _global_filters(args, client)
                 result = discover_global(
                     client, filters, args.top, args.page, args.max_pages,

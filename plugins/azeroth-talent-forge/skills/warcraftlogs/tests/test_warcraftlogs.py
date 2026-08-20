@@ -1087,14 +1087,44 @@ class DiscoveryTests(unittest.TestCase):
 
     def test_global_rankings_query_exposes_documented_encounter_arguments(self):
         query = warcraftlogs.load_query("encounter-rankings")
-        for value in ("$encounterID", "$zoneID", "$difficulty", "$partition", "$page", "$serverRegion", "$serverSlug", "$metric", "$leaderboard", "fightRankings"):
+        for value in ("$encounterID", "$zoneID", "$difficulty", "$partition", "$page", "$serverRegion", "$serverSlug", "$metric", "fightRankings"):
             self.assertIn(value, query)
+        self.assertNotIn("$leaderboard", query)
+        self.assertNotIn("$hardModeLevel", query)
+        self.assertNotIn("leaderboard:", query)
+        self.assertNotIn("hardModeLevel:", query)
         self.assertIn("zone(id: $zoneID)", query)
         self.assertNotIn("zoneID: $zoneID", query)
         self.assertNotIn("className: $className", query)
         self.assertNotIn("specName: $specName", query)
         self.assertNotIn("role: $role", query)
         self.assertNotIn("characterRankings", query)
+
+    def test_global_leaderboard_is_rejected_before_api_call(self):
+        client = FixtureClient({})
+        with self.assertRaisesRegex(ValueError, "leaderboard.*not supported"):
+            warcraftlogs.discover_global(
+                client,
+                warcraftlogs.DiscoveryFilters(encounter=2902, zone=1300),
+                top=2,
+                page=1,
+                leaderboard="all",
+            )
+        self.assertEqual(client.calls, [])
+
+    def test_global_cli_rejects_leaderboard_before_metadata_call(self):
+        client = FixtureClient({})
+        with tempfile.TemporaryDirectory() as directory, patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ), redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()) as errors:
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret",
+                "--env-file", str(Path(directory) / "missing.env"),
+                "find", "global", "--encounter", "2902", "--leaderboard", "all",
+            ])
+        self.assertEqual(exit_code, 2)
+        self.assertIn("leaderboard", errors.getvalue().lower())
+        self.assertEqual(client.calls, [])
 
     def test_global_error_only_ranking_is_sampled_with_sanitized_errors(self):
         client = FixtureClient({"encounter-rankings": {"errors": [{"message": "ranking unavailable", "path": ["worldData"], "extensions": {"code": "DOWN"}}]}})

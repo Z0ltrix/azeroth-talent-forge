@@ -41,9 +41,11 @@ python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py 
   script rejects `--season` and `--partition` for these two commands.
 - Cross-report discovery: `find global` requires an instance/zone or encounter
   and supports the ranking filters exposed by the CLI, including class/spec,
-  role, partition, difficulty, key, affixes, kill/wipe, time, metric, and
-  leaderboard. It is ranking-based and always `completeness: "sampled"`, never
-  an exhaustive public-report search. Keep `--top` and `--max-pages` bounded.
+  role, partition, difficulty, key, affixes, kill/wipe, time, and metric. The
+  public endpoint does not expose a safe leaderboard filter, so the CLI rejects
+  `--leaderboard` before making an API call. It is ranking-based and always
+  `completeness: "sampled"`, never an exhaustive public-report search. Keep
+  `--top` and `--max-pages` bounded.
 - Reference metadata: `metadata regions`, `realms`, `zones`, `encounters`,
   `seasons`, `classes`, `specs`, `affixes`, and `abilities` list normalized API
   names and IDs (with `realms` narrowed by region/name). Use these collections
