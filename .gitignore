@@ -9,3 +9,6 @@ docs/superpowers/
 # Python runtime artifacts
 __pycache__/
 *.pyc
+
+# Temporary Warcraft Logs exports
+tmp/

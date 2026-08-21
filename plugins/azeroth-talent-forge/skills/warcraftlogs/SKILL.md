@@ -7,7 +7,8 @@ description: Use when a Warcraft Logs URL or report code needs public report ins
 
 Use the bundled `scripts/warcraftlogs.py` orchestrator for public Warcraft Logs v2
 GraphQL data. This skill covers report URLs/codes, character and guild searches,
-sampled global ranking discovery, metadata lookup, and bounded combat-log analysis.
+sampled global ranking discovery, metadata lookup, targeted player/run details,
+and bounded combat-log analysis.
 
 ## Boundaries
 
@@ -23,21 +24,37 @@ sampled global ranking discovery, metadata lookup, and bounded combat-log analys
 
 ## Route requests
 
-Use this staged workflow for analysis: discover candidate reports, fetch rich
-fights, fetch details for selected fights, then perform local evaluation. A
-report match is not a run match. When the user asks for a performance
-comparison or an explanation of a run, read [Local run evaluation](references/evaluation.md)
-for the target-actor, cohort, metric, and provenance recipe.
+Use this staged workflow for analysis: discover compact report candidates, select
+the report IDs needed, fetch one report's fights, filter to the target player,
+then fetch details only for selected fight IDs. A report match is not a run
+match. When the user asks for a performance comparison or an explanation of a
+run, read [Local run evaluation](references/evaluation.md) for the target-actor,
+cohort, metric, and provenance recipe.
+
+Keep report-wide context separate from fight-specific details; only hydrate the
+fight-specific views needed for the selected run.
+
+Typical character workflow:
+
+```powershell
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py find character --name Ratelka --server Dun-Morogh --region EU --start-time $start --end-time $end --latest 1
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report fights REPORTCODE --player Ratelka
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report details REPORTCODE --fight FIGHTID --player Ratelka
+```
 
 - For “today,” convert the user's timezone window to absolute epoch
   milliseconds and use `report fights --absolute-start-time ...
   --absolute-end-time ... --time-mode started`. Preserve the selected fight
   IDs and the chosen time mode.
-- For each selected fight, retrieve rich fights, player-details, and bounded
-  events scoped to that fight. Use table/graph/rankings only as needed within
-  their supported scope. Summary and master-data are optional report-wide
-  context, not fight-specific data. Use `--output` for substantial payloads
-  and inspect the receipt.
+- `find character|guild --latest N` applies the latest selection locally after
+  the report filters match; it is never sent as a GraphQL variable.
+- `report fights --player NAME` resolves actor IDs through that report's master
+  data and returns only fights containing that player. `report player-details
+  --player NAME` filters the returned detail payload locally.
+- `report details --fight ID --player NAME` fetches one fight, player details,
+  and the default actor-scoped tables (`DamageDone`, `Healing`, `DamageTaken`,
+  `Deaths`, `Interrupts`, `Casts`). Use `--views` to narrow those tables. Events
+  remain a separate bounded opt-in command.
 - Before local evaluation, inspect `scope`, `filters`, `completeness`,
   `pagination.truncated`, `warnings`, and `errors`. Never turn partial or
   sampled data into an exhaustive claim.

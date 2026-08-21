@@ -34,6 +34,19 @@ class QueryContractTests(unittest.TestCase):
             "friendlyPets", "friendlyNPCs",
         ):
             self.assertIn(field, query)
+        self.assertIn("friendlyNPCs { id gameID instanceCount groupCount petOwner }", query)
+        self.assertRegex(
+            query,
+            re.compile(
+                r"dungeonPulls \{.*?enemyNPCs \{ id gameID minimumInstanceID maximumInstanceID "
+                r"minimumInstanceGroupID maximumInstanceGroupID \}",
+                re.S,
+            ),
+        )
+        self.assertNotRegex(
+            query,
+            re.compile(r"dungeonPulls \{.*?enemyNPCs \{[^}]*instanceCount", re.S),
+        )
 
     def test_player_details_query_requests_combatant_info(self):
         query = warcraftlogs.load_query("report-player-details")

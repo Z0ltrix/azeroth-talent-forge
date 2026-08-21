@@ -6,7 +6,7 @@ query MetadataRealm($region: String!, $slug: String!) {
       normalizedName
       slug
       region { id name slug }
-      subregion { id name slug }
+      subregion { id name }
     }
   }
 }

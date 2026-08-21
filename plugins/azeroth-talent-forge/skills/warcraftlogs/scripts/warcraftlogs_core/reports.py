@@ -17,6 +17,9 @@ from .transport import sanitize_graphql_errors, utc_now
 
 EVENT_PAGE_LIMIT = 10000
 EVENT_MAX_PAGES = 5
+DETAILS_DEFAULT_VIEWS = ("DamageDone", "Healing", "DamageTaken", "Deaths", "Interrupts", "Casts")
+DETAILS_SOURCE_SCOPED_VIEWS = frozenset(("DamageDone", "Healing", "Interrupts", "Casts"))
+DETAILS_TARGET_SCOPED_VIEWS = frozenset(("DamageTaken", "Deaths"))
 
 
 class OutputWriteError(Exception):
@@ -235,6 +238,9 @@ def report_request(args) -> tuple:
         for value in (getattr(args, attribute, None),)
         if value is not None and attribute not in ("start_time", "end_time")
     }
+    player = getattr(args, "player", None)
+    if player is not None:
+        filters["player"] = player
     return reference, variables, scope, filters
 
 
@@ -320,6 +326,154 @@ def _public_report_payload(payload: Mapping[str, object], field: str):
     if field == "masterData":
         return dict(value) if isinstance(value, Mapping) else {"actors": []}
     return value
+
+
+def _normalized_name(value) -> str:
+    return normalize_name(value)
+
+
+def _player_matches(player, wanted) -> bool:
+    return isinstance(player, Mapping) and isinstance(player.get("name"), str) and _normalized_name(player["name"]) == wanted
+
+
+def resolve_report_player_ids(master_data, player_name) -> list:
+    wanted = _normalized_name(player_name)
+    actors = master_data.get("actors") if isinstance(master_data, Mapping) else []
+    player_ids = []
+    for actor in _items(actors):
+        if not isinstance(actor, Mapping):
+            continue
+        name = actor.get("name")
+        if not isinstance(name, str):
+            continue
+        if _normalized_name(name) == wanted and actor.get("id") is not None:
+            player_ids.append(actor["id"])
+    return player_ids
+
+
+def resolve_report_player(master_data, player_name):
+    wanted = _normalized_name(player_name)
+    actors = master_data.get("actors") if isinstance(master_data, Mapping) else []
+    for actor in _items(actors):
+        if not isinstance(actor, Mapping):
+            continue
+        name = actor.get("name")
+        if isinstance(name, str) and _normalized_name(name) == wanted:
+            return dict(actor)
+    return None
+
+
+def _filter_player_details_value(value, wanted):
+    if isinstance(value, Mapping):
+        filtered = {}
+        for key, item in value.items():
+            if key in ("players", "tanks", "healers", "dps") and isinstance(item, list):
+                filtered[key] = [dict(player) for player in item if _player_matches(player, wanted)]
+            else:
+                filtered[key] = _filter_player_details_value(item, wanted)
+        return filtered
+    if isinstance(value, list):
+        return [_filter_player_details_value(item, wanted) for item in value]
+    return value
+
+
+def filter_report_data_by_player(kind, data, player_name, master_data=None):
+    if player_name is None:
+        return data
+    wanted = _normalized_name(player_name)
+    if kind == "fights":
+        player_ids = set(resolve_report_player_ids(master_data or {}, player_name))
+        if not player_ids:
+            return []
+        filtered = []
+        for fight in _items(data):
+            friendly_players = _items(fight.get("friendlyPlayers")) if isinstance(fight, Mapping) else []
+            if any(player_id in friendly_players for player_id in player_ids):
+                filtered.append(fight)
+        return filtered
+    if kind == "player-details":
+        return _filter_player_details_value(data, wanted)
+    return data
+
+
+def _parse_details_views(views) -> list:
+    if views is None:
+        return list(DETAILS_DEFAULT_VIEWS)
+    allowed = {view.casefold(): view for view in DETAILS_DEFAULT_VIEWS}
+    selected = []
+    for raw_view in str(views).split(","):
+        view = raw_view.strip()
+        if not view:
+            continue
+        canonical = allowed.get(view.casefold())
+        if canonical is None:
+            raise ValueError("Invalid report details view: %s" % view)
+        if canonical not in selected:
+            selected.append(canonical)
+    if not selected:
+        raise ValueError("Report details views must not be empty")
+    return selected
+
+
+def fetch_report_details(client, code, fight_id, player_name=None, translate=True, views=None, warnings=None):
+    if not isinstance(fight_id, int) or isinstance(fight_id, bool) or fight_id < 1:
+        raise ValueError("Report fight must be a positive integer")
+    fight_variables = {"code": code, "allowUnlisted": False, "fightIDs": [fight_id], "translate": translate}
+    master_variables = {"code": code, "allowUnlisted": False, "translate": translate}
+    player_variables = {"code": code, "allowUnlisted": False, "fightIDs": [fight_id], "translate": translate}
+    errors = []
+
+    fights_payload = client.execute("report-fights", fight_variables)
+    if fights_payload.get("errors"):
+        errors.extend(fights_payload["errors"])
+    fights = report_data(fights_payload, "fights", warnings=warnings)
+    if not fights:
+        raise ValueError("Report fight was not found")
+    fight = fights[0]
+
+    master_payload = client.execute("report-master-data", master_variables)
+    if master_payload.get("errors"):
+        errors.extend(master_payload["errors"])
+    master_data = report_data(master_payload, "master-data")
+
+    player = resolve_report_player(master_data, player_name) if player_name is not None else None
+    if player_name is not None and player is None:
+        raise ValueError("Report player was not found")
+
+    player_details_payload = client.execute("report-player-details", player_variables)
+    if player_details_payload.get("errors"):
+        errors.extend(player_details_payload["errors"])
+    player_details = report_data(player_details_payload, "player-details")
+
+    if player_name is not None:
+        player_details = filter_report_data_by_player("player-details", player_details, player_name, master_data=master_data)
+
+    tables = {}
+    for view in _parse_details_views(views):
+        table_variables = {
+            "code": code,
+            "allowUnlisted": False,
+            "fightIDs": [fight_id],
+            "dataType": view,
+            "translate": translate,
+        }
+        if player is not None and player.get("id") is not None:
+            if view in DETAILS_SOURCE_SCOPED_VIEWS:
+                table_variables["sourceID"] = player.get("id")
+            elif view in DETAILS_TARGET_SCOPED_VIEWS:
+                table_variables["targetID"] = player.get("id")
+        table_payload = client.execute("report-table", table_variables)
+        if table_payload.get("errors"):
+            errors.extend(table_payload["errors"])
+        tables[view] = report_data(table_payload, "table")
+
+    return {
+        "fight": fight,
+        "player": player,
+        "player_details": player_details,
+        "tables": tables,
+        "errors": errors,
+    }
 
 
 def hydrate_discovery_report(client, code: str, filters: DiscoveryFilters, fight_id: Optional[int] = None) -> Tuple[list, list]:

@@ -17,7 +17,7 @@ query ReportFights($code: String!, $allowUnlisted: Boolean!, $fightIDs: [Int], $
         dungeonPulls {
           id name encounterID startTime endTime kill x y
           boundingBox { minX maxX minY maxY }
-          enemyNPCs { id gameID instanceCount groupCount petOwner }
+          enemyNPCs { id gameID minimumInstanceID maximumInstanceID minimumInstanceGroupID maximumInstanceGroupID }
           maps { id }
         }
         maps { id }

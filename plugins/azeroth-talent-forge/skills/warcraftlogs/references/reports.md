@@ -12,6 +12,7 @@ official host and a positive fight ID.
 | `report fights REPORT` | Fight list, kills/wipes, difficulty, and Mythic+ fields. |
 | `report master-data REPORT` | Actors and abilities needed for later filtering. |
 | `report player-details REPORT` | Player detail payloads for a bounded report/fight view. |
+| `report details REPORT` | One fight plus player details and actor-scoped default tables. |
 | `report table REPORT` | Warcraft Logs table data for a selected view. |
 | `report graph REPORT` | Graph data for a selected view. |
 | `report rankings REPORT` | Report-level ranking payload. |
@@ -51,6 +52,27 @@ Player details request combatant information by default. Preserve gear, stats,
 spec, talent-tree, and talent payloads; do not flatten them before local
 evaluation.
 
+## Targeted run details
+
+Use `report fights --player NAME` to keep only runs containing a named actor.
+The command resolves actor IDs from report master data and matches them against
+each fight's `friendlyPlayers` list. The `--player` value is local and is not a
+GraphQL variable.
+
+Use `report details` after selecting a fight. It requires `--fight ID` or a
+fight ID in the report URL and returns one composed envelope with:
+
+- `fight`: the selected fight summary;
+- `player`: the resolved report actor, or null when no player filter was given;
+- `player_details`: combatant details, filtered when `--player` is present;
+- `tables`: `DamageDone`, `Healing`, `DamageTaken`, `Deaths`, `Interrupts`, and
+  `Casts` by default.
+
+With `--player`, source-oriented tables receive `sourceID` and target-oriented
+tables receive `targetID`. Use `--views DamageDone,Deaths` to narrow the table
+set. An unknown player fails rather than silently returning unscoped data.
+Inspect `filters`, `warnings`, `errors`, and the fight scope in the envelope.
+
 ## Events
 
 Events require either `--fight` (or a fight in the report URL) or both
@@ -73,9 +95,10 @@ limit, and rejects a non-advancing pagination cursor instead of looping.
 
 ## Analysis sequence
 
-1. Start with `report summary` and `report fights`.
-2. Use `master-data` to map actor and ability IDs.
-3. Request a single fight or time window with `events`.
+1. Start with filtered discovery and `report fights --player NAME`.
+2. Use `report details --fight ID --player NAME` for the selected run.
+3. Request a single fight or time window with `events` only when exact timing
+   is needed.
 4. Check the envelope's scope, pagination, warnings, and errors before making
    performance claims.
 

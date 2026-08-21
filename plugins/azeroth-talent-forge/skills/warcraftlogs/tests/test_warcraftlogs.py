@@ -220,6 +220,8 @@ class PackagingTests(unittest.TestCase):
             self.assertIn(phrase, skill.lower())
         for phrase in ("absolute-start-time", "time-mode", "--output", "--max-pages"):
             self.assertIn(phrase, cli)
+        for phrase in ("--latest", "--player", "report details", "--views"):
+            self.assertIn(phrase, skill.lower() + cli.lower() + discovery.lower() + reports.lower())
         for phrase in ("absolute-start-time", "started", "timezone", "same-spec/key"):
             self.assertIn(phrase, discovery + reports)
         for phrase in ("combatant", "--fight", "event-limit", "sampled"):
@@ -825,6 +827,190 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(result["data"][0]["keystoneLevel"], 12)
         self.assertEqual(result["data"][0]["keystoneAffixes"], [9])
         self.assertEqual(result["data"][1]["friendlyPlayers"], [])
+
+    def test_fights_filters_to_player_using_report_master_data(self):
+        exit_code, output, errors, client = self.run_report(
+            {
+                "report-fights": fixture("report-fights.json"),
+                "report-master-data": fixture("report-master-data.json"),
+            },
+            "fights",
+            "AbCd1234",
+            "--player",
+            "Tankadin",
+        )
+
+        result = json.loads(output)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(errors, "")
+        self.assertEqual([fight["id"] for fight in result["data"]], [9])
+        self.assertEqual(result["filters"]["player"], "Tankadin")
+        self.assertEqual(client.calls, ["report-fights", "report-master-data"])
+
+    def test_fights_player_partial_master_data_error_is_sanitized_without_traceback(self):
+        exit_code, output, errors, client = self.run_report(
+            {
+                "report-fights": fixture("report-fights.json"),
+                "report-master-data": {
+                    "errors": [{
+                        "message": "Master data unavailable",
+                        "path": ["reportData", "report", "masterData"],
+                        "extensions": {"code": "PARTIAL", "secret": "discard"},
+                    }],
+                },
+            },
+            "fights",
+            "AbCd1234",
+            "--player",
+            "Tankadin",
+        )
+
+        self.assertEqual(exit_code, 4)
+        self.assertEqual(output, "")
+        self.assertIn("Master data unavailable", errors)
+        self.assertNotIn("discard", errors)
+        self.assertNotIn("Traceback", errors)
+        self.assertEqual(client.calls, ["report-fights", "report-master-data"])
+
+    def test_player_details_filters_to_named_player(self):
+        exit_code, output, errors, client = self.run_report(
+            {"report-player-details": fixture("report-player-details.json")},
+            "player-details",
+            "AbCd1234",
+            "--player",
+            "Tankadin",
+        )
+
+        result = json.loads(output)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(errors, "")
+        self.assertEqual(result["data"], {"players": [{"id": 1, "name": "Tankadin"}]})
+        self.assertEqual(client.calls, ["report-player-details"])
+
+    def test_details_fetches_one_fight_and_actor_scoped_default_tables(self):
+        exit_code, output, errors, client = self.run_report(
+            {
+                "report-fights": fixture("report-fights.json"),
+                "report-master-data": fixture("report-master-data.json"),
+                "report-player-details": fixture("report-player-details.json"),
+                "report-table": fixture("report-table.json"),
+            },
+            "details",
+            "AbCd1234",
+            "--fight",
+            "9",
+            "--player",
+            "Tankadin",
+        )
+
+        result = json.loads(output)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(errors, "")
+        self.assertEqual(result["command"], "report details")
+        self.assertEqual(result["data"]["fight"]["id"], 9)
+        self.assertEqual(result["data"]["player"]["id"], 1)
+        self.assertEqual(result["data"]["player_details"]["players"][0]["name"], "Tankadin")
+        self.assertEqual(
+            set(result["data"]["tables"]),
+            {"DamageDone", "Healing", "DamageTaken", "Deaths", "Interrupts", "Casts"},
+        )
+        self.assertEqual(result["data"]["tables"]["DamageDone"]["entries"][0]["name"], "Tankadin")
+        self.assertEqual(client.calls.count("report-fights"), 1)
+        self.assertEqual(client.calls.count("report-master-data"), 1)
+        self.assertEqual(client.calls.count("report-player-details"), 1)
+        self.assertEqual(client.calls.count("report-table"), 6)
+        table_variables = [variables for name, variables in zip(client.calls, client.variables) if name == "report-table"]
+        self.assertEqual({variables["dataType"] for variables in table_variables}, {"DamageDone", "Healing", "DamageTaken", "Deaths", "Interrupts", "Casts"})
+        self.assertTrue(all(variables.get("sourceID") == 1 for variables in table_variables if variables["dataType"] in {"DamageDone", "Healing", "Interrupts", "Casts"}))
+        self.assertTrue(all(variables.get("targetID") == 1 for variables in table_variables if variables["dataType"] in {"DamageTaken", "Deaths"}))
+
+    def test_details_includes_requested_views_in_filters(self):
+        exit_code, output, errors, client = self.run_report(
+            {
+                "report-fights": fixture("report-fights.json"),
+                "report-master-data": fixture("report-master-data.json"),
+                "report-player-details": fixture("report-player-details.json"),
+                "report-table": fixture("report-table.json"),
+            },
+            "details",
+            "AbCd1234",
+            "--fight",
+            "9",
+            "--player",
+            "Tankadin",
+            "--views",
+            "DamageDone,Healing",
+        )
+
+        result = json.loads(output)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(errors, "")
+        self.assertEqual(result["filters"]["views"], "DamageDone,Healing")
+        self.assertEqual(set(result["data"]["tables"]), {"DamageDone", "Healing"})
+        self.assertEqual(client.calls.count("report-table"), 2)
+
+    def test_details_rejects_unknown_player_before_table_requests(self):
+        exit_code, output, errors, client = self.run_report(
+            {
+                "report-fights": fixture("report-fights.json"),
+                "report-master-data": fixture("report-master-data.json"),
+                "report-player-details": fixture("report-player-details.json"),
+                "report-table": fixture("report-table.json"),
+            },
+            "details",
+            "AbCd1234",
+            "--fight",
+            "9",
+            "--player",
+            "Missing",
+        )
+
+        self.assertEqual(exit_code, 2)
+        self.assertEqual(output, "")
+        self.assertIn("Report player was not found", errors)
+        self.assertEqual(client.calls, ["report-fights", "report-master-data"])
+
+    def test_details_preserves_fight_selection_warnings_in_envelope(self):
+        payload = fixture("report-fights.json")
+        payload["data"]["reportData"]["report"]["fights"].append(
+            {
+                "id": 11,
+                "encounterID": 2903,
+                "difficulty": 10,
+                "startTime": 4000,
+                "endTime": 3000,
+                "kill": False,
+                "friendlyPlayers": [1],
+                "friendlySpecs": [66],
+                "gameZone": {"id": 2335, "name": "The Dawnbreaker"},
+                "inProgress": False,
+                "keystoneAffixes": [9],
+                "keystoneLevel": 12,
+                "keystoneTime": 1550000,
+                "keystoneBonus": 2,
+            }
+        )
+        exit_code, output, errors, client = self.run_report(
+            {
+                "report-fights": payload,
+                "report-master-data": fixture("report-master-data.json"),
+                "report-player-details": fixture("report-player-details.json"),
+                "report-table": fixture("report-table.json"),
+            },
+            "details",
+            "AbCd1234",
+            "--fight",
+            "9",
+            "--player",
+            "Tankadin",
+        )
+
+        result = json.loads(output)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(errors, "")
+        self.assertTrue(result["warnings"])
+        self.assertIn("Skipped fight 11 because its relative timestamps are invalid", result["warnings"][0])
+        self.assertEqual(client.calls.count("report-table"), 6)
 
     def test_fights_rejects_report_relative_window(self):
         with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
@@ -1687,6 +1873,28 @@ class DiscoveryTests(unittest.TestCase):
             self.assertEqual(exit_code, 2)
             self.assertEqual(client.calls, [])
 
+    def test_global_latest_is_rejected_before_api_call(self):
+        args = warcraftlogs.build_parser().parse_args([
+            "find", "global", "--zone", "1300", "--latest", "1",
+        ])
+        self.assertEqual(args.latest, 1)
+
+        client = FixtureClient({})
+        errors = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ), patch.dict(os.environ, {}, clear=True), redirect_stderr(errors):
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret",
+                "--env-file", str(Path(directory) / "missing.env"),
+                "find", "global", "--zone", "1300", "--latest", "1",
+            ])
+
+        self.assertEqual(exit_code, 2)
+        self.assertIn("global", errors.getvalue().lower())
+        self.assertIn("latest", errors.getvalue().lower())
+        self.assertEqual(client.calls, [])
+
     def test_global_empty_fixture_keeps_sample_contract(self):
         client = FixtureClient({
             "metadata-world": fixture("metadata-world.json"),
@@ -1833,6 +2041,119 @@ class DiscoveryTests(unittest.TestCase):
         with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
             warcraftlogs.build_parser().parse_args(["find", "character", "--name", "Tankadin"])
         self.assertEqual(raised.exception.code, 2)
+
+    def test_character_discovery_preserves_report_order_without_latest(self):
+        payload = {
+            "data": {
+                "characterData": {
+                    "character": {
+                        "name": "Tankadin",
+                        "server": {"name": "Area 52", "slug": "area-52", "region": {"name": "US", "slug": "us"}},
+                        "recentReports": {
+                            "data": [
+                                {"code": "Older000", "title": "Older run", "startTime": 1000, "endTime": 2000},
+                                {"code": "Newer000", "title": "Newer run", "startTime": 3000},
+                            ],
+                            "current_page": 1,
+                            "last_page": 1,
+                            "has_more_pages": False,
+                        },
+                    }
+                }
+            }
+        }
+        client = FixtureClient({"character": payload, "character-reports": payload})
+        result = warcraftlogs.discover_reports(
+            client,
+            "character",
+            {"name": "Tankadin", "serverSlug": "area-52", "serverRegion": "us"},
+            warcraftlogs.DiscoveryFilters(),
+            page=1,
+            limit=100,
+        )
+
+        self.assertEqual([report["code"] for report in result["data"]], ["Older000", "Newer000"])
+        self.assertNotIn("latest", result)
+
+    def test_character_discovery_latest_selects_newest_report_and_stays_local(self):
+        payload = {
+            "data": {
+                "characterData": {
+                    "character": {
+                        "name": "Tankadin",
+                        "server": {"name": "Area 52", "slug": "area-52", "region": {"name": "US", "slug": "us"}},
+                        "recentReports": {
+                            "data": [
+                                {"code": "Older000", "title": "Older run", "startTime": 1000, "endTime": 2000},
+                                {"code": "Newer000", "title": "Newer run", "startTime": 3000},
+                            ],
+                            "current_page": 1,
+                            "last_page": 1,
+                            "has_more_pages": False,
+                        },
+                    }
+                }
+            }
+        }
+        client = FixtureClient({"character": payload, "character-reports": payload})
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ), patch.dict(os.environ, {}, clear=True), redirect_stdout(output):
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret",
+                "--env-file", str(Path(directory) / "missing.env"), "find", "character",
+                "--name", "Tankadin", "--server", "Area 52", "--region", "US",
+                "--latest", "1",
+            ])
+
+        result = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(result["filters"]["latest"], 1)
+        self.assertEqual([report["code"] for report in result["data"]], ["Newer000"])
+        self.assertEqual(result["matched_count"], 2)
+        self.assertEqual(result["excluded_count"], 0)
+        self.assertEqual(result["selected_count"], 1)
+        self.assertEqual(client.variables[1], {
+            "name": "Tankadin", "serverSlug": "area-52", "serverRegion": "us", "limit": 100, "page": 1,
+        })
+        self.assertNotIn("latest", client.variables[1])
+
+    def test_character_discovery_latest_preserves_match_counts(self):
+        payload = {
+            "data": {
+                "characterData": {
+                    "character": {
+                        "name": "Tankadin",
+                        "server": {"name": "Area 52", "slug": "area-52", "region": {"name": "US", "slug": "us"}},
+                        "recentReports": {
+                            "data": [
+                                {"code": "Older000", "title": "Older run", "startTime": 1000, "endTime": 2000},
+                                {"code": "Newer000", "title": "Newer run", "startTime": 3000},
+                            ],
+                            "current_page": 1,
+                            "last_page": 1,
+                            "has_more_pages": False,
+                        },
+                    }
+                }
+            }
+        }
+        client = FixtureClient({"character": payload, "character-reports": payload})
+        result = warcraftlogs.discover_reports(
+            client,
+            "character",
+            {"name": "Tankadin", "serverSlug": "area-52", "serverRegion": "us"},
+            warcraftlogs.DiscoveryFilters(),
+            page=1,
+            limit=100,
+            latest=1,
+        )
+
+        self.assertEqual([report["code"] for report in result["data"]], ["Newer000"])
+        self.assertEqual(result["matched_count"], 2)
+        self.assertEqual(result["excluded_count"], 0)
+        self.assertEqual(result["selected_count"], 1)
 
     def test_character_discovery_uses_canonical_identity_and_report_page(self):
         payload = fixture("find-character-page-1.json")

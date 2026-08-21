@@ -37,7 +37,9 @@ No Python package install is required for the included scripts.
 
 ## Plugin Installation
 
-Codex installs plugins from a configured marketplace. This repository includes a marketplace file at:
+Codex installs plugins from a configured marketplace. In this repository,
+`.agents\plugins\marketplace.json` is that marketplace index. It points Codex
+at the actual plugin folder under `plugins\azeroth-talent-forge`.
 
 ```text
 .agents\plugins\marketplace.json
@@ -49,7 +51,13 @@ Install from the GitHub repository in two steps:
 2. Install the `azeroth-talent-forge` plugin from that marketplace.
 
 ```powershell
-codex plugin marketplace add https://github.com/Z0ltrix/azeroth-talent-forge.git --ref main
+codex plugin marketplace add Z0ltrix/azeroth-talent-forge --ref main
+codex plugin add azeroth-talent-forge --marketplace azeroth-talent-forge
+```
+
+The equivalent selector form is also valid:
+
+```powershell
 codex plugin add azeroth-talent-forge@azeroth-talent-forge
 ```
 
@@ -63,13 +71,14 @@ List configured marketplaces:
 codex plugin marketplace list
 ```
 
-List available plugins:
+List available plugins and installed status:
 
 ```powershell
 codex plugin list
 ```
 
-You should see marketplace `azeroth-talent-forge` and plugin `azeroth-talent-forge`.
+You should see marketplace `azeroth-talent-forge` and plugin
+`azeroth-talent-forge@azeroth-talent-forge`.
 
 ### Updating The Installed Plugin
 
@@ -77,7 +86,7 @@ Refresh the GitHub marketplace snapshot, then reinstall the plugin:
 
 ```powershell
 codex plugin marketplace upgrade azeroth-talent-forge
-codex plugin add azeroth-talent-forge@azeroth-talent-forge
+codex plugin add azeroth-talent-forge --marketplace azeroth-talent-forge
 ```
 
 Start a new Codex thread after updating.
@@ -97,7 +106,8 @@ cd C:\Users\chris\Documents\GitHub\azeroth-talent-forge
 git pull
 ```
 
-The marketplace root is the repository root. The plugin root is:
+The marketplace root is the repository root because Codex looks for
+`.agents\plugins\marketplace.json` there. The plugin root is:
 
 ```text
 plugins\azeroth-talent-forge

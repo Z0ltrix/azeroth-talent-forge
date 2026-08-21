@@ -35,7 +35,7 @@ REPORT_HOSTS = frozenset((
 ))
 METADATA_TTL_SECONDS = 24 * 60 * 60
 HTTP_TIMEOUT_SECONDS = 30
-REPORT_KINDS = ("summary", "fights", "master-data", "player-details", "table", "graph", "rankings")
+REPORT_KINDS = ("summary", "fights", "master-data", "player-details", "details", "table", "graph", "rankings")
 GLOBAL_TOP_MIN = 1
 GLOBAL_TOP_MAX = 100
 GLOBAL_MAX_PAGES = 5

@@ -51,6 +51,14 @@ def _filters_dict(filters: DiscoveryFilters) -> dict:
     return {field: getattr(filters, field) for field in _DISCOVERY_FILTER_FIELDS if getattr(filters, field) is not None}
 
 
+def _report_latest_time(report):
+    for field in ("endTime", "startTime"):
+        value = report.get(field)
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            return value
+    return float("-inf")
+
+
 def _positive_id(value, label):
     if value is None:
         return None
@@ -170,13 +178,15 @@ def _global_filters(args, client=None) -> DiscoveryFilters:
     return DiscoveryFilters(**values)
 
 
-def discover_reports(client, kind: str, identity: Mapping[str, str], filters: DiscoveryFilters, page: int, limit: int, max_pages: int = 1) -> dict:
+def discover_reports(client, kind: str, identity: Mapping[str, str], filters: DiscoveryFilters, page: int, limit: int, max_pages: int = 1, latest: Optional[int] = None) -> dict:
     if kind not in ("character", "guild"):
         raise ValueError("Unknown discovery kind")
     if page < 1 or max_pages < 1:
         raise ValueError("Discovery page and max pages must be positive")
     if not 1 <= limit <= 100:
         raise ValueError("Discovery limit must be between 1 and 100")
+    if latest is not None and (not isinstance(latest, int) or isinstance(latest, bool) or latest < 1):
+        raise ValueError("Discovery latest must be a positive integer")
     if filters.season is not None or filters.partition is not None:
         raise ValueError("Discovery cannot establish a report-specific season or partition match")
     reports = []
@@ -234,12 +244,16 @@ def discover_reports(client, kind: str, identity: Mapping[str, str], filters: Di
         else:
             for reason in reasons:
                 exclusion_reasons[reason] = exclusion_reasons.get(reason, 0) + 1
-    return {
-        "data": matched,
+    matched_count = len(matched)
+    selected = matched
+    if latest is not None:
+        selected = sorted(matched, key=_report_latest_time, reverse=True)[:latest]
+    result = {
+        "data": selected,
         "candidate_count": len(reports),
         "hydrated_count": hydrated_count,
-        "matched_count": len(matched),
-        "excluded_count": len(reports) - len(matched),
+        "matched_count": matched_count,
+        "excluded_count": len(reports) - matched_count,
         "exclusion_reasons": exclusion_reasons,
         "character": dict(character) if character is not None else None,
         "pagination": {
@@ -252,6 +266,9 @@ def discover_reports(client, kind: str, identity: Mapping[str, str], filters: Di
             "truncated": has_more and pages_fetched >= max_pages,
         },
     }
+    if latest is not None:
+        result["selected_count"] = len(selected)
+    return result
 
 
 def _ranking_value(value):

@@ -27,6 +27,10 @@ password. `--no-cache` bypasses metadata cache reads and writes.
 | `report KIND REPORT` | One public report surface. |
 | `find character|guild|global` | Public report discovery. |
 
+The targeted report flow is deliberately staged: discovery returns report IDs,
+`report fights` selects runs inside one report, and `report details` hydrates one
+fight. This keeps report-wide and run-specific data separate.
+
 Use `--help` at each level for the exact flags:
 
 ```powershell
@@ -48,6 +52,15 @@ python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py 
 table, graph, and player-detail calls. `report fights` uses absolute bounds and
 `--time-mode {started,overlap,completed}`. A receipt from `--output` gives the
 path, record count, page count, and truncation; read it before evaluation.
+
+For report discovery, `find character` and `find guild` accept `--latest N`.
+After all other report filters match, the CLI sorts by report `endTime` (falling
+back to `startTime`) and returns only the newest N reports. The flag is local
+selection and is recorded in the output envelope, not sent to the API.
+
+For report targeting, `report fights --player NAME` and `report player-details
+--player NAME` apply a local actor-name filter. `report details` additionally
+requires `--fight ID` or a fight ID in the report URL.
 
 ## JSON response
 
