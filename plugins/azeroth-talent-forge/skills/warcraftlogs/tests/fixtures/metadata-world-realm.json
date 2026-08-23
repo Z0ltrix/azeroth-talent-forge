@@ -1,0 +1,9 @@
+{
+  "data": {
+    "worldData": {
+      "regions": [{"id": 2, "name": "Europe", "slug": "EU"}],
+      "expansions": [{"id": 12, "name": "Midnight"}],
+      "zones": [{"id": 55, "name": "Voidscar", "difficulties": [], "encounters": [{"id": 12923, "name": "Voidscar"}], "partitions": []}]
+    }
+  }
+}

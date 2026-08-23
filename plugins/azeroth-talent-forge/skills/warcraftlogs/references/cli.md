@@ -63,6 +63,23 @@ For report targeting, `report fights --player NAME` and `report player-details
 --player NAME` apply a local actor-name filter. `report details` additionally
 requires `--fight ID` or a fight ID in the report URL.
 
+## Realm-filtered global discovery
+
+For a realm-filtered Mythic+ cohort, provide both fields and keep the sample
+bounded:
+
+```powershell
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py find global --encounter 12923 --server-region EU --server-slug DunMorogh --class Warrior --spec Fury --top 10 --max-pages 1
+```
+
+`DunMorogh`, `Dun-Morogh`, and `dun-morogh` normalize to the metadata slug
+`dun-morogh`. The ranking request sends `serverRegion` only: M+ `fightRankings`
+does not safely support `serverSlug`. Each returned candidate must expose
+`realm_filter.verification: "matched_actor.server"`; otherwise it was excluded.
+`RANKING_ERROR` remains a fatal API result, never a successful zero-result
+response. The realm fallback is still sampled and may find no candidate within
+the chosen page bound.
+
 ## Targeted fight selection
 
 `report fights REPORT` accepts these local selectors:

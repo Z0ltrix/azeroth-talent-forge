@@ -1,0 +1,12 @@
+{
+  "data": {
+    "reportData": {
+      "report": {
+        "visibility": "public",
+        "archiveStatus": {"isArchived": false, "isAccessible": true, "archiveDate": null},
+        "startTime": 1000000,
+        "fights": [{"id": 9, "encounterID": 12923, "difficulty": 8, "startTime": 1000, "endTime": 2000, "kill": true, "friendlyPlayers": [1], "friendlySpecs": [], "gameZone": {"id": 55, "name": "Voidscar"}, "inProgress": false, "keystoneAffixes": [], "keystoneLevel": 6, "keystoneTime": 1000, "keystoneBonus": 1}]
+      }
+    }
+  }
+}

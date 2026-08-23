@@ -102,6 +102,13 @@ python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py 
   `--leaderboard` before making an API call. It is ranking-based and always
   `completeness: "sampled"`, never an exhaustive public-report search. Keep
   `--top` and `--max-pages` bounded.
+- Realm-filtered Mythic+ discovery requires `--server-region` with
+  `--server-slug`. Realm spellings such as `DunMorogh`, `Dun-Morogh`, and
+  `dun-morogh` resolve through metadata. M+ `fightRankings` accepts
+  `serverRegion` but not `serverSlug`; the script sends only the canonical
+  region, then verifies the class/spec-selected `team` actor against hydrated
+  `masterData.server`. Require `realm_filter.verification: "matched_actor.server"`
+  in output; candidates without that evidence are excluded.
 - Global exact-key discovery translates `--key-min N --key-max N` when equal to
   ranking `bracket: N-1`, then verifies the hydrated fight's actual key. Key
   ranges stay local and carry a warning that no ranking bracket was pushed.

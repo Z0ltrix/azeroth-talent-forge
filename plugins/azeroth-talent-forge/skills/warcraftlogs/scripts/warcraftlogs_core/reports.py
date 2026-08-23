@@ -615,7 +615,8 @@ def fetch_report_details(client, code, fight_id, player_name=None, translate=Tru
     }
 
 
-def hydrate_discovery_report(client, code: str, filters: DiscoveryFilters, fight_id: Optional[int] = None) -> Tuple[list, list]:
+def hydrate_discovery_report(client, code: str, filters: DiscoveryFilters, fight_id: Optional[int] = None,
+                             require_actors: bool = False) -> Tuple[list, list]:
     """Fetch only the report data needed by derived discovery filters."""
     if not filters.needs_hydration and fight_id is None:
         return [], []
@@ -631,7 +632,7 @@ def hydrate_discovery_report(client, code: str, filters: DiscoveryFilters, fight
         fights = _public_report_payload(fights_payload, "fights")
         if fight_id is not None:
             fights = [fight for fight in fights if fight.get("id") == fight_id]
-    if filters.class_name is not None or filters.spec_name is not None or filters.role is not None:
+    if require_actors or filters.class_name is not None or filters.spec_name is not None or filters.role is not None:
         master_payload = client.execute("report-master-data", common)
         if master_payload.get("errors"):
             raise PartialGraphQLError(master_payload["errors"])

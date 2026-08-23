@@ -36,6 +36,16 @@ def select_named(items, name, kind) -> dict:
     raise ValueError("Unknown %s: %s" % (kind, name))
 
 
+def normalize_realm_slug(value) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("Realm slug must be a non-empty string")
+    value = re.sub(r"(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Za-z])(?=\d)|(?<=\d)(?=[A-Za-z])", "-", value.strip())
+    parts = [part for part in re.split(r"[\s-]+", value.casefold()) if part]
+    if not parts:
+        raise ValueError("Realm slug must be a non-empty string")
+    return "-".join(parts)
+
+
 def default_metadata_cache_dir() -> Path:
     if os.name == "nt":
         local_app_data = os.environ.get("LOCALAPPDATA")
@@ -163,6 +173,6 @@ class MetadataResolver:
             raise ValueError("Realm lookup requires region")
         if not isinstance(name, str) or not name.strip():
             raise ValueError("Realm lookup requires name")
-        slug = normalize_name(name).replace(" ", "-")
-        payload, provenance = self._query("metadata-realm", {"region": region.strip(), "slug": slug})
+        slug = normalize_realm_slug(name)
+        payload, provenance = self._query("metadata-realm", {"region": region.strip().upper(), "slug": slug})
         return _normalize_realm(payload), provenance

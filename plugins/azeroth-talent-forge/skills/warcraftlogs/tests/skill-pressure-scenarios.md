@@ -83,6 +83,20 @@ result.
   `missing_data`, and labels component casts as API metrics rather than button
   presses.
 
+## Scenario 6: realm-filtered Mythic+ cohort
+
+- User request: “Find Fury Warrior Mythic+ runs on EU/Dun Morogh.”
+- No-guidance baseline: An agent may pass a human realm spelling straight to
+  `fightRankings`, treat an embedded `RANKING_ERROR` as zero results, or claim
+  a realm from another member of the five-player team.
+- Expected risk: a broken realm query or an unverifiable cross-realm cohort.
+- Observable failure to prevent: `serverSlug` sent to M+ rankings, no
+  `matched_actor.server` provenance, or a successful empty response after a
+  ranking error.
+- Pass condition after guidance: The agent resolves the canonical realm,
+  pushes only `serverRegion`, verifies the selected `team` actor against
+  hydrated `masterData.server`, and keeps `RANKING_ERROR` fatal.
+
 ## Evaluator follow-up
 
 When a fresh-context evaluator is available, run each scenario five times

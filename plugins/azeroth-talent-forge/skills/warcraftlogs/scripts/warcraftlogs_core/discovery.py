@@ -8,7 +8,7 @@ from .models import (DiscoveryFilters, PublicReportError, PartialGraphQLError, r
                      _actor_field_matches, _actor_role_matches,
                      _DISCOVERY_FILTER_FIELDS, GLOBAL_TOP_MIN, GLOBAL_TOP_MAX,
                      GLOBAL_MAX_PAGES, GLOBAL_WARNING, _report_fights)
-from .metadata import (MetadataResolver, normalize_name, select_named,
+from .metadata import (MetadataResolver, normalize_name, normalize_realm_slug, select_named,
                         _normalize_world, _normalize_game)
 from .reports import (hydrate_discovery_report, report_data, _pagination_data,
                       _public_report_payload, make_envelope)
@@ -17,6 +17,24 @@ from .transport import sanitize_graphql_errors
 
 class RankingResponseError(RuntimeError):
     """The ranking field returned an embedded API error."""
+
+
+def resolve_global_realm(client, server_region=None, server_slug=None, no_cache=False) -> Tuple[Optional[str], Optional[str], Optional[dict]]:
+    if server_region is None and server_slug is None:
+        return None, None, None
+    if not isinstance(server_region, str) or not server_region.strip():
+        if server_slug is not None:
+            raise ValueError("Global server slug requires --server-region for verified realm filtering")
+        raise ValueError("Global server region must be a non-empty string")
+    region = server_region.strip().upper()
+    if server_slug is None:
+        return region, None, None
+    realm, unused = MetadataResolver(client, no_cache=no_cache).realm(region, server_slug)
+    realm_region = realm.get("region", {}).get("slug") if isinstance(realm.get("region"), Mapping) else None
+    realm_slug = realm.get("slug")
+    if not isinstance(realm_region, str) or not isinstance(realm_slug, str):
+        raise TypeError("Realm metadata did not contain canonical region and slug")
+    return realm_region, realm_slug, realm
 
 def _identity_variables(name, server, region) -> dict:
     if not isinstance(name, str) or not name.strip():
@@ -412,6 +430,71 @@ def _ranking_actor(candidate: Mapping[str, object]) -> Optional[dict]:
     return {"id": actor_id, "name": name}
 
 
+def _actor_matches_filters(actor: Mapping[str, object], filters: DiscoveryFilters) -> bool:
+    return (
+        (filters.class_name is None or _actor_field_matches(actor, filters.class_name, ("className", "class", "subType"))) and
+        (filters.spec_name is None or _actor_field_matches(actor, filters.spec_name, ("specName", "spec", "subType"))) and
+        (filters.role is None or _actor_role_matches(actor, filters.role))
+    )
+
+
+def _ranking_team(candidate: Mapping[str, object]) -> list:
+    return [dict(actor) for actor in _items(candidate.get("team")) if isinstance(actor, Mapping) and actor.get("name") is not None]
+
+
+def _same_ranked_actor(actor: Mapping[str, object], ranked: Mapping[str, object]) -> bool:
+    name = ranked.get("name")
+    if isinstance(name, str) and name:
+        return _casefold(actor.get("name")) == _casefold(name)
+    return ranked.get("id") is not None and actor.get("id") == ranked.get("id")
+
+
+def _merge_ranked_actor(actor: Mapping[str, object], ranked: Mapping[str, object]) -> dict:
+    result = dict(actor)
+    for source, target in (("class", "className"), ("spec", "specName"), ("role", "role")):
+        if ranked.get(source) is not None:
+            result[target] = ranked[source]
+    return result
+
+
+def _matching_ranking_actor(candidate: Mapping[str, object], actors, filters: Optional[DiscoveryFilters] = None,
+                            team_only: bool = False) -> Tuple[Optional[dict], str]:
+    ranked = None if team_only else _ranking_actor(candidate)
+    source = "ranking_row"
+    if ranked is None:
+        ranked = _ranking_team(candidate)
+        source = "ranking_team"
+        if filters is not None:
+            ranked = [actor for actor in ranked if _actor_matches_filters(actor, filters)]
+    else:
+        ranked = [ranked]
+    matches = [
+        _merge_ranked_actor(actor, ranked_actor)
+        for ranked_actor in ranked
+        for actor in actors
+        if _same_ranked_actor(actor, ranked_actor)
+    ]
+    unique = {(actor.get("id"), actor.get("name")): actor for actor in matches}
+    if len(unique) == 1:
+        return next(iter(unique.values())), source
+    return None, "ambiguous" if unique else "missing"
+
+
+def _actor_server_matches(actor: Mapping[str, object], server_slug: str) -> bool:
+    server = actor.get("server")
+    values = [server]
+    if isinstance(server, Mapping):
+        values = [server.get(field) for field in ("slug", "normalizedName", "name")]
+    for value in values:
+        if isinstance(value, str):
+            try:
+                if normalize_realm_slug(value) == server_slug:
+                    return True
+            except ValueError:
+                continue
+    return False
+
+
 def _actor_identity(actor: Mapping[str, object], match_source: str) -> dict:
     subtype = actor.get("subType") or actor.get("specName") or actor.get("spec")
     return {
@@ -429,30 +512,21 @@ def _actor_identity(actor: Mapping[str, object], match_source: str) -> dict:
 def _resolve_ranked_actor(candidate: Mapping[str, object], fights, actors, filters: DiscoveryFilters):
     if not any(getattr(filters, field) is not None for field in ("class_name", "spec_name", "role")):
         return None, None
-    row_actor = _ranking_actor(candidate)
-    if row_actor is not None:
+    ranked_actor, ranked_source = _matching_ranking_actor(candidate, actors, filters)
+    if ranked_actor is not None:
+        return ranked_actor, ranked_source
+    if _ranking_actor(candidate) is not None:
         if not actors:
-            return dict(candidate, **row_actor), "ranking_row"
-        matches = [
-            actor for actor in actors
-            if (row_actor.get("id") is None or actor.get("id") == row_actor.get("id")) and
-            (row_actor.get("name") is None or _casefold(actor.get("name")) == _casefold(row_actor.get("name")))
-        ]
-        if len(matches) == 1:
-            return matches[0], "ranking_row"
-        return None, "ambiguous"
-    def satisfies(actor):
-        return (
-            (filters.class_name is None or _actor_field_matches(actor, filters.class_name, ("className", "class", "subType"))) and
-            (filters.spec_name is None or _actor_field_matches(actor, filters.spec_name, ("specName", "spec", "subType"))) and
-            (filters.role is None or _actor_role_matches(actor, filters.role))
-        )
-    ranked = [actor for actor in actors if actor.get("ranked") is True and satisfies(actor)]
+            return dict(candidate, **_ranking_actor(candidate)), "ranking_row"
+        return None, ranked_source
+    if _ranking_team(candidate):
+        return None, ranked_source
+    ranked = [actor for actor in actors if actor.get("ranked") is True and _actor_matches_filters(actor, filters)]
     if len(ranked) == 1:
         return ranked[0], "ranked_group_member"
     if any("ranked" in actor for actor in actors):
         return None, "missing" if not ranked else "ambiguous"
-    unique = [actor for actor in actors if satisfies(actor)]
+    unique = [actor for actor in actors if _actor_matches_filters(actor, filters)]
     if len(unique) == 1:
         return unique[0], "unique_group_match"
     if len(unique) > 1:
@@ -541,6 +615,8 @@ def make_global_result(rows, sample_size, filters, ranking_basis="encounter_rank
             result[field] = metadata[field]
     if metadata.get("fatal_error"):
         result["fatal_error"] = True
+    if metadata.get("realm_filter"):
+        result["realm_filter"] = dict(metadata["realm_filter"])
     return result
 
 
@@ -549,6 +625,8 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
                     expansion_id=None) -> dict:
     if leaderboard is not None:
         raise ValueError("Global leaderboard filtering is not supported by the public Warcraft Logs API")
+    if server_slug is not None and (not isinstance(server_region, str) or not server_region.strip()):
+        raise ValueError("Global server slug requires --server-region for verified realm filtering")
     if not isinstance(top, int) or isinstance(top, bool) or not GLOBAL_TOP_MIN <= top <= GLOBAL_TOP_MAX:
         raise ValueError("Global top must be between 1 and 100")
     if (
@@ -582,8 +660,13 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
             ))
         rows = [row for part in parts for row in part["data"]]
         child_errors = [error for part in parts for error in part.get("errors", [])]
+        result_filters = _filters_dict(filters)
+        if server_region is not None:
+            result_filters["server_region"] = server_region
+        if server_slug is not None:
+            result_filters["server_slug"] = server_slug
         return make_global_result(
-            rows, top, _filters_dict(filters),
+            rows, top, result_filters,
             source_rows=sum(part["source_rows"] for part in parts),
             unique_candidates=len(_dedupe_global_candidates(rows)),
             hydrated_candidates=sum(part["hydrated_candidates"] for part in parts),
@@ -593,6 +676,11 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
             truncated=any(part["truncated"] for part in parts),
             metric=metric,
             errors=child_errors,
+            fatal_error=any(part.get("fatal_error") for part in parts),
+            realm_filter={
+                "ranking": "serverRegion",
+                "verification": "matched_actor.server",
+            } if server_slug is not None else None,
         )
     zone_id = filters.zone or filters.instance
     if zone_id is None:
@@ -620,7 +708,7 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
     for field, value in (
         ("difficulty", filters.difficulty), ("partition", filters.partition),
         ("metric", metric), ("leaderboard", leaderboard),
-        ("serverRegion", server_region), ("serverSlug", server_slug),
+        ("serverRegion", server_region),
     ):
         if value is not None:
             variables[field] = value
@@ -632,6 +720,7 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
     exclusion_reasons = {}
     errors = []
     fatal_error = False
+    realm_filter_requested = server_slug is not None
     while pages_fetched < max_pages and (pages_fetched == 0 or has_more):
         variables["page"] = current_page
         try:
@@ -675,7 +764,7 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
             processed_exclusions += 1
             continue
         actor_filters_requested = any(getattr(filters, field) is not None for field in ("class_name", "spec_name", "role"))
-        if missing or (actor_filters_requested and _ranking_actor(candidate) is None):
+        if missing or realm_filter_requested or (actor_filters_requested and _ranking_actor(candidate) is None):
             hydrated_count += 1
             hydration_fields = set(missing)
             if actor_filters_requested:
@@ -685,6 +774,7 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
                     client, candidate["report_code"],
                     _filters_without(filters, set(_DISCOVERY_FILTER_FIELDS) - hydration_fields),
                     fight_id=candidate.get("fight_id"),
+                    require_actors=realm_filter_requested,
                 )
             except PartialGraphQLError as error:
                 errors.extend(error.errors)
@@ -698,6 +788,7 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
                 continue
             hydrated_filters = _filters_without(filters, set(_DISCOVERY_FILTER_FIELDS) - hydration_fields)
             report = dict(candidate)
+            report_actors = actors
             matched_actor, actor_source = _resolve_ranked_actor(candidate, fights, actors, filters)
             if actor_filters_requested:
                 if matched_actor is None:
@@ -705,6 +796,24 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
                     processed_exclusions += 1
                     continue
                 actors = [matched_actor]
+            if realm_filter_requested:
+                realm_actor, realm_source = _matching_ranking_actor(
+                    candidate,
+                    report_actors,
+                    filters if actor_filters_requested else None,
+                    team_only=True,
+                )
+                if realm_actor is None:
+                    exclusion_reasons["server_identity"] = exclusion_reasons.get("server_identity", 0) + 1
+                    processed_exclusions += 1
+                    continue
+                if not _actor_server_matches(realm_actor, server_slug):
+                    exclusion_reasons["server_slug"] = exclusion_reasons.get("server_slug", 0) + 1
+                    processed_exclusions += 1
+                    continue
+                matched_actor, actor_source = realm_actor, realm_source
+                if actor_filters_requested:
+                    actors = [matched_actor]
             is_match, reasons = report_matches(report, fights, actors, hydrated_filters)
             if not is_match:
                 for reason in reasons:
@@ -724,10 +833,15 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
         if len(matched) >= top:
             break
     truncated = has_more and pages_fetched >= max_pages or len(candidates) > top
+    result_filters = _filters_dict(filters)
+    if server_region is not None:
+        result_filters["server_region"] = server_region
+    if server_slug is not None:
+        result_filters["server_slug"] = server_slug
     return make_global_result(
         matched,
         top,
-        _filters_dict(filters),
+        result_filters,
         source_rows=len(rows),
         unique_candidates=len(candidates),
         hydrated_candidates=hydrated_count,
@@ -742,6 +856,10 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
         requested_key=exact_key,
         ranking_bracket=ranking_bracket,
         fatal_error=fatal_error,
+        realm_filter={
+            "ranking": "serverRegion",
+            "verification": "matched_actor.server",
+        } if realm_filter_requested else None,
     )
 
 

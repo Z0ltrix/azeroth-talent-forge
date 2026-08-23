@@ -1,0 +1,14 @@
+{
+  "data": {
+    "worldData": {
+      "server": {
+        "id": 424,
+        "name": "Dun Morogh",
+        "normalizedName": "DunMorogh",
+        "slug": "dun-morogh",
+        "region": {"id": 2, "name": "Europe", "slug": "EU"},
+        "subregion": {"id": 4, "name": "German"}
+      }
+    }
+  }
+}

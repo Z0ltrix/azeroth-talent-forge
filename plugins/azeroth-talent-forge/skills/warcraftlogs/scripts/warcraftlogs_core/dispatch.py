@@ -86,11 +86,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     raise ValueError("Global page and max pages must be between 1 and 5")
                 if args.leaderboard is not None:
                     raise ValueError("Global leaderboard filtering is not supported by the public Warcraft Logs API")
+                server_region, server_slug, unused_realm = resolve_global_realm(
+                    client, args.server_region, args.server_slug, no_cache=args.no_cache,
+                )
                 filters = _global_filters(args, client)
                 result = discover_global(
                     client, filters, args.top, args.page, args.max_pages,
                     metric=args.metric, leaderboard=args.leaderboard,
-                    server_region=args.server_region, server_slug=args.server_slug,
+                    server_region=server_region, server_slug=server_slug,
                     expansion_id=args.expansion_id,
                 )
             except AuthenticationError as error:

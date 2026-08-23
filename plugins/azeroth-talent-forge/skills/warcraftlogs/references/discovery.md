@@ -60,7 +60,14 @@ python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py 
 
 Supported global filters include class/spec, role, partition, difficulty,
 keystone range, affixes, timed/depleted, kill/wipe, time, server region/slug,
-and metric. The output is always `completeness: "sampled"` and carries counts
+and metric. A realm slug requires `--server-region`; the metadata resolver
+canonicalizes `DunMorogh`, `Dun-Morogh`, and `dun-morogh` to `dun-morogh`.
+Mythic+ `fightRankings` supports `serverRegion`, but sending `serverSlug`
+returns a ranking error. The adapter therefore sends the canonical region only,
+hydrates the candidate report, and retains it only when the class/spec-selected
+ranking `team` member has `matched_actor.server` equal to the canonical realm.
+The output records this fallback as `realm_filter`; unverified actors are
+excluded, never reported as realm matches. The output is always `completeness: "sampled"` and carries counts
 for source rows, hydrated candidates, exclusions, returned candidates, and
 truncation. `--leaderboard` is intentionally rejected by the public endpoint
 adapter.
@@ -77,7 +84,8 @@ If the API returns an embedded `fightRankings.error` field, the script emits a
 sanitized structured `RANKING_ERROR` and exits with the API/data-contract error
 status. It must not turn that response into an empty successful result. Global
 results remain `sampled`; they are bounded ranking candidates, not an
-exhaustive leaderboard.
+exhaustive leaderboard. A realm fallback can therefore return no candidate in a
+bounded sample without proving that the realm has no matching runs.
 
 ## Filter semantics
 

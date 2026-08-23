@@ -186,7 +186,7 @@ class PackagingTests(unittest.TestCase):
 
     def test_manifest_version_and_skill_entry_are_machine_readable(self):
         manifest = json.loads(self.MANIFEST.read_text(encoding="utf-8"))
-        self.assertEqual(manifest["version"], "0.3.0")
+        self.assertEqual(manifest["version"], "0.3.1")
         self.assertIn("skills", manifest)
 
     def test_repo_agents_documents_plugin_release_rules(self):
@@ -270,6 +270,9 @@ class PackagingTests(unittest.TestCase):
             self.assertIn(phrase, documents["reports"].lower())
         for phrase in ("bracket", "fightRankings.error", "not pushed", "sampled"):
             self.assertIn(phrase, documents["discovery"])
+        for document in (documents["skill"], documents["cli"], documents["discovery"]):
+            self.assertIn("serverSlug", document)
+            self.assertIn("matched_actor.server", document)
         for phrase in ("category + ability_id", "display names", "button presses", "context"):
             self.assertIn(phrase, documents["evaluation"].lower())
         for phrase in ("report actor-metrics", "compare actor-metrics"):
@@ -1857,18 +1860,168 @@ class DiscoveryTests(unittest.TestCase):
 
     def test_global_rankings_query_exposes_documented_encounter_arguments(self):
         query = warcraftlogs.load_query("encounter-rankings")
-        for value in ("$encounterID", "$zoneID", "$difficulty", "$partition", "$page", "$serverRegion", "$serverSlug", "$metric", "fightRankings"):
+        for value in ("$encounterID", "$zoneID", "$difficulty", "$partition", "$page", "$serverRegion", "$metric", "fightRankings"):
             self.assertIn(value, query)
         self.assertNotIn("$leaderboard", query)
         self.assertNotIn("$hardModeLevel", query)
         self.assertNotIn("leaderboard:", query)
         self.assertNotIn("hardModeLevel:", query)
+        self.assertNotIn("$serverSlug", query)
+        self.assertNotIn("serverSlug:", query)
         self.assertIn("zone(id: $zoneID)", query)
         self.assertNotIn("zoneID: $zoneID", query)
         self.assertNotIn("className: $className", query)
         self.assertNotIn("specName: $specName", query)
         self.assertNotIn("role: $role", query)
         self.assertNotIn("characterRankings", query)
+
+    def test_realm_slug_normalizes_dun_morogh_variants(self):
+        for value in ("DunMorogh", "Dun-Morogh", "dun-morogh"):
+            with self.subTest(value=value):
+                client = FixtureClient({"metadata-realm": fixture("metadata-realm-dun-morogh.json")})
+                realm, unused = warcraftlogs.MetadataResolver(client, no_cache=True).realm("EU", value)
+                self.assertEqual(client.variables, [{"region": "EU", "slug": "dun-morogh"}])
+                self.assertEqual(realm["slug"], "dun-morogh")
+
+    def test_global_realm_slug_falls_back_to_region_and_verified_actor(self):
+        client = FixtureClient({
+            "encounter-rankings": fixture("global-rankings-realm.json"),
+            "report-fights": fixture("report-fights-realm.json"),
+            "report-master-data": fixture("report-master-data-dun-morogh.json"),
+        })
+
+        result = warcraftlogs.discover_global(
+            client,
+            warcraftlogs.DiscoveryFilters(encounter=12923, zone=55, class_name="Warrior", spec_name="Fury"),
+            top=1,
+            page=1,
+            server_region="EU",
+            server_slug="dun-morogh",
+        )
+
+        ranking_call = next(variables for name, variables in zip(client.calls, client.variables) if name == "encounter-rankings")
+        self.assertEqual(ranking_call["serverRegion"], "EU")
+        self.assertNotIn("serverSlug", ranking_call)
+        self.assertEqual(len(result["data"]), 1)
+        self.assertEqual(result["data"][0]["matched_actor"]["name"], "Realmwarrior")
+        self.assertEqual(result["data"][0]["matched_actor"]["spec"], "Fury")
+        self.assertEqual(result["realm_filter"], {
+            "ranking": "serverRegion",
+            "verification": "matched_actor.server",
+        })
+        self.assertFalse(result.get("fatal_error", False))
+
+    def test_global_realm_slug_excludes_unverified_actor_realm(self):
+        other_realm_master_data = fixture("report-master-data-dun-morogh.json")
+        other_realm_master_data["data"]["reportData"]["report"]["masterData"]["actors"][0]["server"] = "Area 52"
+        client = FixtureClient({
+            "encounter-rankings": fixture("global-rankings-realm.json"),
+            "report-fights": fixture("report-fights-realm.json"),
+            "report-master-data": other_realm_master_data,
+        })
+
+        result = warcraftlogs.discover_global(
+            client,
+            warcraftlogs.DiscoveryFilters(encounter=12923, zone=55, class_name="Warrior", spec_name="Fury"),
+            top=1,
+            page=1,
+            server_region="EU",
+            server_slug="dun-morogh",
+        )
+
+        self.assertEqual(result["data"], [])
+        self.assertFalse(result.get("fatal_error", False))
+        self.assertEqual(result["exclusion_reasons"]["server_slug"], 1)
+
+    def test_global_realm_slug_ranking_error_remains_fatal(self):
+        client = FixtureClient({
+            "encounter-rankings": fixture("global-rankings-embedded-error.json"),
+        })
+
+        result = warcraftlogs.discover_global(
+            client,
+            warcraftlogs.DiscoveryFilters(encounter=12923, zone=55),
+            top=1,
+            page=1,
+            server_region="EU",
+            server_slug="dun-morogh",
+        )
+
+        self.assertEqual(result["data"], [])
+        self.assertTrue(result["fatal_error"])
+        self.assertEqual(result["errors"][0]["extensions"]["code"], "RANKING_ERROR")
+
+    def test_global_realm_slug_uses_team_actor_not_conflicting_row_actor(self):
+        master_data = fixture("report-master-data-dun-morogh.json")
+        master_data["data"]["reportData"]["report"]["masterData"]["actors"][0]["server"] = "Area 52"
+        master_data["data"]["reportData"]["report"]["masterData"]["actors"].append({
+            "id": 2, "gameID": 0, "icon": "Warrior-Fury", "name": "Outsider",
+            "petOwner": None, "server": "DunMorogh", "subType": "FuryWarrior", "type": "Player",
+        })
+        client = FixtureClient({
+            "encounter-rankings": fixture("global-rankings-realm-conflicting-actor.json"),
+            "report-fights": fixture("report-fights-realm.json"),
+            "report-master-data": master_data,
+        })
+
+        result = warcraftlogs.discover_global(
+            client,
+            warcraftlogs.DiscoveryFilters(encounter=12923, zone=55, class_name="Warrior", spec_name="Fury"),
+            top=1,
+            page=1,
+            server_region="EU",
+            server_slug="dun-morogh",
+        )
+
+        self.assertEqual(result["data"], [])
+        self.assertEqual(result["exclusion_reasons"]["server_slug"], 1)
+
+    def test_global_zone_propagates_realm_ranking_error_as_fatal(self):
+        client = FixtureClient({
+            "metadata-world": fixture("metadata-world-realm.json"),
+            "encounter-rankings": fixture("global-rankings-embedded-error.json"),
+        })
+
+        result = warcraftlogs.discover_global(
+            client,
+            warcraftlogs.DiscoveryFilters(zone=55),
+            top=1,
+            page=1,
+            server_region="EU",
+            server_slug="dun-morogh",
+        )
+
+        self.assertTrue(result["fatal_error"])
+        self.assertEqual(result["errors"][0]["extensions"]["code"], "RANKING_ERROR")
+        self.assertEqual(result["realm_filter"]["verification"], "matched_actor.server")
+
+    def test_global_cli_resolves_realm_then_sends_region_only(self):
+        client = FixtureClient({
+            "metadata-realm": fixture("metadata-realm-dun-morogh.json"),
+            "metadata-world": fixture("metadata-world-realm.json"),
+            "encounter-rankings": fixture("global-rankings-realm.json"),
+            "report-fights": fixture("report-fights-realm.json"),
+            "report-master-data": fixture("report-master-data-dun-morogh.json"),
+        })
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ), redirect_stdout(output), redirect_stderr(io.StringIO()):
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret",
+                "--env-file", str(Path(directory) / "missing.env"), "--no-cache",
+                "find", "global", "--encounter", "12923", "--server-region", "eu",
+                "--server-slug", "DunMorogh", "--top", "1", "--max-pages", "1",
+            ])
+
+        result = json.loads(output.getvalue())
+        realm_call = next(variables for name, variables in zip(client.calls, client.variables) if name == "metadata-realm")
+        ranking_call = next(variables for name, variables in zip(client.calls, client.variables) if name == "encounter-rankings")
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(realm_call, {"region": "EU", "slug": "dun-morogh"})
+        self.assertEqual(ranking_call["serverRegion"], "EU")
+        self.assertNotIn("serverSlug", ranking_call)
+        self.assertEqual(result["data"][0]["matched_actor"]["name"], "Realmwarrior")
 
     def test_global_leaderboard_is_rejected_before_api_call(self):
         client = FixtureClient({})

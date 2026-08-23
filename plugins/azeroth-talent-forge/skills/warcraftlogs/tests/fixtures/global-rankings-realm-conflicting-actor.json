@@ -1,0 +1,9 @@
+{
+  "data": {
+    "worldData": {
+      "encounter": {
+        "fightRankings": "{\"rankings\":[{\"rank\":1,\"actor\":{\"id\":2,\"name\":\"Outsider\"},\"report\":{\"code\":\"Realm0001\",\"fightID\":9},\"team\":[{\"id\":9001,\"name\":\"Realmwarrior\",\"class\":\"Warrior\",\"spec\":\"Fury\",\"role\":\"dps\"}]}],\"page\":1,\"hasMorePages\":false}"
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "data": {
+    "worldData": {
+      "encounter": {
+        "fightRankings": "{\"rankings\":[{\"rank\":1,\"report\":{\"code\":\"Realm0001\",\"fightID\":9},\"team\":[{\"id\":9001,\"name\":\"Realmwarrior\",\"class\":\"Warrior\",\"spec\":\"Fury\",\"role\":\"dps\"},{\"id\":9002,\"name\":\"Realmhealer\",\"class\":\"Paladin\",\"spec\":\"Holy\",\"role\":\"healer\"}]}],\"page\":1,\"hasMorePages\":false}"
+      }
+    }
+  }
+}

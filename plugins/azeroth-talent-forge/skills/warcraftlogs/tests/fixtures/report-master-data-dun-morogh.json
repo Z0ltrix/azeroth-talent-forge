@@ -1,0 +1,17 @@
+{
+  "data": {
+    "reportData": {
+      "report": {
+        "visibility": "public",
+        "archiveStatus": {"isArchived": false, "isAccessible": true, "archiveDate": null},
+        "masterData": {
+          "logVersion": 22,
+          "gameVersion": 110005,
+          "lang": "en",
+          "abilities": [],
+          "actors": [{"id": 1, "gameID": 0, "icon": "Warrior-Fury", "name": "Realmwarrior", "petOwner": null, "server": "DunMorogh", "subType": "Warrior", "type": "Player"}]
+        }
+      }
+    }
+  }
+}
