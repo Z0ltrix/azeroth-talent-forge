@@ -1,0 +1,60 @@
+{
+  "fight": {
+    "id": 20,
+    "name": "Den of Nalorakk",
+    "encounterID": 3107,
+    "keystoneLevel": 6,
+    "keystoneBonus": 1,
+    "gameZone": {"id": 2444, "name": "Midnight"},
+    "startTime": 1000,
+    "endTime": 2000
+  },
+  "player": {
+    "id": 1,
+    "name": "Ratelka",
+    "subType": "FuryWarrior",
+    "specName": "Fury",
+    "role": "dps"
+  },
+  "player_details": {"players": [{"id": 1, "name": "Ratelka"}]},
+  "tables": {
+    "DamageDone": {
+      "entries": [
+        {
+          "guid": 9000,
+          "name": "Parent Container",
+          "total": 999,
+          "subentries": [
+            {"guid": 1001, "name": "Shared Name", "total": 300, "casts": 2, "scope": "actor"},
+            {"guid": 1002, "name": "Shared Name", "total": 200, "casts": 3, "scope": "actor"}
+          ]
+        },
+        {"guid": 1001, "name": "Renamed Name", "total": 50, "casts": 1, "scope": "actor"},
+        {"guid": 6001, "name": "Malformed Value", "total": "not-a-number", "scope": "actor"},
+        {"name": "Missing Ability", "total": 10}
+      ],
+      "total": 550
+    },
+    "Casts": {
+      "entries": [
+        {"guid": 1001, "name": "Renamed Name", "casts": 4, "scope": "actor"},
+        {"guid": 1002, "name": "Shared Name", "casts": 3, "scope": "actor"}
+      ]
+    },
+    "Interrupts": {
+      "entries": [
+        {"guid": 3001, "name": "Interrupt Spell", "uses": 2, "scope": "actor"}
+      ]
+    },
+    "DamageTaken": {
+      "entries": [
+        {"guid": 4001, "name": "Incoming Hit", "total": 800, "scope": "actor"}
+      ]
+    },
+    "Deaths": {
+      "entries": [
+        {"guid": 5001, "name": "Death Event", "count": 1, "scope": "actor"}
+      ]
+    }
+  }
+}

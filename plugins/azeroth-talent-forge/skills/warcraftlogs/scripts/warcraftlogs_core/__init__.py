@@ -6,6 +6,7 @@ __all__ = [
     "discovery",
     "dispatch",
     "metadata",
+    "metrics",
     "models",
     "parser",
     "reports",

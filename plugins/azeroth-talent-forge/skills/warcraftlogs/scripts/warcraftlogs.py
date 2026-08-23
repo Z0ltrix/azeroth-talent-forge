@@ -14,6 +14,7 @@ from warcraftlogs_core.transport import *  # noqa: F401,F403
 from warcraftlogs_core.metadata import *  # noqa: F401,F403
 from warcraftlogs_core.reports import *  # noqa: F401,F403
 from warcraftlogs_core.discovery import *  # noqa: F401,F403
+from warcraftlogs_core import metrics as _metrics
 from warcraftlogs_core.parser import build_parser
 from warcraftlogs_core import dispatch as _dispatch
 from warcraftlogs_core import models as _models
@@ -34,7 +35,7 @@ def main(argv=None):
 
 
 def __getattr__(name):
-    for module in (_models, _credentials, _transport, _metadata, _reports, _discovery, _dispatch):
+    for module in (_models, _credentials, _transport, _metadata, _reports, _discovery, _metrics, _dispatch):
         if hasattr(module, name):
             return getattr(module, name)
     raise AttributeError(name)

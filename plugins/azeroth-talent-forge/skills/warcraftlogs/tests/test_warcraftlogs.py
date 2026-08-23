@@ -21,12 +21,13 @@ class FoundationImportTests(unittest.TestCase):
         self.assertTrue(hasattr(transport, "load_query"))
 
     def test_metadata_and_reports_service_modules_exist(self):
-        from warcraftlogs_core import metadata, reports
+        from warcraftlogs_core import metadata, metrics, reports
 
         self.assertTrue(hasattr(metadata, "MetadataResolver"))
         self.assertTrue(hasattr(metadata, "normalize_name"))
         self.assertTrue(hasattr(reports, "parse_report_reference"))
         self.assertTrue(hasattr(reports, "iter_event_pages"))
+        self.assertTrue(hasattr(metrics, "normalize_actor_metrics"))
 
 SCRIPT = Path(__file__).parents[1] / "scripts" / "warcraftlogs.py"
 SPEC = importlib.util.spec_from_file_location("warcraftlogs_cli", SCRIPT)
@@ -1578,6 +1579,50 @@ class EventTests(unittest.TestCase):
             ])
         self.assertEqual(exit_code, 2)
         self.assertEqual(client.calls, [])
+
+
+class MetricsTests(unittest.TestCase):
+    def test_normalize_actor_metrics_uses_numeric_ability_identity_and_leaf_rows(self):
+        from warcraftlogs_core import metrics
+
+        result = metrics.normalize_actor_metrics(fixture("report-table-components.json"))
+        self.assertEqual(result["metrics_schema_version"], 1)
+        self.assertEqual(result["actor"]["name"], "Ratelka")
+        self.assertEqual(result["run"]["key_level"], 6)
+
+        damage = result["damage_components"]
+        identities = {(row["category"], row["ability_id"]) for row in damage}
+        self.assertEqual(identities, {("DamageDone", 1001), ("DamageDone", 1002)})
+        self.assertEqual(next(row for row in damage if row["ability_id"] == 1001)["values"]["total"], 350)
+        self.assertEqual(next(row for row in damage if row["ability_id"] == 1001)["name"], "Shared Name")
+        self.assertIn("Renamed Name", next(row for row in damage if row["ability_id"] == 1001)["observed_names"])
+        self.assertNotIn(9000, {row["ability_id"] for row in damage})
+
+        casts = result["cast_components"]
+        self.assertEqual({row["ability_id"] for row in casts}, {1001, 1002})
+        self.assertEqual(result["utility"]["Interrupts"][0]["ability_id"], 3001)
+        self.assertEqual(result["survival"]["DamageTaken"][0]["ability_id"], 4001)
+        self.assertTrue(any(item["reason"] == "ability_id_missing" for item in result["missing_data"]))
+        self.assertTrue(any(item["reason"] == "numeric_values_missing" for item in result["missing_data"]))
+        self.assertTrue(any(item["reason"] == "view_missing" and item["category"] == "Healing" for item in result["missing_data"]))
+        self.assertNotIn("button_presses", result)
+
+    def test_normalize_actor_metrics_keeps_incompatible_scopes_separate(self):
+        from warcraftlogs_core import metrics
+
+        details = fixture("report-table-components.json")
+        details["tables"]["DamageDone"]["entries"].append({
+            "guid": 1001, "name": "Shared Name", "total": 25, "scope": "different-scope",
+        })
+        result = metrics.normalize_actor_metrics(details)
+        rows = [row for row in result["damage_components"] if row["ability_id"] == 1001]
+        self.assertEqual(len(rows), 2)
+
+    def test_normalize_actor_metrics_rejects_invalid_detail_shape(self):
+        from warcraftlogs_core import metrics
+
+        with self.assertRaises(TypeError):
+            metrics.normalize_actor_metrics({"tables": []})
 
 
 class DiscoveryTests(unittest.TestCase):
