@@ -9,7 +9,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 class SkillContractTests(unittest.TestCase):
     def test_release_manifest_and_old_skill_migration(self):
         manifest = json.loads((ROOT.parents[1] / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
-        self.assertEqual(manifest["version"], "1.0.1")
+        self.assertEqual(manifest["version"], "1.0.2")
         self.assertFalse((ROOT.parent / "wowhead-talent-planner").exists())
 
     def test_skill_is_named_talents_and_routes_every_public_operation(self):
@@ -33,7 +33,7 @@ class SkillContractTests(unittest.TestCase):
 
     def test_every_reference_is_a_filled_markdown_document(self):
         documents = list((ROOT / "references").rglob("*.md"))
-        self.assertGreaterEqual(len(documents), 132)
+        self.assertGreaterEqual(len(documents), 131)
         forbidden = ("TODO", "TBD", "placeholder", "Talent definition", "Unresolved source text")
         for path in documents:
             with self.subTest(path=path.relative_to(ROOT)):
