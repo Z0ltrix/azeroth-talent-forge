@@ -186,7 +186,7 @@ class PackagingTests(unittest.TestCase):
 
     def test_manifest_version_and_skill_entry_are_machine_readable(self):
         manifest = json.loads(self.MANIFEST.read_text(encoding="utf-8"))
-        self.assertEqual(manifest["version"], "0.2.0")
+        self.assertEqual(manifest["version"], "0.3.0")
         self.assertIn("skills", manifest)
 
     def test_repo_agents_documents_plugin_release_rules(self):
