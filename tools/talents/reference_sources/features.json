@@ -1,0 +1,11 @@
+[
+  {"id": "import-export", "title": "Import and export", "command": "inspect --code STRING / modify --code STRING / generate --spec SPEC"},
+  {"id": "inspect", "title": "Inspect", "command": "inspect --code STRING"},
+  {"id": "validate", "title": "Validate", "command": "validate --code STRING"},
+  {"id": "compare", "title": "Compare", "command": "compare --left STRING --right STRING"},
+  {"id": "modify", "title": "Modify", "command": "modify --code STRING [--set ENTRY=RANK] [--clear ENTRY]"},
+  {"id": "generate", "title": "Generate", "command": "generate --spec SPEC [--require ENTRY] [--forbid ENTRY] [--prefer ENTRY=WEIGHT]"},
+  {"id": "presets", "title": "Presets", "command": "presets list / presets show --id PRESET_ID"},
+  {"id": "patch-assets", "title": "Patch assets", "command": "assets info [--build BUILD]"},
+  {"id": "errors", "title": "Errors", "command": "all commands"}
+]
