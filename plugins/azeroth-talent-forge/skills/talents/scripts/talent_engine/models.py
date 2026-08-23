@@ -22,6 +22,9 @@ class Selection:
     purchased_ranks: int
     observed_granted_ranks: int = 0
     choice_index: int = 0
+    # Preserve an accepted legacy import which omitted a choice marker. New
+    # selections use None and therefore follow the graph's current node type.
+    encoded_choice_marker: bool | None = None
 
 
 @dataclass(frozen=True)
@@ -54,6 +57,7 @@ class CodecNode:
     is_granted: bool = False
     choice_count: int = 0
     visible: bool = True
+    entry_ids: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -69,6 +73,8 @@ class SpecGraph:
     exclusions: tuple[tuple[int, int], ...] = ()
     budgets: tuple[tuple[int, int], ...] = ()
     grants: tuple[tuple[int, int], ...] = ()
+    costs: tuple[tuple[int, int, int], ...] = ()
+    currency_budgets: tuple[tuple[int, int, int], ...] = ()
 
     @property
     def node_by_id(self) -> dict[int, CodecNode]:
@@ -76,7 +82,11 @@ class SpecGraph:
 
     @property
     def entry_by_id(self) -> dict[int, CodecNode]:
-        return {node.entry_id: node for node in self.nodes}
+        return {
+            entry_id: node
+            for node in self.nodes
+            for entry_id in (node.entry_ids or (node.entry_id,))
+        }
 
     @property
     def name_by_entry(self) -> dict[int, str]:

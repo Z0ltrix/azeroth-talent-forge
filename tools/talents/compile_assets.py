@@ -56,7 +56,8 @@ def _literal(value: Any) -> str:
         return "true" if value else "false"
     if isinstance(value, (int, float)):
         return str(value)
-    return "'" + str(value).replace("'", "''") + "'"
+    # Ladybug's Cypher parser uses backslash escaping for quoted strings.
+    return "'" + str(value).replace("\\", "\\\\").replace("'", "\\'").replace("\r", "\\r").replace("\n", "\\n") + "'"
 
 
 def _create_node(connection: ladybug.Connection, label: str, values: dict[str, Any]) -> None:
@@ -90,7 +91,9 @@ def _compile_graph(snapshot: dict[str, Any], database_path: Path) -> None:
         for item in snapshot.get("specs", []):
             _create_node(connection, "Spec", {"id": item["id"], "class_id": item.get("class_id", 0), "role": item.get("role", ""), "name": item["name"]})
         for item in snapshot.get("trees", []):
-            _create_node(connection, "Tree", {"id": item["id"], "kind": item.get("kind", ""), "spec_id": item.get("spec_id", 0) or 0})
+            _create_node(connection, "Tree", {"id": item["id"], "kind": item.get("kind", ""), "class_id": item.get("class_id", 0) or 0, "spec_id": item.get("spec_id", 0) or 0})
+        for item in snapshot.get("subtrees", []):
+            _create_node(connection, "Subtree", {"id": item["id"], "name": item.get("name", ""), "tree_id": item.get("tree_id", 0) or 0, "currency_id": item.get("currency_id", 0) or 0, "required_level": item.get("required_level", 0) or 0})
         orders = snapshot.get("codec_orders", {})
         tree_to_spec = {item["id"]: item.get("spec_id") for item in snapshot.get("trees", [])}
         for item in snapshot.get("nodes", []):
@@ -103,9 +106,13 @@ def _compile_graph(snapshot: dict[str, Any], database_path: Path) -> None:
         for item in snapshot.get("definitions", []):
             _create_node(connection, "Definition", {"id": item["id"], "spell_id": item.get("spell_id", 0) or 0, "name": item["name"], "description": item["description"], "effect": item.get("effect", item["description"]), "source": item.get("source", "")})
         for item in snapshot.get("effects", []):
-            _create_node(connection, "SpellEffect", {"id": item["id"], "definition_id": item.get("definition_id", 0) or 0, "effect_index": item.get("effect_index", 0), "effect_type": item.get("effect_type", ""), "amount": item.get("amount", 0.0)})
+            _create_node(connection, "SpellEffect", {"id": item["id"], "definition_id": item.get("definition_id", 0) or 0, "effect_index": item.get("effect_index", 0), "operation_type": item.get("operation_type", 0), "curve_id": item.get("curve_id", 0)})
         for item in snapshot.get("currencies", []):
             _create_node(connection, "Currency", {"id": item["id"], "kind": item.get("kind", "")})
+        for item in snapshot.get("currency_sources", []):
+            _create_node(connection, "CurrencySource", {"id": item["id"], "currency_id": item.get("currency_id", 0), "amount": item.get("amount", 0), "level": item.get("level", 0), "ordinal": item.get("order", 0)})
+        for item in snapshot.get("conditions", []):
+            _create_node(connection, "Condition", {"id": item["id"], "source_condition_id": item.get("source_condition_id", item["id"]), "source": item.get("source", ""), "tree_id": item.get("tree_id", 0), "node_id": item.get("node_id", 0), "entry_id": item.get("entry_id", 0), "currency_id": item.get("currency_id", 0), "spent": item.get("spent", 0), "level": item.get("level", 0), "granted_ranks": item.get("granted_ranks", 0), "type": item.get("type", 0)})
         for item in snapshot.get("presets", []):
             _create_node(connection, "Preset", {"id": item["preset_id"], "label": item.get("label", ""), "category": item.get("category", ""), "code": item["code"], "spec_id": item.get("spec_id", 0) or 0, "hero_subtree_id": item.get("hero_subtree_id", 0) or 0, "source_url": item.get("source_url", ""), "source_name": item.get("source_name", ""), "claimed_patch": item.get("claimed_patch", "") or ""})
         class_ids = {item["id"] for item in snapshot.get("classes", [])}
@@ -114,23 +121,65 @@ def _compile_graph(snapshot: dict[str, Any], database_path: Path) -> None:
         node_ids = {item["id"] for item in snapshot.get("nodes", [])}
         entry_ids = {item["id"] for item in snapshot.get("entries", [])}
         definition_ids = {item["id"] for item in snapshot.get("definitions", [])}
+        currency_ids = {item["id"] for item in snapshot.get("currencies", [])}
+        condition_ids = {item["id"] for item in snapshot.get("conditions", [])}
         for item in snapshot.get("specs", []):
             if item.get("class_id") in class_ids:
                 _create_edge(connection, "HAS_SPEC", "Class", item["class_id"], "Spec", item["id"])
         for item in snapshot.get("trees", []):
             if item.get("spec_id") in spec_ids:
                 _create_edge(connection, "USES_SPEC_TREE", "Spec", item["spec_id"], "Tree", item["id"])
+            elif item.get("kind") == "class" and item.get("class_id") in {spec.get("class_id") for spec in snapshot.get("specs", [])}:
+                for spec in snapshot.get("specs", []):
+                    if spec.get("class_id") == item.get("class_id"):
+                        _create_edge(connection, "USES_SPEC_TREE", "Spec", spec["id"], "Tree", item["id"])
         for item in snapshot.get("nodes", []):
             if item.get("tree_id") in tree_ids:
                 _create_edge(connection, "HAS_NODE", "Tree", item["tree_id"], "TraitNode", item["id"])
+        edge_relations = {0: "VISUAL_EDGE", 2: "SUFFICIENT_FOR", 3: "REQUIRED_FOR", 4: "MUTUALLY_EXCLUSIVE"}
+        for item in snapshot.get("edges", []):
+            relation = edge_relations.get(int(item.get("type", 0)))
+            if relation and item.get("source") in node_ids and item.get("target") in node_ids:
+                _create_edge(connection, relation, "TraitNode", item["source"], "TraitNode", item["target"])
+        for item in snapshot.get("subtrees", []):
+            if item.get("tree_id") in tree_ids:
+                _create_edge(connection, "HAS_SUBTREE", "Tree", item["tree_id"], "Subtree", item["id"])
         for item in snapshot.get("entries", []):
             if item.get("node_id") in node_ids:
                 _create_edge(connection, "HAS_ENTRY", "TraitNode", item["node_id"], "Entry", item["id"])
             if item.get("definition_id") in definition_ids:
                 _create_edge(connection, "USES_DEFINITION", "Entry", item["id"], "Definition", item["definition_id"])
+        for item in snapshot.get("effects", []):
+            if item.get("definition_id") in definition_ids:
+                _create_edge(connection, "HAS_EFFECT", "Definition", item["definition_id"], "SpellEffect", item["id"])
+        for item in snapshot.get("currency_sources", []):
+            if item.get("currency_id") in currency_ids:
+                _create_edge(connection, "UNLOCKS", "Currency", item["currency_id"], "CurrencySource", item["id"])
+        for item in snapshot.get("costs", []):
+            if item.get("node_id") in node_ids and item.get("currency_id") in currency_ids:
+                _create_edge(connection, "COSTS", "TraitNode", item["node_id"], "Currency", item["currency_id"], {"amount": item.get("amount", 0)})
+        for item in snapshot.get("grants", []):
+            if item.get("spec_id") in spec_ids and item.get("node_id") in node_ids:
+                _create_edge(connection, "GRANTS", "Spec", item["spec_id"], "TraitNode", item["node_id"], {"entry_id": item.get("entry_id", 0), "ranks": item.get("ranks", 0)})
+        for item in snapshot.get("conditions", []):
+            if item.get("id") not in condition_ids:
+                continue
+            if item.get("source") in {"node", "group"} and item.get("node_id") in node_ids:
+                _create_edge(connection, "HAS_CONDITION", "TraitNode", item["node_id"], "Condition", item["id"])
+            elif item.get("source") == "entry" and item.get("entry_id") in entry_ids:
+                _create_edge(connection, "ENTRY_HAS_CONDITION", "Entry", item["entry_id"], "Condition", item["id"])
+            elif item.get("source") == "tree" and item.get("tree_id") in tree_ids:
+                _create_edge(connection, "TREE_HAS_CONDITION", "Tree", item["tree_id"], "Condition", item["id"])
         for item in snapshot.get("presets", []):
             if item.get("spec_id") in spec_ids:
                 _create_edge(connection, "FOR_SPEC", "Preset", item["preset_id"], "Spec", item["spec_id"])
+        for spec_key, order in orders.items():
+            spec_id = int(spec_key)
+            if spec_id not in spec_ids:
+                continue
+            for ordinal, node_id in enumerate(order):
+                if node_id in node_ids:
+                    _create_edge(connection, "SERIALIZES", "Spec", spec_id, "TraitNode", node_id, {"ordinal": ordinal})
         connection.close()
     finally:
         database.close()

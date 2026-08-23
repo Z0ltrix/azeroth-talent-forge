@@ -55,7 +55,8 @@ def modify_build(build: TalentBuild, graph: SpecGraph, *, set_ranks=(), clear=()
         entry_id = resolve_entry(graph, token)
         node = graph.entry_by_id[entry_id]
         old = current.get(node.node_id, Selection(node.node_id, entry_id, 0))
-        current[node.node_id] = replace(old, entry_id=entry_id, purchased_ranks=int(rank), observed_granted_ranks=0)
+        choice_index = node.entry_ids.index(entry_id) if node.is_choice else old.choice_index
+        current[node.node_id] = replace(old, entry_id=entry_id, purchased_ranks=int(rank), observed_granted_ranks=0, choice_index=choice_index)
     for token in clear:
         entry_id = resolve_entry(graph, token)
         node = graph.entry_by_id[entry_id]
@@ -65,7 +66,10 @@ def modify_build(build: TalentBuild, graph: SpecGraph, *, set_ranks=(), clear=()
         entry_id = resolve_entry(graph, token)
         node = graph.entry_by_id[entry_id]
         old = current.get(node.node_id, Selection(node.node_id, entry_id, 0))
-        current[node.node_id] = replace(old, purchased_ranks=max(old.purchased_ranks, 1), choice_index=int(choice_index))
+        index = int(choice_index)
+        if not node.is_choice or index < 0 or index >= len(node.entry_ids):
+            raise TalentError("CHOICE_CONFLICT", f"entry {entry_id} has an invalid choice {index}", node_id=node.node_id)
+        current[node.node_id] = replace(old, entry_id=node.entry_ids[index], purchased_ranks=max(old.purchased_ranks, 1), choice_index=index, encoded_choice_marker=True)
     if cascade:
         selected = {node_id for node_id, selection in current.items() if selection.purchased_ranks > 0 or selection.observed_granted_ranks > 0}
         changed = True

@@ -6,7 +6,8 @@ locale = "enUS"
 
 [wago]
 url = "https://wago.tools/db2/{table}/csv?build={build}&locale={locale}"
-tables = "ChrClasses,ChrSpecialization,TraitTree,TraitNode,TraitNodeEntry,TraitNodeXTraitNodeEntry,TraitDefinition,TraitDefinitionEffectPoints,TraitEdge,TraitCond,TraitCost,TraitCostDefinition,TraitCurrency,TraitCurrencySource,TraitSubTree,Spell,SpellEffect"
+tables = "ChrClasses,ChrSpecialization,SpecSetMember,TraitTree,TraitTreeXTraitCurrency,TraitNode,TraitNodeEntry,TraitNodeXTraitNodeEntry,TraitNodeXTraitCond,TraitNodeXTraitCost,TraitNodeGroup,TraitNodeGroupXTraitCond,TraitNodeGroupXTraitCost,TraitNodeGroupXTraitNode,TraitNodeEntryXTraitCost,TraitDefinition,TraitDefinitionEffectPoints,TraitEdge,TraitCond,TraitCost,TraitCurrency,TraitCurrencySource,TraitSubTree,Spell,SpellName,SpellEffect"
+dbd_tables = "ChrClasses,ChrSpecialization,SpecSetMember,TraitTree,TraitTreeXTraitCurrency,TraitNode,TraitNodeEntry,TraitNodeXTraitNodeEntry,TraitNodeXTraitCond,TraitNodeXTraitCost,TraitNodeGroup,TraitNodeGroupXTraitCond,TraitNodeGroupXTraitCost,TraitNodeGroupXTraitNode,TraitNodeEntryXTraitCost,TraitDefinition,TraitDefinitionEffectPoints,TraitEdge,TraitCond,TraitCost,TraitCurrency,TraitCurrencySource,TraitSubTree,Spell,SpellName,SpellEffect"
 
 [wowdbdefs]
 base_url = "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/{table}.dbd"

@@ -1,0 +1,3107 @@
+[
+  {
+    "source": "Wowhead",
+    "url": "https://www.wowhead.com/talent-calc/blizzard/CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzYmZmZmxsZmZZYMGNzMmZzMjZGzYMDAAAAWGDwMGgBWglFjGzAYWiZ2gZmBMbAAAAYGA",
+    "spec_id": 73,
+    "code": "CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzYmZmZmxsZmZZYMGNzMmZzMjZGzYMDAAAAWGDwMGgBWglFjGzAYWiZ2gZmBMbAAAAYGA",
+    "source_kind": "external",
+    "class_id": 1,
+    "label": "Protection Warrior public planner build",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/arcane-mage/talents",
+    "class_id": 8,
+    "spec_id": 62,
+    "label": "Arcane Method build 1",
+    "code": "C4DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMDamxAAAwAAgAmZmZZZmJWAAYDzMzM2sMzMzyMGjZmBLMzMzMDAwAAAMzsAAmBADzMD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/arcane-mage/talents",
+    "class_id": 8,
+    "spec_id": 62,
+    "label": "Arcane Method build 2",
+    "code": "C4DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMDamxAAAwAAgAmZmZZZmJWAAYbwMzwmlZMjZMmZmZGWYmZmZGAgBAAYmZDAMDAGmZG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/arcane-mage/talents",
+    "class_id": 8,
+    "spec_id": 62,
+    "label": "Arcane Method build 3",
+    "code": "C4DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMDamxAAAwAAmZmmlllZAgYDAgNYmZYzyMmZZGjZmZmhFmZmZmBAYAAAGgZGwMAYYmZA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/arcane-mage/talents",
+    "class_id": 8,
+    "spec_id": 62,
+    "label": "Arcane Method build 4",
+    "code": "C4DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMDamxAAAwAAmZmmlllZAgYDAgNMzMzYzyMzMLzYMmZGswMzMzMAADAAwAMzAmBADzMD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/fire-mage/talents",
+    "class_id": 8,
+    "spec_id": 63,
+    "label": "Fire Method build 1",
+    "code": "C8DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMzIzMGAAAGAwMz0sstMDAwmZmx2YmZGLAAAAAYxMzMDAAMmxMmZmZmFAMzQGjxgZYMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/fire-mage/talents",
+    "class_id": 8,
+    "spec_id": 63,
+    "label": "Fire Method build 2",
+    "code": "C8DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMzIzMGAAAGAwMz0sstMDAwmZmx2MzMzYBAAAAALmZmZAAgZMmZmZMzsMAMzQGjBMDjB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/frost-mage/talents",
+    "class_id": 8,
+    "spec_id": 64,
+    "label": "Frost Method build 1",
+    "code": "CAEAAAAAAAAAAAAAAAAAAAAAAMzwYZm5BmFMzEzMGzMzMziZmZMjZAAAgZmZWWmZaDAA2AAAALAstMmZmZY2GGzwCAAAzsBMTGDYGMMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/frost-mage/talents",
+    "class_id": 8,
+    "spec_id": 64,
+    "label": "Frost Method build 2",
+    "code": "CAEAAAAAAAAAAAAAAAAAAAAAAMzwYZm5BmFMzEzMGzMzMziZmZMjZgAAAzMzssMz0GAAsBAAAWAYbZMzMzwsNMmhFAAAmZDYGGDYGMMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/frost-mage/talents",
+    "class_id": 8,
+    "spec_id": 64,
+    "label": "Frost Method build 3",
+    "code": "CAEAAAAAAAAAAAAAAAAAAAAAAMzwYZm5BmFMzEzMGzMzMWMzMzMGzsMTzMLzCAAAaBAA2AAAALAstMmZmZYMjxM2WAAAAzMYGGDYghB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/frost-mage/talents",
+    "class_id": 8,
+    "spec_id": 64,
+    "label": "Frost Method build 4",
+    "code": "CAEAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzEzMGzMzMWMzMzMGzsMTzMLzCAAAaBAA2AAAALAstMmZm5BYMjxM2WAAAAzMYmMGwADD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/holy-paladin/talents",
+    "class_id": 2,
+    "spec_id": 65,
+    "label": "Holy Method build 1",
+    "code": "CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAw2MzMjZMzYxYmZYZwMLmpJGGzMDjZLDADAbgNWmxMLz2Mzs1AAAAsAGYzwYGDmBAwMDzYMaA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/holy-paladin/talents",
+    "class_id": 2,
+    "spec_id": 65,
+    "label": "Holy Method build 2",
+    "code": "CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAwyMzMjZ2mZmNYMsM2mZWMTTMMmZGGzWGAGA2AbsMjZWmtZmZrBAAAYBMwmhxMGYAAMzwMGjGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/holy-paladin/talents",
+    "class_id": 2,
+    "spec_id": 65,
+    "label": "Holy Method build 3",
+    "code": "CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAADWGzMzMjZmZBGDLjNzsY0EDjZmhxslBgBgNwGLzMzsMbzMzWDAAAwCLMzwmHAmxgZAAMzwMGjGA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/protection-paladin/talents",
+    "class_id": 2,
+    "spec_id": 66,
+    "label": "Protection Method build 1",
+    "code": "CIEAAAAAAAAAAAAAAAAAAAAAAsZsNLjZMzMzMLLjxYWmlZMAADAAAAAAaamZZmxMDzMbtBgBGwAbAAAEgZmltlWmZsYbBDAYGGDAmZAwMDyYB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/protection-paladin/talents",
+    "class_id": 2,
+    "spec_id": 66,
+    "label": "Protection Method build 2",
+    "code": "CIEAAAAAAAAAAAAAAAAAAAAAAsNDzyMzYmZmx2yYMLzithBAYAAAAAAQamZZmxMzYMbtBgBMwMYDAAMz02MzyMAAb22wAgxMMAAsMDwMDyYB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/retribution-paladin/talents",
+    "class_id": 2,
+    "spec_id": 70,
+    "label": "Retribution Method build 1",
+    "code": "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAANbbzMzywMDAAAAAAzUmtZYmx2Y2GmZbGjxMDzYhtBAAkZm2mZ2mBAsBYAwYGGYGjZDbzghxMGMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/retribution-paladin/talents",
+    "class_id": 2,
+    "spec_id": 70,
+    "label": "Retribution Method build 2",
+    "code": "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzMzAAAAAAYmyYGmZsNmthZ2mxYMGmxGbAAAZmptZmtZAAbAGAMmhBmxMzGWmBDjZMYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/retribution-paladin/talents",
+    "class_id": 2,
+    "spec_id": 70,
+    "label": "Retribution Method build 3",
+    "code": "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAANbbzMzywMDAAAAAAzUmtZYmx2Y2GmZbGjxYYGLsNAMLz2Mzs1gAAAWAMAYMDDMjZmNgZmhxMGMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/retribution-paladin/talents",
+    "class_id": 2,
+    "spec_id": 70,
+    "label": "Retribution Method build 4",
+    "code": "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzMzAAAAAAYmyYGmZsNmthZ2mxYMGmxCbAYWmtZmZrBBAAsAYAwYGGYGzMbAzMDjZMYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/arms-warrior/talents",
+    "class_id": 1,
+    "spec_id": 71,
+    "label": "Arms Method build 1",
+    "code": "CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMz8AzMDAAAghphZYGbLzMzMDzYmBAAAAwMLzMgMGbLDsAGwMMhMD2AzMYMzgZMAzMAMjhB",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "MISSING_PREREQUISITE"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/arms-warrior/talents",
+    "class_id": 1,
+    "spec_id": 71,
+    "label": "Arms Method build 2",
+    "code": "CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMz8AzMDAAAghphZYGbLzMzMDzYmBAAAAwMLzMwWGjtlBWADYGmQmBbgZGMmBmxAMzAwMGGA",
+    "expected_status": "observed-drift",
+    "expected_decode_error": "CHOICE_CONFLICT"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/arms-warrior/talents",
+    "class_id": 1,
+    "spec_id": 71,
+    "label": "Arms Method build 3",
+    "code": "CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzMzYGAAAghphZYmZbZmZmZYGzMAAAAAGLmB2iZstMwCYAzwEyMYDYGMGMbmtBYmBgZmhB",
+    "expected_status": "observed-drift",
+    "expected_decode_error": "CHOICE_CONFLICT"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/arms-warrior/talents",
+    "class_id": 1,
+    "spec_id": 71,
+    "label": "Arms Method build 4",
+    "code": "CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMzMzMDAAAghphZYGbLzMzMDzYmBAAAAwMmZAZGwmZMsBDMj2oxgFwMDGjBzYwMDAYGDD",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "MISSING_PREREQUISITE"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/arms-warrior/talents",
+    "class_id": 1,
+    "spec_id": 71,
+    "label": "Arms Method build 5",
+    "code": "CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMzMzMDAAAghphZYGbLzMzMDzYmBAAAAwwMDslZAbmxwGMwMajGDWAzMYMGMjBzMAgZMMA",
+    "expected_status": "observed-drift",
+    "expected_decode_error": "CHOICE_CONFLICT"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/arms-warrior/talents",
+    "class_id": 1,
+    "spec_id": 71,
+    "label": "Arms Method build 6",
+    "code": "CcEAAAAAAAAAAAAAAAAAAAAAAgZmxsMzMzYGAAAghphZYmZbZmZmZYGzMAAAAAGbmB2iBsZGDLwAzoNaMYBYGMGMbmtBzMAgZmhB",
+    "expected_status": "observed-drift",
+    "expected_decode_error": "CHOICE_CONFLICT"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/fury-warrior/talents",
+    "class_id": 1,
+    "spec_id": 72,
+    "label": "Fury Method build 1",
+    "code": "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDDmx2yMzMzMmxMzMjZmZWmZGjZmthZGAAIGLLDsAmgZYCMDbAzMbMGAAMzYYMzMMYA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/fury-warrior/talents",
+    "class_id": 1,
+    "spec_id": 72,
+    "label": "Fury Method build 2",
+    "code": "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDDmx2yMzMzMmxMzMjZMzyMzYMzsNmZGAAIGLLDsAmgZYCMDbAzMbMGAAMzYYMzMMYA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH",
+      "MISSING_PREREQUISITE"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/fury-warrior/talents",
+    "class_id": 1,
+    "spec_id": 72,
+    "label": "Fury Method build 3",
+    "code": "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDDmZ2WmZmZmxMmZMjZMzyMzYMzsNmZGAAIGLLDsAmgZYCMDbAmZjxAAgZGDzMzMMYA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH",
+      "MISSING_PREREQUISITE"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/fury-warrior/talents",
+    "class_id": 1,
+    "spec_id": 72,
+    "label": "Fury Method build 4",
+    "code": "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDDzMz2yMzMzMMmZmZMjZWmZGjZmlxMzAAAhB2glNjGzAysgZsAYGMGAMzAYYMzMMYA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH",
+      "MISSING_PREREQUISITE"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/fury-warrior/talents",
+    "class_id": 1,
+    "spec_id": 72,
+    "label": "Fury Method build 5",
+    "code": "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDDzMz2yMmZmxMmZMjZMzyMzYMzsMmZGAAIMwGssZ0YGQmFMjFAzgxAgZGADzMzMMYA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH",
+      "MISSING_PREREQUISITE"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/protection-warrior/talents",
+    "class_id": 1,
+    "spec_id": 73,
+    "label": "Protection Method build 1",
+    "code": "CkEAAAAAAAAAAAAAAAAAAAAAA0yAAAzMzwMzYGzmxsMjxY0wMDLzMzMDGzMAAAAYZMAzYAGYDWWMaMDgZLmZDzMmZwsBAzMAAMDMG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/protection-warrior/talents",
+    "class_id": 1,
+    "spec_id": 73,
+    "label": "Protection Method build 2",
+    "code": "CkEAAAAAAAAAAAAAAAAAAAAAA0yAAAzMjZmZmZGzmxsMjxY0wMDLzMzMDGzMAAAAYZAYGDwAbwyiRjZAMbxMbwMmZwsBAzMAAMDMG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/protection-warrior/talents",
+    "class_id": 1,
+    "spec_id": 73,
+    "label": "Protection Method build 3",
+    "code": "CkEAAAAAAAAAAAAAAAAAAAAAA0yAAAjZMmZmZGzmZmlZMGjGzYGLzMzMDDzMAAAAYZmBwYAGYDWWMaMDgZLmZDGzMDjNAYmBAADMG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/balance-druid/talents",
+    "class_id": 11,
+    "spec_id": 102,
+    "label": "Balance Method build 1",
+    "code": "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmhxMWYZmlZGjZ2wAgx2yMDGz2IwEAAAgFzMzMD2MMGzAAYmBLDA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/balance-druid/talents",
+    "class_id": 11,
+    "spec_id": 102,
+    "label": "Balance Method build 2",
+    "code": "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwswMzMYYGjZWmZxMzYhlZWGjZGLYYAGbbzMYMbjATAAAAWMzMzMYzYGjZAAMzADA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/balance-druid/talents",
+    "class_id": 11,
+    "spec_id": 102,
+    "label": "Balance Method build 3",
+    "code": "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMD8AmFzMzMYYGjZWGbzYGbsMzyYmZGLYYAGgltxGmmZWGBAAAYzMzMzgNDMmBwMDAMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/balance-druid/talents",
+    "class_id": 11,
+    "spec_id": 102,
+    "label": "Balance Method build 4",
+    "code": "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNMmZgxsMzMzMLMgxMLzsYMzswyMLjxMjNMAYstNzgxsNCMBAAAYhZmZGsZMjxAAwMDWGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/feral-druid/talents",
+    "class_id": 11,
+    "spec_id": 103,
+    "label": "Feral Method build 1",
+    "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwYMjxYmZMmtFWGbzMzYmZAAAAYJY2gxMjaGzCzMzYMzMAAAAAAAGAAAABAz2MLNLzssBmZAWMzwAAYmBAD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/feral-druid/talents",
+    "class_id": 11,
+    "spec_id": 103,
+    "label": "Feral Method build 2",
+    "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWCmNYMzomxswMzMGzMDAAAAAAgBAAAQzsMLzMzACsAmZAWMzwAAAYmNMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/feral-druid/talents",
+    "class_id": 11,
+    "spec_id": 103,
+    "label": "Feral Method build 3",
+    "code": "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYJY2M8AmZUzYWMzMzsMm5BMAAAAAAADAAAgmZZWmZmZ2mZrZbmlFYmZAWYwAAYmBzshB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/feral-druid/talents",
+    "class_id": 11,
+    "spec_id": 103,
+    "label": "Feral Method build 4",
+    "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYJY2gxMjaGziZmZmlxMMAAAAAAADAAAgAgZZmlmlZW2AzMALmZYAAMzAgB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/feral-druid/talents",
+    "class_id": 11,
+    "spec_id": 103,
+    "label": "Feral Method build 5",
+    "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMzY2MWGbzYm5BmZAAAAYJY2MMmZUzYWGzMzYMzDMDAAAAAAwAAAAoZWmlZmZABWAz8AALbGMAAAmZDD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/feral-druid/talents",
+    "class_id": 11,
+    "spec_id": 103,
+    "label": "Feral Method build 6",
+    "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWCmNYMzomxswMzMGzMzAAAAAAAMAAAAamlZZmZGQgFwMDwCzwAAAYmNMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/feral-druid/talents",
+    "class_id": 11,
+    "spec_id": 103,
+    "label": "Feral Method build 7",
+    "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZMzGzMzMmZ2WGLjtZMzYmBAAAglgZDGzMqZMLMzMjxMzAAAAAAAYAAAAEAMLzs0sMz2GYmBYxMDDAgZGAMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/feral-druid/talents",
+    "class_id": 11,
+    "spec_id": 103,
+    "label": "Feral Method build 8",
+    "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwYmZMmtl5BWGbzMzMzMDAAAALBzGMmZUzYWYmZGjZegZAAAAAAAGAAAABAz2MLNLzssBmZAWMzwAAYmBAD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/guardian-druid/talents",
+    "class_id": 11,
+    "spec_id": 104,
+    "label": "Guardian Method build 1",
+    "code": "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMMAAAAAgZsZALbzMYMLDgpAAAAbYmHAYxMYALWAYmBwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/guardian-druid/talents",
+    "class_id": 11,
+    "spec_id": 104,
+    "label": "Guardian Method build 2",
+    "code": "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmhFzYMzmZZGMLLDMbMGNRzMzyMzMzYMjZAAAAAAzYZGwy2MDGz2AYKAAAwGmxAWMDGwiltBYmBwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/restoration-druid/talents",
+    "class_id": 11,
+    "spec_id": 105,
+    "label": "Restoration Method build 1",
+    "code": "CkGAAAAAAAAAAAAAAAAAAAAAAMjxMbzMjZmxsN8AmZGGbMDAAAAAAAAAAWG0sZGTzMGGzyMzMzwwMAAAAAAAAAACAAY2mZpZbmNbMmZwMDQzAAMzAwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/restoration-druid/talents",
+    "class_id": 11,
+    "spec_id": 105,
+    "label": "Restoration Method build 2",
+    "code": "CkGAAAAAAAAAAAAAAAAAAAAAAMjxMbzMjZmxsN8ADzsYsxMAAAAAAAAAAYZQzmZMNzYYMLzMzMDDzAAAAAAAAAbLjNMNzsMAAABswYmBzMANDAmZAADA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/restoration-druid/talents",
+    "class_id": 11,
+    "spec_id": 105,
+    "label": "Restoration Method build 3",
+    "code": "CkGAAAAAAAAAAAAAAAAAAAAAAMMmZbMjZmxsN8AMzswsYbGAAAAAAAAAAsMoZzMmmZMjxsYmZGmhHYGAAAAAAAMAAEAAwsNzWzyML2YmZgZmFQzAAMzAwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/restoration-druid/talents",
+    "class_id": 11,
+    "spec_id": 105,
+    "label": "Restoration Method build 4",
+    "code": "CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsN8AMzsYsYbGAAAAAAAAAAsYoZbGmmBwsYmZmZxwDMAAAAAMAAzA22GLYamZZAAACYhZmZGmZ2ANDAmZAADA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/blood-death-knight/talents",
+    "class_id": 6,
+    "spec_id": 250,
+    "label": "Blood Method build 1",
+    "code": "CoPAAAAAAAAAAAAAAAAAAAAAAwYWGzMmxMzMYbmZmmZZGjxMGAAAAwMzMzMzMDzYMAYMzMzAAAMmtBGwSwywEYYBwMmBAgZGAzYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/blood-death-knight/talents",
+    "class_id": 6,
+    "spec_id": 250,
+    "label": "Blood Method build 2",
+    "code": "CoPAAAAAAAAAAAAAAAAAAAAAAwYWmZGmxMzMMbzMz0MbGzMmxAAAAAmZmZmZmZYGjBAjZmZGAAADMwMW0YZDklBsBYGzAAAmZghB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/blood-death-knight/talents",
+    "class_id": 6,
+    "spec_id": 250,
+    "label": "Blood Method build 3",
+    "code": "CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzMmxMzMMLzMz0MLGjxMGAAAAwMmZmZmZYGDAYmZmZGAAADMwMW0YZBklBsBYGzAAAmZghB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/blood-death-knight/talents",
+    "class_id": 6,
+    "spec_id": 250,
+    "label": "Blood Method build 4",
+    "code": "CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmhZZmZmmZxYmxMGAAAAwMmZmZmZYGDAYmZmZGAAgxsNwAWC2GmADLAmxMAAMzAYYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/frost-death-knight/talents",
+    "class_id": 6,
+    "spec_id": 251,
+    "label": "Frost Method build 1",
+    "code": "CsPAAAAAAAAAAAAAAAAAAAAAAMAmZMjZAz2MzMzMLzMjMjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEyYBzMmZGYAYYmBYmBD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/frost-death-knight/talents",
+    "class_id": 6,
+    "spec_id": 251,
+    "label": "Frost Method build 2",
+    "code": "CsPAAAAAAAAAAAAAAAAAAAAAAMAzMMjZAz2MzMzMLzMjMjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEyYBzMmZGYAYYmBYmBD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/unholy-death-knight/talents",
+    "class_id": 6,
+    "spec_id": 252,
+    "label": "Unholy Method build 1",
+    "code": "CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMDDz2MzMTzmZmZMjBAAAAAAAgZGmZAwyMmZ2mZGjZAbmFDDZgZjhGLAYGAGzMjZAmZmxYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/unholy-death-knight/talents",
+    "class_id": 6,
+    "spec_id": 252,
+    "label": "Unholy Method build 2",
+    "code": "CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMDDz2MzMTzmZmZMjBAAAAAAAgZGzYAwyMMzmZGjZMwAzYRjlFAbTsBgZAMzMzMmBzMYGjPA",
+    "expected_status": "observed-drift",
+    "expected_decode_error": "RANK_OUT_OF_RANGE"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/unholy-death-knight/talents",
+    "class_id": 6,
+    "spec_id": 252,
+    "label": "Unholy Method build 3",
+    "code": "CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMDDz2MzMTzmZmZMjBAAAAAAAgZGGDAWmxMz2MzYMDYzsZYIDMbM0YBDYGAGzMjZAmZmxYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/unholy-death-knight/talents",
+    "class_id": 6,
+    "spec_id": 252,
+    "label": "Unholy Method build 4",
+    "code": "CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMDDz2MzMTzmxMzMjBAAAAAAAgZGzYAwyMmZ2MzYMDYzsZYIDMbM0YBDYGAGzMjZAmZmxYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/beast-mastery-hunter/talents",
+    "class_id": 3,
+    "spec_id": 253,
+    "label": "Beast Mastery Method build 1",
+    "code": "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGGzs8AzwMmZMDzMGzMmZGzYGmZGzYGM0MAAAAgZAAAYmZmBYmNCDzCYbAYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/beast-mastery-hunter/talents",
+    "class_id": 3,
+    "spec_id": 253,
+    "label": "Beast Mastery Method build 2",
+    "code": "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsBzwQDbAAYGPwMzsMzwMzMjZGMzYmhZGzMzYbmZYMDLDNDAAAAAAAAmHYMzAmZjAmFw2AwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/beast-mastery-hunter/talents",
+    "class_id": 3,
+    "spec_id": 253,
+    "label": "Beast Mastery Method build 3",
+    "code": "C0PAAAAAAAAAAAAAAAAAAAAAAYzsNwAGwMsBZsAAgZMjZWMDzYmxMMzYYGzMjZMDzMjZMDGaGAAAAwMAAAMzMzgZGQYYWAbDAD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/beast-mastery-hunter/talents",
+    "class_id": 3,
+    "spec_id": 253,
+    "label": "Beast Mastery Method build 4",
+    "code": "C0PAAAAAAAAAAAAAAAAAAAAAAYzsNwAGwMsBZsAAgZGzMziZYGmxMjZmZYGzMjZmZsNzMMmhlhmBAAAAMDAAAzDMmZYmBEwsA2GAA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/marksmanship-hunter/talents",
+    "class_id": 3,
+    "spec_id": 254,
+    "label": "Marksmanship Method build 1",
+    "code": "C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGzYZAMD2AAAAAAAAAzYGzwMmZGzgx0MGM2WmZmZmZmZmFmZZwMAAg5BmZGDgZajhBYjZ2mxA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/marksmanship-hunter/talents",
+    "class_id": 3,
+    "spec_id": 254,
+    "label": "Marksmanship Method build 2",
+    "code": "C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGzYZAMD2AAAAAAAAAzYGzwMmZGzgx0MGMbbmZmZmZmZmFmZZYGAAg5BmZGDgZajhBYjZ2mxA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/marksmanship-hunter/talents",
+    "class_id": 3,
+    "spec_id": 254,
+    "label": "Marksmanship Method build 3",
+    "code": "C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmhZMzMmBjpZMYW2WmZmZmZmZmFmZZYGAAg5BGzAgZabDGgNmZbGD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/marksmanship-hunter/talents",
+    "class_id": 3,
+    "spec_id": 254,
+    "label": "Marksmanship Method build 4",
+    "code": "C4PAAAAAAAAAAAAAAAAAAAAAAYzsMwAmgZYbAzCAAAAAAAAYGzYGmxMzYGMmmxgx2yMzMzMzMzswMLDGAAg5BmZGzMzACDDwGzsNjB",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/marksmanship-hunter/talents",
+    "class_id": 3,
+    "spec_id": 254,
+    "label": "Marksmanship Method build 5",
+    "code": "C4PAAAAAAAAAAAAAAAAAAAAAAYzsMwAmgZYLwsAAAAAAAAAmxMzMMjZmxMYMNjBzymZMzMzMzMLMzywMAAAzDMmxMzMgsBDwGzsNjB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/survival-hunter/talents",
+    "class_id": 3,
+    "spec_id": 255,
+    "label": "Survival Method build 1",
+    "code": "C8PAAAAAAAAAAAAAAAAAAAAAAMgxMGWIbwMM0glZMzMmZWGAAAAAAmxMmZZbGjZMDeATzAAAAMAYGLLzMzixMjxMDgZ2AmFjhxmBA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/survival-hunter/talents",
+    "class_id": 3,
+    "spec_id": 255,
+    "label": "Survival Method build 2",
+    "code": "C8PAAAAAAAAAAAAAAAAAAAAAAMgxMGWILwMM0gFzMzMzMWGAAAAAAmxMzMLbzYMjZwYaGAAAgBAPwYZZm5BWYmZwYMgZ2AYGjZmNDA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/survival-hunter/talents",
+    "class_id": 3,
+    "spec_id": 255,
+    "label": "Survival Method build 3",
+    "code": "C8PAAAAAAAAAAAAAAAAAAAAAAMgxMGWgNYGGawyMmZGzMLDAAAAAAzYGzssNjxMmBPgpZAAAAGAMjllZmZxYmxYmZAmZDYYMM2MAA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/survival-hunter/talents",
+    "class_id": 3,
+    "spec_id": 255,
+    "label": "Survival Method build 4",
+    "code": "C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxYGLDgZC2mZmZmZMbzDAAAAAAYGzMzYbGjZMDGTzAAAAMAwYZZmxCmZmxYmBgZsBGjZmNDA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/discipline-priest/talents",
+    "class_id": 5,
+    "spec_id": 256,
+    "label": "Discipline Method build 1",
+    "code": "CAQAAAAAAAAAAAAAAAAAAAAAAADsMmxywMYmhZzsNzMzMzMAAAAAAAAAAMDLzgZmZYGmBMNTzMYmBABwsNbbgxmBAgxYmxgZwMDmJYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/discipline-priest/talents",
+    "class_id": 5,
+    "spec_id": 256,
+    "label": "Discipline Method build 2",
+    "code": "CAQAAAAAAAAAAAAAAAAAAAAAAADsMGWmZmBDmZbmtZmZmxMDAAAAAAAAAgZYZGMzMDzwMgpZamBYmFMEGzyAMGsAAAjxMjBzAMzMTwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/discipline-priest/talents",
+    "class_id": 5,
+    "spec_id": 256,
+    "label": "Discipline Method build 3",
+    "code": "CAQAAAAAAAAAAAAAAAAAAAAAAADsYegZ2YMmZmhZDzMzMzMAAAAAAAAAAYGWmBzMzgxMD2MNTMYmBABwsNbbgxmBAgxMzMGMDmZwMNDzA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/discipline-priest/talents",
+    "class_id": 5,
+    "spec_id": 256,
+    "label": "Discipline Method build 4",
+    "code": "CAQAAAAAAAAAAAAAAAAAAAAAAADsMDWmZMPwMwMbzYmZmZMzAAAAAAAAAAYGWmBzMzgxMD2MNTMAzsghwYWGgxgFAAYMzMjBzAMzMTwM",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/holy-priest/talents",
+    "class_id": 5,
+    "spec_id": 257,
+    "label": "Holy Method build 1",
+    "code": "CEQAAAAAAAAAAAAAAAAAAAAAAwYAAAAAAAgZmlxMjZmZYmZYZGmBAAAwMmlZwMzMMDzAYmaAgZWMTmFDAMGsZmZWA0MGjxwMz2yAMDMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/holy-priest/talents",
+    "class_id": 5,
+    "spec_id": 257,
+    "label": "Holy Method build 2",
+    "code": "CEQAAAAAAAAAAAAAAAAAAAAAAwYAAAAAAAGjZmlZmZMzMDzMDLzwMAAAAmxsMDmZmhZYGAzUDgZWwQYMLDwYgFGzCgmxYMGmZAmZmBGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/holy-priest/talents",
+    "class_id": 5,
+    "spec_id": 257,
+    "label": "Holy Method build 3",
+    "code": "CEQAAAAAAAAAAAAAAAAAAAAAAwYAAAAAAgZzwYWGwMzMjZmZsMzMzAAAAYYWmhZmZGmxMD2wMFAYmNzkZzAAjBbGjFANjZGjBzstMADYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/holy-priest/talents",
+    "class_id": 5,
+    "spec_id": 257,
+    "label": "Holy Method build 4",
+    "code": "CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAgZmxsMmhZGDzwYZmZmBAAAwwsMDzMzMMjZGAzUDgZWwQYMbDwYgFzMzCgmxYMGMDwMzMwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/shadow-priest/talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Method build 1",
+    "code": "CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMz2MGzw2MzYmZGbIzYxMNAzAMzmZY2MAkxYBAzMgxMzMmNmZbZAmBDA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/shadow-priest/talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Method build 2",
+    "code": "CIQAAAAAAAAAAAAAAAAAAAAAAMMDzAAAAAAAAAAAAwMLmxMbzMGz2MGzw2MzYmZGbIzYxMNAzAMzmZY2MAkxYBAzMgxMzMmNmZbZAmBDA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/shadow-priest/talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Method build 3",
+    "code": "CIQAAAAAAAAAAAAAAAAAAAAAAMMDzAAAAAAAAAAAAMmZxMGbzMmZ2mBzw2MzYmZGbIzYxMNAzAMzmZY2MAkxYBAzMgxMzMmNmZbZAmBDA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/shadow-priest/talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Method build 4",
+    "code": "CIQAAAAAAAAAAAAAAAAAAAAAAMMDzAAAAAAAAAAAAwMLmxMbjxMzyMGzM2mBzMzMbIzYZjGgZAmZzMMbGAyYsAgZGgZmZmZ2YmtlBYGMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/shadow-priest/talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Method build 5",
+    "code": "CIQAAAAAAAAAAAAAAAAAAAAAAMMDzAAAAAAAAAAAAwMLmxMbjxMzyMGzw2MzYmZGbIzYxMNAzAMzmZY2MAkxYBAzMgxMzMmNmZbZAmBDA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/shadow-priest/talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Method build 6",
+    "code": "CIQAAAAAAAAAAAAAAAAAAAAAAMMjZGAAAAAAAAAAAAMLmxMbzMMz2MzYG2mZGzMzYDZGLmpBYmZGAIAz2stAmNGAYwYmZGz2YGMzgZwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/shadow-priest/talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Method build 7",
+    "code": "CIQAAAAAAAAAAAAAAAAAAAAAAMMjZGAAAAAAAAAAAAegZxMmZbmBz2MzYG2mZGzMzYDZGLmpBYmZGAIAz2stAmNGAYwYmZGz2YGMzgZwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/shadow-priest/talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Method build 8",
+    "code": "CIQAAAAAAAAAAAAAAAAAAAAAAMMjZGAAAAAAAAAAAgxDMLmxYbmhZ2mZYG2mZGzMzYDZGLmpBYmZGAIAz2stAmNGAYwYmZGz2YGMzgZwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/shadow-priest/talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Method build 9",
+    "code": "CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMzyMzYmx2MYmZmZDZGLb0AMzMDAEgZb2WAzGDAMwMzMzMbMDmZwMYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/shadow-priest/talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Method build 10",
+    "code": "CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMzyMzYG2mZGzMzYDZGLmpBYmZGAIAz2stAmNGAYwYmZGzGzgZGMDGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/assassination-rogue/talents",
+    "class_id": 4,
+    "spec_id": 259,
+    "label": "Assassination Method build 1",
+    "code": "CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAIbzMzMzMjxyMzMbzsMzMPgZMzYMMzYMAbmlBGwSwywEYYxgZGgxYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/assassination-rogue/talents",
+    "class_id": 4,
+    "spec_id": 259,
+    "label": "Assassination Method build 2",
+    "code": "CMQAAAAAAAAAAAAAAAAAAAAAAYmlxsNDGAAAAAYWGsNDAAAAAIbzMzMzMjxyMzMbzsMzMzYGzYMmZMMAbmlBGwSwywEYYxgZGgxYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/outlaw-rogue/talents",
+    "class_id": 4,
+    "spec_id": 260,
+    "label": "Outlaw Method build 1",
+    "code": "CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMmZmtZmZmZMmF4BmZbaZw2MAAAAAAbbzMzwMzMziZmZbAAAAYmBAjZxwQGYWYhWYjBYmBDMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/outlaw-rogue/talents",
+    "class_id": 4,
+    "spec_id": 260,
+    "label": "Outlaw Method build 2",
+    "code": "CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMjZmtZmZMzMzsAmZbaZw2MAAAAAAbbzMzwMzMziZmZbAAAAYmBAjZxwQGYWYhWYjBYmBDMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/subtlety-rogue/talents",
+    "class_id": 4,
+    "spec_id": 261,
+    "label": "Subtlety Method build 1",
+    "code": "CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDDzMzMzgZbGzYbbmZmZmZMYMz2AAAAwgxsYWGYALglhJkZBzwMDwMGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/subtlety-rogue/talents",
+    "class_id": 4,
+    "spec_id": 261,
+    "label": "Subtlety Method build 2",
+    "code": "CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDDzMzMzw8AbzYGbbzMzMzMjBjZ2GAAAAGMmFzyADYBsMMhMLYGmZAmxA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/elemental-shaman/talents",
+    "class_id": 7,
+    "spec_id": 262,
+    "label": "Elemental Method build 1",
+    "code": "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMmZmZZbZMMjZAAAAgFzsBDYAzGTIzCAYZmZGjtlZahZmFWmZmZMDzyMWMzwMLAADAMzYYYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/elemental-shaman/talents",
+    "class_id": 7,
+    "spec_id": 262,
+    "label": "Elemental Method build 2",
+    "code": "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAYZmZGjtlZahZmFWmZmZMDzyMWmxYmZBAYAgZGDDD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/elemental-shaman/talents",
+    "class_id": 7,
+    "spec_id": 262,
+    "label": "Elemental Method build 3",
+    "code": "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMGjZZZZMmhBAAAAsYmNYADY2YCZWAgZZmZGjtFTbMzsNWmxMjhlZZmZZGjZmFAgZAwMjhhB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/enhancement-shaman/talents",
+    "class_id": 7,
+    "spec_id": 263,
+    "label": "Enhancement Method build 1",
+    "code": "CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDLkFYGGawCAz2MmxYZZGbMzsNWmZmZYsMGAAzwYmhZCMzgBjB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/enhancement-shaman/talents",
+    "class_id": 7,
+    "spec_id": 263,
+    "label": "Enhancement Method build 2",
+    "code": "CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbkFYGGawCAz2MmxYZZGbMzYsMzMzMGLjBAwMMmZYEYmBDGDA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/restoration-shaman/talents",
+    "class_id": 7,
+    "spec_id": 264,
+    "label": "Restoration Method build 1",
+    "code": "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNjZGjZGzMMjFYDmxiGbDIzAbmBDWmZmRz2yMzmZMLsMzDMzYwsMAAAwMzgZGAYwM",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/restoration-shaman/talents",
+    "class_id": 7,
+    "spec_id": 264,
+    "label": "Restoration Method build 2",
+    "code": "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNjZGjZGzMMWMzCMgJYWYCMWMDzwsNzY0stMzsZGzGLGzMGWmlBAAAmZGDgZGYwM",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/restoration-shaman/talents",
+    "class_id": 7,
+    "spec_id": 264,
+    "label": "Restoration Method build 3",
+    "code": "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZGjZmZMjZsAbwMW0YbAZGYjZMDz2MjRz2yMzmZMbsYMzYYZWmBAgBwMDmZAAYG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/affliction-warlock/talents",
+    "class_id": 9,
+    "spec_id": 265,
+    "label": "Affliction Method build 1",
+    "code": "CkQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjhZmZmlBAAYmZZ2mZmFzAAjttBGwAmhlADbDAAAzAAAYmZMjZGDDzYmZGDmZmBAYGYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/affliction-warlock/talents",
+    "class_id": 9,
+    "spec_id": 265,
+    "label": "Affliction Method build 2",
+    "code": "CkQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzM2mZmZWGAAwMzsMbzMzyYAgx2yADYCmhtADbDAAAGAAAzMjZMzsNGzgZmZGDzMzAAMDMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/affliction-warlock/talents",
+    "class_id": 9,
+    "spec_id": 265,
+    "label": "Affliction Method build 3",
+    "code": "CkQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjBzMmlBAAYmZZWmZmlxAAWgBmFjGzAysAWGAAAMAAwMDmZGzMMGmZmZmZGMzMzAAmBG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/demonology-warlock/talents",
+    "class_id": 9,
+    "spec_id": 266,
+    "label": "Demonology Method build 1",
+    "code": "CoQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjxmZGzyAAAAAAAAGzYYBGYb0GNsYwMLzyMzMmBAmhZmZmZAGzYMbAAgZmZmZGzwyMGwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/demonology-warlock/talents",
+    "class_id": 9,
+    "spec_id": 266,
+    "label": "Demonology Method build 2",
+    "code": "CoQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjxmZGzyAAAAAAAAGzYYBGYb0GNsYYmZZ2mZmxMAwMMmZmZAGzYMbAAgZmZmZGzwyMGwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/demonology-warlock/talents",
+    "class_id": 9,
+    "spec_id": 266,
+    "label": "Demonology Method build 3",
+    "code": "CoQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjxmZGzyAAAAAAAMWWGYADYGWCZsZwMLzyMzMmBAmhZmZAmZGzYMbAAgZmZmZGzwyMGwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/demonology-warlock/talents",
+    "class_id": 9,
+    "spec_id": 266,
+    "label": "Demonology Method build 4",
+    "code": "CoQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjxmZGzyAAAAAAAMWWGYADYGWCZsZYmZZ2mZmxMAwMMmZAmZGzYMbAAgZmZmZGzwyMGwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/destruction-warlock/talents",
+    "class_id": 9,
+    "spec_id": 267,
+    "label": "Destruction Method build 1",
+    "code": "CsQAAAAAAAAAAAAAAAAAAAAAAwMmZmpZbMMzMmtZxMzMLGjFzAAgZmxMzsZBGYWMaMDgZL2YAAgxAjNAgZGYmxMDAAAzMzAAwYYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/destruction-warlock/talents",
+    "class_id": 9,
+    "spec_id": 267,
+    "label": "Destruction Method build 2",
+    "code": "CsQAAAAAAAAAAAAAAAAAAAAAAwMmZmpZbMMzMmtZbmZmZxYWWMDAAmxYmZ2sADMLGNmBwsFbMAAwYA2AAmZgZGzMAAAMzMDAAjhB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/destruction-warlock/talents",
+    "class_id": 9,
+    "spec_id": 267,
+    "label": "Destruction Method build 3",
+    "code": "CsQAAAAAAAAAAAAAAAAAAAAAAwMmZmpZbMMzMmtZbmZmZxMzyyYAAwMGzMzmFYgZxoxMAmtYjBAAGzwAAgZGwMmZ2AAAMzMDAAMM",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/destruction-warlock/talents",
+    "class_id": 9,
+    "spec_id": 267,
+    "label": "Destruction Method build 4",
+    "code": "CsQAAAAAAAAAAAAAAAAAAAAAAwMmZmpZbMMzMmtZxMzMLGjFzAAgZmxMzsBGzYYhMw2wGNWYAAgxAjNAMzAYmxMDAAAzMzAAwYYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/destruction-warlock/talents",
+    "class_id": 9,
+    "spec_id": 267,
+    "label": "Destruction Method build 5",
+    "code": "CsQAAAAAAAAAAAAAAAAAAAAAAwMmZmpZbMMzMmtZbmZmZxMzyyYAAwMGzMzGYMjhFyAbDb0YhBAAGzwAAMzAwMmZ2AAAMzMDAAMM",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/brewmaster-monk/talents",
+    "class_id": 10,
+    "spec_id": 268,
+    "label": "Brewmaster Method build 1",
+    "code": "CwQAQnG51S19isUJoJoTeJ/IKDAAAwMbbGzwwyM2YmZMAAAAAAALLYmYmBmhZ2YwMzMDz2wMmZ5BYZbW2mNmZBAA2QAAAmtZpZmZ2YYDgZGmGDAAYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/brewmaster-monk/talents",
+    "class_id": 10,
+    "spec_id": 268,
+    "label": "Brewmaster Method build 2",
+    "code": "CwQAQnG51S19isUJoJoTeJ/IKDAAAwMLbGzYGWmxGmZMAAAAAAALLYEzMwMM2MjxMzMDz2YmxMLYZz22YGzCAAsNLTLz2MLDAwsNLNzMziZYDMzMzw0YAAAD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/brewmaster-monk/talents",
+    "class_id": 10,
+    "spec_id": 268,
+    "label": "Brewmaster Method build 3",
+    "code": "CwQAQnG51S19isUJoJoTeJ/IKDAAAgZbzYGG2mx2YmZMAAAAAAALLYEzMwMM2MjxMzMDz2YmxMLYb5BW2mthZBAAWmlplZbmlBAY2mlmZmZzMsBmZmZYaMAAgB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/brewmaster-monk/talents",
+    "class_id": 10,
+    "spec_id": 268,
+    "label": "Brewmaster Method build 4",
+    "code": "CwQAQnG51S19isUJoJoTeJ/IKDAAAgZbzYGGzyMzGzMjBAAAAAAYZBzEzMwMM2MMmZmZY2YmxYZYZ7BW2mNMLAAwGCAAwsNLNzMzGDbAMzw0YAAAD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/brewmaster-monk/talents",
+    "class_id": 10,
+    "spec_id": 268,
+    "label": "Brewmaster Method build 5",
+    "code": "CwQAQnG51S19isUJoJoTeJ/IKDAAAgZbzYGGzyMzGzMjBAAAAAAYZBzEzMwMM2MMmZmZY2YmxYZYZ7BW2mNMLAAwysMtMbzsMAAz2s0MzMbMsBmZmZYaMAAgB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/windwalker-monk/talents",
+    "class_id": 10,
+    "spec_id": 269,
+    "label": "Windwalker Method build 1",
+    "code": "C0QAAAAAAAAAAAAAAAAAAAAAAMzYM2GmhlZGbzAAAAAAAAAAAAsMMaGzAGwMGmZmZY2GmhZZmAAWMz2MjZmZmBAwGAMLzSzMzsAgBmZAYsMQMgLA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/windwalker-monk/talents",
+    "class_id": 10,
+    "spec_id": 269,
+    "label": "Windwalker Method build 2",
+    "code": "C0QAAAAAAAAAAAAAAAAAAAAAAMzYAMGbzMz2MAAAAAAAAAAAALDz0MmhhBMMMzMzwsNMDzyDMBAsYmtZmxMzMDAgNAYWmlmZmZBADMzAwYZgYAD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/windwalker-monk/talents",
+    "class_id": 10,
+    "spec_id": 269,
+    "label": "Windwalker Method build 3",
+    "code": "C0QAAAAAAAAAAAAAAAAAAAAAAMzYM2GmhlZmZbGAAAAAAAAAAAglhRzYGwAmxwMzMDz2wMMLzEAwiZ2mZMjZmBAwiZWmtxEEAAGAzAMWGImZmFXA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/windwalker-monk/talents",
+    "class_id": 10,
+    "spec_id": 269,
+    "label": "Windwalker Method build 4",
+    "code": "C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYbmZ2mBAAAAAAAAAAAYZYmmxMMMghhZmZGmNmZYWegJAgFmNmxMzMDAgFzsMbjJIAgZMAmBYsMQMzMbG",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/mistweaver-monk/talents",
+    "class_id": 10,
+    "spec_id": 270,
+    "label": "Mistweaver Method build 1",
+    "code": "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghx2MwmFzYmZbGbYmZYmlttZGLMjmxMgBDGWmZmZYWGMYxEAAAAABYxyMLz2MDAAMgBYGwYYsMZMDA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/mistweaver-monk/talents",
+    "class_id": 10,
+    "spec_id": 270,
+    "label": "Mistweaver Method build 2",
+    "code": "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghx2MLDbWMjZmtZstsMjZYmlttZGLMjmxMgBDGWmZmZYWGMMLmAAAAAIALWmZZ2mZAAgBAYGwYYsIjZA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/mistweaver-monk/talents",
+    "class_id": 10,
+    "spec_id": 270,
+    "label": "Mistweaver Method build 3",
+    "code": "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM2mB2sYGzMbzYDzMDzsstMzYhZ0MmBMYwYWmZmZY2GmhZZmAAAAAz20ysNzysBAAAAwMzAADwiMAA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/mistweaver-monk/talents",
+    "class_id": 10,
+    "spec_id": 270,
+    "label": "Mistweaver Method build 4",
+    "code": "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMWmZZYxixMzsZsssND2Mz22yMjFmRzYGwgBjZZmZmhZbYGmlZCAAAAgAsYbmlZbmBAAAGgZADwiMmBA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/mistweaver-monk/talents",
+    "class_id": 10,
+    "spec_id": 270,
+    "label": "Mistweaver Method build 5",
+    "code": "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgxMWGLjZz2MmZsYstsNjZ2Mz2yyMjFmRzYGwgBDLzMzMMbYGmlZCAAAAgAsYbmlZbmBAAAAMDYMwiMmBA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/mistweaver-monk/talents",
+    "class_id": 10,
+    "spec_id": 270,
+    "label": "Mistweaver Method build 6",
+    "code": "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM2mZZYxixMzsZsssND2Mzy2yMjFmRzYGwgBjZZmZmhZbYGmlZCAAAAMbTLz2MLzGAAAAAzMDAMALyAA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/havoc-demon-hunter/talents",
+    "class_id": 12,
+    "spec_id": 577,
+    "label": "Havoc Method build 1",
+    "code": "CEkAAAAAAAAAAAAAAAAAAAAAAYAzMz2MmZmxMzkxMDAAAAAAY2MmtZYmxyMzYZm5BmZWmZWGjBWmFzYY200wMjhNAAAAAAAAmZwAAAAwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/havoc-demon-hunter/talents",
+    "class_id": 12,
+    "spec_id": 577,
+    "label": "Havoc Method build 2",
+    "code": "CEkAAAAAAAAAAAAAAAAAAAAAAYmZmZmZ2mxMzMmZmMmZAAAAAAAzmxsNDzMwMWmZegZYmxYWGYZ2MjhZTTjZmxwGAAAAAAAAzMYAAAAYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/havoc-demon-hunter/talents",
+    "class_id": 12,
+    "spec_id": 577,
+    "label": "Havoc Method build 3",
+    "code": "CEkAAAAAAAAAAAAAAAAAAAAAAYgZmZ2mxMzMmZmMmZAAAAAAAzmxsNDzMz2MzYZmxMWmZYmlZ2mBDjlNmkxMjhFAAAAAAAwMDwAAAAwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/havoc-demon-hunter/talents",
+    "class_id": 12,
+    "spec_id": 577,
+    "label": "Havoc Method build 4",
+    "code": "CEkAAAAAAAAAAAAAAAAAAAAAAYGMzMz2MmZmxMzkxMDAAAAAAY2MmtZYmZ2mZGLzMmhZGmZZmtZwwYbjJZMzYYBAAAAAAAMzAMAAAAM",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/vengeance-demon-hunter/talents",
+    "class_id": 12,
+    "spec_id": 581,
+    "label": "Vengeance Method build 1",
+    "code": "CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZMzMjMzMYWMzMjBjZGzYGzMDzMzM2MzsNGAAAAAAAIgZmxGAAAAGMmZmZ2abmZGAYAAAAMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/vengeance-demon-hunter/talents",
+    "class_id": 12,
+    "spec_id": 581,
+    "label": "Vengeance Method build 2",
+    "code": "CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZMzMjMzMYWMzMjBjZGzYGzMDzMzM2MzsNGAAAAwsNDGGLLMhhZmxCAAAAGMAEgZGgBAAAwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/vengeance-demon-hunter/talents",
+    "class_id": 12,
+    "spec_id": 581,
+    "label": "Vengeance Method build 3",
+    "code": "CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZMMzkZmB2MjZwMjZGzMzMzYwMzM2YmtxwAAAAAAAIgZmZ2AAAAwAzMzMzWbzMzAADAAAgB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/vengeance-demon-hunter/talents",
+    "class_id": 12,
+    "spec_id": 581,
+    "label": "Vengeance Method build 4",
+    "code": "CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZMMzkZmB2MjZwMjZGzMzMzYwMzM2YmtxwAAAAwsNDGGLLMhhZmZWAAAAwADgAMzAMAAAAG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/devastation-evoker/talents",
+    "class_id": 13,
+    "spec_id": 1467,
+    "label": "Devastation Method build 1",
+    "code": "CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAzMDMDzwMgBjZaMzMNjx2wMzMzMzMzAmZmxYmZZmZgBGD2glxox2AYGA2wMYmBDD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/devastation-evoker/talents",
+    "class_id": 13,
+    "spec_id": 1467,
+    "label": "Devastation Method build 2",
+    "code": "CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZAMzwMwMYMTjZmpZmZ2mhZmZmZmZGwMzMGzMLzMDMwYwGsMGN2GAzAwGGYmBDD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/devastation-evoker/talents",
+    "class_id": 13,
+    "spec_id": 1467,
+    "label": "Devastation Method build 3",
+    "code": "CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAzMDmZYGzMgBjZamZmJzM2GmZGmZmZGwMmxYmZZmZwMwMmBWALgZYCsBWGGAzMDD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/devastation-evoker/talents",
+    "class_id": 13,
+    "spec_id": 1467,
+    "label": "Devastation Method build 4",
+    "code": "CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMjZGzMgBjZamZmJzM2mxMzwYmZGwMmxYmZZmZwMwMmBWALgZYCsBWGGAzMDD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/preservation-evoker/talents",
+    "class_id": 13,
+    "spec_id": 1468,
+    "label": "Preservation Method build 1",
+    "code": "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAmZmZ2WmZGDjxsMDw2wAAAzYGzYMMTMmBAAAMzMTzYmZmZZMDAMmBWAbgZYCZjxmhZAmZYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/preservation-evoker/talents",
+    "class_id": 13,
+    "spec_id": 1468,
+    "label": "Preservation Method build 2",
+    "code": "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAmZmZ22mZGDjxsZGw2wAAAzYGzYMMTMmBAAAMzMTzYmZmZZMDAMmBWAbgZYCZjxmhZAmZYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/preservation-evoker/talents",
+    "class_id": 13,
+    "spec_id": 1468,
+    "label": "Preservation Method build 3",
+    "code": "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAMzMz2yMYYmxsZGjx2wAAAzYGzYMMTMmBAAAMzMTzYmZmZZMDAAjZsxCMwMaohhFYmZGAGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/preservation-evoker/talents",
+    "class_id": 13,
+    "spec_id": 1468,
+    "label": "Preservation Method build 4",
+    "code": "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAYmZ2MzMmxYMbGmZmthBAAmxMmBjZkZmBAAAYmZmMjZGjZmBAzYGYBsAmhJkNYzwAYmZMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/preservation-evoker/talents",
+    "class_id": 13,
+    "spec_id": 1468,
+    "label": "Preservation Method build 5",
+    "code": "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAYmZ2WmHAzYmxsZMzMzywAAAzYGzgxMyMzAAAAMzMTmxMjxMzAgBGzYhNYgZ0QDYBGzMAjB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/augmentation-evoker/talents",
+    "class_id": 13,
+    "spec_id": 1473,
+    "label": "Augmentation Method build 1",
+    "code": "CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZ2AAAAAAAAYmhxMYM1YmZGAAAAMjZMmZWGzMwMMwYGLsADMDDNwCGjZGAYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/augmentation-evoker/talents",
+    "class_id": 13,
+    "spec_id": 1473,
+    "label": "Augmentation Method build 2",
+    "code": "CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZ2AAAAAAAAYmhZGYM1YmZGAAAAMjZMmZWGzMwMMwYGLsADMDDNwCGzMzAAD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/augmentation-evoker/talents",
+    "class_id": 13,
+    "spec_id": 1473,
+    "label": "Augmentation Method build 3",
+    "code": "CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbjZmxyMYmlZMzMmBAAAAAAAAzMMmBjpGzMzAAAAgZMjxMzyYmBmZzYwCsMGGbDgZQshxAzMAG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/augmentation-evoker/talents",
+    "class_id": 13,
+    "spec_id": 1473,
+    "label": "Augmentation Method build 4",
+    "code": "CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbjZmxyMYmtZMzMmBAAAAAAAAmhHYGYM1YmZGAAAAMzMjxMz2YmBmZzYwCsMGGbDgZQshxMYmBDG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/devourer-demon-hunter/talents",
+    "class_id": 12,
+    "spec_id": 1480,
+    "label": "Devourer Method build 1",
+    "code": "CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMzMzMzMzMDzsYGjFtswMzMzWbzMzAYGDABMGMmB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/devourer-demon-hunter/talents",
+    "class_id": 12,
+    "spec_id": 1480,
+    "label": "Devourer Method build 2",
+    "code": "CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMzMzMjZmZMzsYGjFtswMzMzWbzMzAYGDABMGMmB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/devourer-demon-hunter/talents",
+    "class_id": 12,
+    "spec_id": 1480,
+    "label": "Devourer Method build 3",
+    "code": "CgcBAAAAAAAAAAAAAAAAAAAAAAA2mZmZmZmZMGmBAAAAAAgxsNYGAAAAAAAAmxMMPwMzMzMzMDzsNzYsJLAIgBYGzMz2Mz0sNzyMzYMDA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/devourer-demon-hunter/talents",
+    "class_id": 12,
+    "spec_id": 1480,
+    "label": "Devourer Method build 4",
+    "code": "CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMmZmZmZmZYmtZGjNttAgAGgZMzMbzMTz2MLzMjxMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/devourer-demon-hunter/talents",
+    "class_id": 12,
+    "spec_id": 1480,
+    "label": "Devourer Method build 5",
+    "code": "CgcBAAAAAAAAAAAAAAAAAAAAAAAWMmZmZmZmxwMAAAAAAAmxYwMAAAAAAAAMjZYMzMzYmZmxMbzMGbabBABMAzYmZ2mZmmtZWmZGzYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/devourer-demon-hunter/talents",
+    "class_id": 12,
+    "spec_id": 1480,
+    "label": "Devourer Method build 6",
+    "code": "CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMzMzMzMzMDzsYGjNtsAgAAMjZmZZmZa2mZxYwYGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Method",
+    "url": "https://www.method.gg/guides/devourer-demon-hunter/talents",
+    "class_id": 12,
+    "spec_id": 1480,
+    "label": "Devourer Method build 7",
+    "code": "CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMzMzMjZmZMzsYGjNtsAgAAMjZmZZmZa2mZxYwYGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/arcane-mage-pve-dps-spec-builds-talents",
+    "class_id": 8,
+    "spec_id": 62,
+    "label": "Arcane Icy Veins build 1",
+    "code": "C4DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMDamZGAAAGAwMz0sssMDAgNAAAzMDbWmxMLzYMzMzMsxMmZmBAYAAAGgZGwMAYYmZA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/arcane-mage-pve-dps-spec-builds-talents",
+    "class_id": 8,
+    "spec_id": 62,
+    "label": "Arcane Icy Veins build 2",
+    "code": "C4DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzQzMzAAAwAAmZmmlllZAAsBAwGMzMsZZGzsMjxMzMzwGzYGzAAMAAADwMDMzAghZmB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/arcane-mage-pve-dps-spec-builds-talents",
+    "class_id": 8,
+    "spec_id": 62,
+    "label": "Arcane Icy Veins build 3",
+    "code": "C4DAAAAAAAAAAAAAAAAAAAAAAMzwYZGzsYzMDNzYGAAADAYmZaWWWmBAwGAAbwMzwmlZMzyMGzMzMDbMjZMDAwAAAMAzMwMDAGmZG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/fire-mage-pve-dps-spec-builds-talents",
+    "class_id": 8,
+    "spec_id": 63,
+    "label": "Fire Icy Veins build 1",
+    "code": "C8DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMDZmZGAAAGAwMz0sstMDAwmZmx2MzMzYDAAAAAbmZMzAAgZMmZmZMzsMAMzAMGwMMGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/fire-mage-pve-dps-spec-builds-talents",
+    "class_id": 8,
+    "spec_id": 63,
+    "label": "Fire Icy Veins build 2",
+    "code": "C8DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzsgZGZmZGAAAAAmZmmltlZAA2MzM2mZmZGbAAAAAYzMjZGAAMjxMzMjZmlBgZGMjxAmhxA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/frost-mage-pve-dps-spec-builds-talents",
+    "class_id": 8,
+    "spec_id": 64,
+    "label": "Frost Icy Veins build 1",
+    "code": "CAEAAAAAAAAAAAAAAAAAAAAAAYGGLzMzsMmZmYmZGjZMziZmZmZMDAAAMzMzyyMTbAAAAAAwGAbbjZmZwsNPgxMsAAAwMbAzADYGMMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/frost-mage-pve-dps-spec-builds-talents",
+    "class_id": 8,
+    "spec_id": 64,
+    "label": "Frost Icy Veins build 2",
+    "code": "CAEAAAAAAAAAAAAAAAAAAAAAAYGGLzMzsMmZmYmZGzMzMziZmZMjZAAAgZmZWWmZaDAAAAAA2AYbbMzMDmthxMsAAAwMbAzADYGMMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/frost-mage-pve-dps-spec-builds-talents",
+    "class_id": 8,
+    "spec_id": 64,
+    "label": "Frost Icy Veins build 3",
+    "code": "CAEAAAAAAAAAAAAAAAAAAAAAAYGGLzMzsMmZmYmZGzMzMWMzMzMzYmlZamZZWAAAgFAAAAAAYBgttxMzMY2mxMzYbBAAAMzgZgBMDwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/holy-paladin-pve-healing-spec-builds-talents",
+    "class_id": 2,
+    "spec_id": 65,
+    "label": "Holy Icy Veins build 1",
+    "code": "CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAw2MzMjZMzYxYmZYZwMLmpJGzYmZYMbZAYADbgNWmxMLz2Mzs1AAAAsAAbGGzYGmBAwMDzghB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/holy-paladin-pve-healing-spec-builds-talents",
+    "class_id": 2,
+    "spec_id": 65,
+    "label": "Holy Icy Veins build 2",
+    "code": "CEEAAAAAAAAAAAAAAAAAAAAAAAAAgZBAmBAA2GzMzMjZmZBmZYZsZmFjmYWmxMzwY2yAwAwGYjlZmZWmtZmZrBAAAYBMD2AGGMDAgZGmxYYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/holy-paladin-pve-healing-spec-builds-talents",
+    "class_id": 2,
+    "spec_id": 65,
+    "label": "Holy Icy Veins build 3",
+    "code": "CEEAAAAAAAAAAAAAAAAAAAAAAAAAgZBAmBAA2GzMzMjZmZBmZYZsZmFjmYWmxMzwY2yAwAwGYjlZmBAAAmZ22WsNzwGYGsBMMYGAzMAMjxoB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/protection-paladin-pve-tank-spec-builds-talents",
+    "class_id": 2,
+    "spec_id": 66,
+    "label": "Protection Icy Veins build 1",
+    "code": "CIEAAAAAAAAAAAAAAAAAAAAAAsZmtZZmZMzMzMWGjxw2MGAAAAAAAAINGmxMzYMbtBgBMwMYbAAgZm2mZWmBAYjNMAGjZYMAALzAmZGwYB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/protection-paladin-pve-tank-spec-builds-talents",
+    "class_id": 2,
+    "spec_id": 66,
+    "label": "Protection Icy Veins build 2",
+    "code": "CIEAAAAAAAAAAAAAAAAAAAAAAsZYWGzYmZmZW2GjZZWmlZMAAAAAAAAQTzMMjZGGzWbAYgBMD2GAAYmptZmlZAA2ssgBAjZYMAALzAmZGwYB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/protection-paladin-pve-tank-spec-builds-talents",
+    "class_id": 2,
+    "spec_id": 66,
+    "label": "Protection Icy Veins build 3",
+    "code": "CIEAAAAAAAAAAAAAAAAAAAAAAsZsMLjZMzMzMLbjxsMmlZMAAAAAAAAQTzMMjZGGzWbAYgBMD2GAAYmptZmlZAA2ssgBAjZYMAALzAmZGwYB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/retribution-paladin-pve-dps-spec-builds-talents",
+    "class_id": 2,
+    "spec_id": 70,
+    "label": "Retribution Icy Veins build 1",
+    "code": "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAANbbzMzywMDAAAAAAzUGzwMjtxsNMz2MGjZGmxCbDAAgZm2mZ2mBAsBYAwYGmBzYMbYbGMMmxgB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/retribution-paladin-pve-dps-spec-builds-talents",
+    "class_id": 2,
+    "spec_id": 70,
+    "label": "Retribution Icy Veins build 2",
+    "code": "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzMzAAAAAAYmyYGmZsNmthZ2mxYMGmxGbAAAMz02Mz2MAgNADAGzwAzYmZDLzghxMGMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/retribution-paladin-pve-dps-spec-builds-talents",
+    "class_id": 2,
+    "spec_id": 70,
+    "label": "Retribution Icy Veins build 3",
+    "code": "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGjZmBAAAAAYmyYGMjtZmthZ2mxYMzwM2YDAAgZm2mZ2mBAsBYAAzwAzYGbYZGMmxMGMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/arms-warrior-pve-dps-spec-builds-talents",
+    "class_id": 1,
+    "spec_id": 71,
+    "label": "Arms Icy Veins build 1",
+    "code": "CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMzMmZGAAAghphxYmZzMzMzgxMDAAAAgZWmZAhxyyALgBMDTgZwGYmx2YbglZWGgZGAMDDA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/arms-warrior-pve-dps-spec-builds-talents",
+    "class_id": 1,
+    "spec_id": 71,
+    "label": "Arms Icy Veins build 2",
+    "code": "CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphxYmZzMzMzYmxMDAAAAgxyMDMhxy2ALgBMDTgZwGYmhhBzyMbDwMDAmhBA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/fury-warrior-pve-dps-spec-builds-talents",
+    "class_id": 1,
+    "spec_id": 72,
+    "label": "Fury Icy Veins build 1",
+    "code": "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDzMmZ2MzMzMDjZmZGzYmlZmxMzMbmZmBAAixy2ALgJYGmAzwGwMDjNAAYmhxYYMYM",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/fury-warrior-pve-dps-spec-builds-talents",
+    "class_id": 1,
+    "spec_id": 72,
+    "label": "Fury Icy Veins build 2",
+    "code": "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjxMzmZmZmZmZMzMzMzYmlZMmZMbmZmBAAixy2ALgJYGmAzwGwMzmBAAYmhxsMwgxA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/fury-warrior-pve-dps-spec-builds-talents",
+    "class_id": 1,
+    "spec_id": 72,
+    "label": "Fury Icy Veins build 3",
+    "code": "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjZMz2yMzMjZmxMzMzMjZWmZmZmxsZmZGAAIMwGssY0YGQmFMjFAzgBAMzAwwiZAGD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/protection-warrior-pve-tank-spec-builds-talents",
+    "class_id": 1,
+    "spec_id": 73,
+    "label": "Protection Icy Veins build 1",
+    "code": "CkEAAAAAAAAAAAAAAAAAAAAAA02AAAzMDzMzMzMzmxsMjxYmGGDLzMzMDGzMAAAAYZAYGDAsYGDbwAzwCNmZBmxMDmNAAzMAgZgxA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/protection-warrior-pve-tank-spec-builds-talents",
+    "class_id": 1,
+    "spec_id": 73,
+    "label": "Protection Icy Veins build 2",
+    "code": "CkEAAAAAAAAAAAAAAAAAAAAAA0yAAAjZYmZmZGziZmlZMGz0YGDLmZmZMDzMAAAAYZAYGDwAbw2iRjZAMLYmNYmZmhxCAMzAAwAGD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/protection-warrior-pve-tank-spec-builds-talents",
+    "class_id": 1,
+    "spec_id": 73,
+    "label": "Protection Icy Veins build 3",
+    "code": "CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzYmZmZmxsYmZZGjxMNmxwiZmZGzwMDAAAAWGAmxAMwGstY0YGAzCmZDmZmZYsAAzMAAMgxA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/protection-warrior-pve-tank-spec-builds-talents",
+    "class_id": 1,
+    "spec_id": 73,
+    "label": "Protection Icy Veins build 4",
+    "code": "CkEAAAAAAAAAAAAAAAAAAAAAAkBAAmZGmZmZmxsZmZZGjxMNMGWmZmZGMmZAAAAwyMDwMGgB2glFjGzAY2wMbgxMDmNAYmBAgZgxA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/protection-warrior-pve-tank-spec-builds-talents",
+    "class_id": 1,
+    "spec_id": 73,
+    "label": "Protection Icy Veins build 5",
+    "code": "CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzwMzMzMmFzMLzYMmpxMGWMzMzYGmZAAAAwyMDwMGgB2gtFjGzAYWwMbYYmZYsAAzMAAMgxA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/protection-warrior-pve-tank-spec-builds-talents",
+    "class_id": 1,
+    "spec_id": 73,
+    "label": "Protection Icy Veins build 6",
+    "code": "CkEAAAAAAAAAAAAAAAAAAAAAAkBAAmZGmZmZmxsZmZZGjxMNMGWmZmZGMmZAAAAwyMDwMGAYxMG2gBmhFaMzCYMzgZDAwMDAYGYMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/protection-warrior-pve-tank-spec-builds-talents",
+    "class_id": 1,
+    "spec_id": 73,
+    "label": "Protection Icy Veins build 7",
+    "code": "CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzwMzMzMmFzMLzYMmpxMGWMzMzYGmZAAAAwyMDwMGAYxMGWgBmhFaMzCYmZGGLAAmZAADYMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/balance-druid-pve-dps-spec-builds-talents",
+    "class_id": 11,
+    "spec_id": 102,
+    "label": "Balance Icy Veins build 1",
+    "code": "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMD8AmFzMzMLMMMmZZGGzYhlZWmZMmZDDAGbLzMYMbDgJAAAALMzMzgNjZMmBAwMDWGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/balance-druid-pve-dps-spec-builds-talents",
+    "class_id": 11,
+    "spec_id": 102,
+    "label": "Balance Icy Veins build 2",
+    "code": "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMD8AmFzMzMLMMMmZZmFzMjFWmZZMmZsgBAjttZGMmtBwEAAAgFmZmZwmxMGzAAYmBGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/balance-druid-pve-dps-spec-builds-talents",
+    "class_id": 11,
+    "spec_id": 102,
+    "label": "Balance Icy Veins build 3",
+    "code": "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMD8AmlZmZmZDgZZmtZWmxMzGLzYMGzshBADw22YBTzMbDAAAA2MzMzMYzYGjBgZGAYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/balance-druid-pve-dps-spec-builds-talents",
+    "class_id": 11,
+    "spec_id": 102,
+    "label": "Balance Icy Veins build 4",
+    "code": "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDMmlZmZmBMDjZWmZZGzYhlZMmZmxCGAMALbjFMNzsMAAAAYjZmZGsZgxMAmZAgBA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/feral-druid-pve-dps-spec-builds-talents",
+    "class_id": 11,
+    "spec_id": 103,
+    "label": "Feral Icy Veins build 1",
+    "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwYMjxYmZMmtFWGbzMzYmZAAAAYLY2MMmZUzYWmZmZGjZMAAAAAAMwAAAAAAMbzs0sNzyGYmHAYxMYAAMzAgB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/feral-druid-pve-dps-spec-builds-talents",
+    "class_id": 11,
+    "spec_id": 103,
+    "label": "Feral Icy Veins build 2",
+    "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZMzGzMzMGz2yYZsNjZmHYmBAAAgtgZzwYmRNjZZmZmZMmxAAAAAAwADAAAAAwsNzSzyMLbgZeAgFzgBAwMDAGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/feral-druid-pve-dps-spec-builds-talents",
+    "class_id": 11,
+    "spec_id": 103,
+    "label": "Feral Icy Veins build 3",
+    "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2YmZmxY2MPw2YbGzMmZAAAAYLY2M8AmZUzYWMzMzsMmxAAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/feral-druid-pve-dps-spec-builds-talents",
+    "class_id": 11,
+    "spec_id": 103,
+    "label": "Feral Icy Veins build 4",
+    "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZYmxMzMzsZsNz2MmZegZGAAAA2CmNDPgZG1MmlxMzMLjZYAAAAAAMwAAAAoZWmlZmZAALwMzAswgBAAwMbYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/guardian-druid-pve-tank-spec-builds-talents",
+    "class_id": 11,
+    "spec_id": 104,
+    "label": "Guardian Icy Veins build 1",
+    "code": "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsMPwYMzmZZGMLLDMbwoJamZWmZmZGjZMDAAAAAYGLzAAAAgmZZWmZmBAwCmZAWMDGwmFDAmZDG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/guardian-druid-pve-tank-spec-builds-talents",
+    "class_id": 11,
+    "spec_id": 104,
+    "label": "Guardian Icy Veins build 2",
+    "code": "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZml5BmZMziZxwMLLDMbGGNRmZWmZmZmlxMGAAAAAgZsYAbbzMYMLDgJAAAgNMzAsYGMgNLAMzAYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/guardian-druid-pve-tank-spec-builds-talents",
+    "class_id": 11,
+    "spec_id": 104,
+    "label": "Guardian Icy Veins build 3",
+    "code": "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsMPwMjZWMLGmZZZgZzwoJyMzyMzMzsMmxAAAAAAMjlZALbzMYMLDgJAAAgNMzAsYGMgNLAMzAYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/restoration-druid-pve-healing-spec-builds-talents",
+    "class_id": 11,
+    "spec_id": 105,
+    "label": "Restoration Icy Veins build 1",
+    "code": "CkGADBD3hSPCL9Y9gz68WcKvMMjxMLzMjZmxsNMYmNjFmBAAAAAAAAAAbDa2YMNzY4BMLzMzMDDzAAAAAAAAAAIAAgZbmlmtZ2sxYmZYmBGNDAwMDADA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/restoration-druid-pve-healing-spec-builds-talents",
+    "class_id": 11,
+    "spec_id": 105,
+    "label": "Restoration Icy Veins build 2",
+    "code": "CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMzsMsZbGAAAAAAAAAAsMoZzw0MjZwsYmZmZZGGDAAAAAAAGAAAAAMbzs1sNziNGzMwMbgmBAYmBgB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/restoration-druid-pve-healing-spec-builds-talents",
+    "class_id": 11,
+    "spec_id": 105,
+    "label": "Restoration Icy Veins build 3",
+    "code": "CkGAAAAAAAAAAAAAAAAAAAAAAMMmxYGzMjZbmZYYhZx2MAAAAAAAAAAYbQzmhpZMzYMLmZmZWmhxAAAAAAAYMAAEAAwsMzWzyML2gZeAMjFQzAAMzAwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/blood-death-knight-pve-tank-spec-builds-talents",
+    "class_id": 6,
+    "spec_id": 250,
+    "label": "Blood Icy Veins build 1",
+    "code": "CoPAAAAAAAAAAAAAAAAAAAAAAwYWmZGmxMzMMLzMz0MLGzMzMGAAAAwMzMzMzMDzYMDAMzMzAAAYgBmxiGLLAWGwGgZMDAAYmBwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/blood-death-knight-pve-tank-spec-builds-talents",
+    "class_id": 6,
+    "spec_id": 250,
+    "label": "Blood Icy Veins build 2",
+    "code": "CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmhZZmZmmZxYmxMGAAAAwMmZmZmZYGjBAjZmZGAAADMwMW0YZBwyA2AMjZAAAzMwwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/blood-death-knight-pve-tank-spec-builds-talents",
+    "class_id": 6,
+    "spec_id": 250,
+    "label": "Blood Icy Veins build 3",
+    "code": "CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmhZZmZmmZxYmZmxAAAAAmxMzMzMDzYMAYMzMzAAAMmtBGwCYbYCMsAYGzAAwMDAMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/blood-death-knight-pve-tank-spec-builds-talents",
+    "class_id": 6,
+    "spec_id": 250,
+    "label": "Blood Icy Veins build 4",
+    "code": "CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmhZZmZmmZxYmxMGAAAAwMmZmZmZ8AzYAAzMzMzAAAYgBmxiGLLAWGwGgZYAAAzMwwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/blood-death-knight-pve-tank-spec-builds-talents",
+    "class_id": 6,
+    "spec_id": 250,
+    "label": "Blood Icy Veins build 5",
+    "code": "CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmhZZmZmmZxYmZmxAAAAAmxMzMzMjHYGDAYmZmZGAAgxsNwAWAbDTghFAzwAAwMDAMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/frost-death-knight-pve-dps-spec-builds-talents",
+    "class_id": 6,
+    "spec_id": 251,
+    "label": "Frost Icy Veins build 1",
+    "code": "CsPAAAAAAAAAAAAAAAAAAAAAAMDwMjZmZGDz2MzMzMLmZmMjxYYmxgZMzMzMzMDAAAAAAAAAgNzihBGY2YohNMzYmZgBgBgZGgB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/frost-death-knight-pve-dps-spec-builds-talents",
+    "class_id": 6,
+    "spec_id": 251,
+    "label": "Frost Icy Veins build 2",
+    "code": "CsPAAAAAAAAAAAAAAAAAAAAAAMDYmZMzMzYY2mZmZmZxMjMjxYYMGMzMzMzMzMDAAAAAAAAAjZbgBsAWGmAjFMzYmZgBghZGAgB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/unholy-death-knight-pve-dps-spec-builds-talents",
+    "class_id": 6,
+    "spec_id": 252,
+    "label": "Unholy Icy Veins build 1",
+    "code": "CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMzYY2mZmZa2MzMjZAAAAAAAAgZGGDAWmxMz2MzYmZAbmFDDMwsxQjFAMDAjZmxMAzMzYMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/unholy-death-knight-pve-dps-spec-builds-talents",
+    "class_id": 6,
+    "spec_id": 252,
+    "label": "Unholy Icy Veins build 2",
+    "code": "CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMzMDz2MzMTzmZGjZAAAAAAAAgZGzYAwyMmZ2MzYMDYzsYYgBmNGasgBMDAjZmxMAzMzYMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/beast-mastery-hunter-pve-dps-spec-builds-talents",
+    "class_id": 3,
+    "spec_id": 253,
+    "label": "Beast Mastery Icy Veins build 1",
+    "code": "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwwMsBAgZYMzyMDzYmhhZGjZGzMjZMziZmxMmBjpZAAAAAzAAAwYmZAmZjxGMLgtBgB",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/beast-mastery-hunter-pve-dps-spec-builds-talents",
+    "class_id": 3,
+    "spec_id": 253,
+    "label": "Beast Mastery Icy Veins build 2",
+    "code": "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGmZmlZGzMzMjZGMzYmhZGzYmFzMjZMDGTzAAAAAAAAgxMzAMzGZDmFw2AwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/beast-mastery-hunter-pve-dps-spec-builds-talents",
+    "class_id": 3,
+    "spec_id": 253,
+    "label": "Beast Mastery Icy Veins build 3",
+    "code": "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsYGzMzMjZGMzYmhZGzMzYbmZMjZYZMNDAAAAAAAA8AjxAmZjAmFw2AwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/beast-mastery-hunter-pve-dps-spec-builds-talents",
+    "class_id": 3,
+    "spec_id": 253,
+    "label": "Beast Mastery Icy Veins build 4",
+    "code": "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsYGzMzMjZGMzYmhZGzMzgxYGzMMmGAAAAAAAAYmxYAzsRwyMLgtBgBA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/marksmanship-hunter-pve-dps-spec-builds-talents",
+    "class_id": 3,
+    "spec_id": 254,
+    "label": "Marksmanship Icy Veins build 1",
+    "code": "C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGzYZAjZwGAAAAAAAAYGzYmFzYmZMDGTzYwYbZmZmZmZmZWYmlBzAAAGzMjBwM22gBYjZ2mxAA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/marksmanship-hunter-pve-dps-spec-builds-talents",
+    "class_id": 3,
+    "spec_id": 254,
+    "label": "Marksmanship Icy Veins build 2",
+    "code": "C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGzYZAjZwGAAAAAAAAYGzYmFzYmZMDGTzYwstZmZmZmZmZWYmlhZAAAGzMjBwM22gBYjZ2mxAA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/marksmanship-hunter-pve-dps-spec-builds-talents",
+    "class_id": 3,
+    "spec_id": 254,
+    "label": "Marksmanship Icy Veins build 3",
+    "code": "C4PAAAAAAAAAAAAAAAAAAAAAAwGMwMGzYZAjZwGAAAAAAAAYGzMzYbGzMjZYZMNjBzy22MzMzMzMzswMLDzAAA4BGjBgZsBGgNmZbGD",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/marksmanship-hunter-pve-dps-spec-builds-talents",
+    "class_id": 3,
+    "spec_id": 254,
+    "label": "Marksmanship Icy Veins build 4",
+    "code": "C4PAAAAAAAAAAAAAAAAAAAAAAwGMwMGzYZAjZwGAAAAAAAAYGzMzgxMzYmhx0wgZZbbmZmZmZmZWwsNMDAAwMjxAwM2wyMAbMz2MG",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/survival-hunter-pve-dps-spec-builds-talents",
+    "class_id": 3,
+    "spec_id": 255,
+    "label": "Survival Icy Veins build 1",
+    "code": "C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYmgtZMzMGzyAAAAAAwMmxMLmxYGzgx0MAAAADAmxyyMzsYMzMjZmBAzYZDGDjNDAA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/survival-hunter-pve-dps-spec-builds-talents",
+    "class_id": 3,
+    "spec_id": 255,
+    "label": "Survival Icy Veins build 2",
+    "code": "C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxYGLDgZGYbmZmZmxsNPAAAAAAgZMzMjtZMmxMsMmmBAAAYAgxyyMjFMzMegxYAYGbgxYmZzAAA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/survival-hunter-pve-dps-spec-builds-talents",
+    "class_id": 3,
+    "spec_id": 255,
+    "label": "Survival Icy Veins build 3",
+    "code": "C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxYGLDgZGYbmZmZmxsNPAAAAAAgZMzMDGjZMzwYaAAAAAAGLLzMWwMzMzYMAMjNsMjxMzmBAAA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/discipline-priest-pve-healing-spec-builds-talents",
+    "class_id": 5,
+    "spec_id": 256,
+    "label": "Discipline Icy Veins build 1",
+    "code": "CAQAAAAAAAAAAAAAAAAAAAAAAADsMmxyYmBzgZbmtZmZmZmBAAAAAAAAAgZYZGMzMDzYmBMNTzMYmBAAY2mtFwYzAAwYMzYwMYmBjgB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/discipline-priest-pve-healing-spec-builds-talents",
+    "class_id": 5,
+    "spec_id": 256,
+    "label": "Discipline Icy Veins build 2",
+    "code": "CAQAAAAAAAAAAAAAAAAAAAAAAADsMDWmZMmBmZbmtZmZmxMDAAAAAAAAAgZYZGMzMzwYmBbmmJGgZWwQYMLDwYwCAAMmZmxgZAmZGBzA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/holy-priest-pve-healing-spec-builds-talents",
+    "class_id": 5,
+    "spec_id": 257,
+    "label": "Holy Icy Veins build 1",
+    "code": "CEQAAAAAAAAAAAAAAAAAAAAAAwYAAAAAAAgZmlxYMzMDzMzYZGmBAAAwwsMDzMzMMDzYAzUAgZWMDziBAGD2MzMLAaGzMGDzMbLDwAGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/holy-priest-pve-healing-spec-builds-talents",
+    "class_id": 5,
+    "spec_id": 257,
+    "label": "Holy Icy Veins build 2",
+    "code": "CEQAAAAAAAAAAAAAAAAAAAAAAwYAAAAAAAMMzsMgZmZYmZGLzMzMAAAAGzsMDmZmxmxMjBMTBAmZzMMbGAYMYzMjFANjZGjBzstMADYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/holy-priest-pve-healing-spec-builds-talents",
+    "class_id": 5,
+    "spec_id": 257,
+    "label": "Holy Icy Veins build 3",
+    "code": "CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAgZmxsMMjZGDzwYZmZmBAAAwYmlZwMzM2MmZMgZKAmZBDhxsNAjBWMzMLAMjZGjBzAMzMgB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/shadow-priest-pve-dps-spec-builds-talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Icy Veins build 1",
+    "code": "CIQAR03Gt7xPmcDNOjs2Zlb3yOMjZGAAAAAAAAAAAgxMMjx2MDzsNzwMjtZMmZmBmMwMNzAzAMzmZ0sZAIjxCAmBYMzMjZbMz2yAMDGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/shadow-priest-pve-dps-spec-builds-talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Icy Veins build 2",
+    "code": "CIQAR03Gt7xPmcDNOjs2Zlb3yOMjZGAAAAAAAAAAAghZxMGbzMmZWmZYmx2MGzMzYDZGLmpBYGgZ2MjmNDAZMWAwMAjZmZMbjZ2WGgZwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/shadow-priest-pve-dps-spec-builds-talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Icy Veins build 3",
+    "code": "CIQAR03Gt7xPmcDNOjs2Zlb3yOMjZGAAAAAAAAAAAgxMMjx2MDzsNzwMsNzMmZmxGyMWMTDwMzMAQAmtZbJY2YAmBYMzMjZbMDmZwMYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/shadow-priest-pve-dps-spec-builds-talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Icy Veins build 4",
+    "code": "CIQAR03Gt7xPmcDNOjs2Zlb3yOMjZGAAAAAAAAAAAghZxMGbzMmZWmZYmx2MGzMzYDZGLmpBYmZGAIAz2stEMbMAwgxMzMmtxMYmBzgB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/shadow-priest-pve-dps-spec-builds-talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Icy Veins build 5",
+    "code": "CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMz2MGzw2MzYmZGbIzYxMNAzAMzmZY2MAkxYBAzMgxMzMmNmZbZAmBDA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/shadow-priest-pve-dps-spec-builds-talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Icy Veins build 6",
+    "code": "CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMzyMzYG2mZGzMzYDZGLmpBYmZGAIAz2stAmNGAYwYmZGzGzgZGMDGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/shadow-priest-pve-dps-spec-builds-talents",
+    "class_id": 5,
+    "spec_id": 258,
+    "label": "Shadow Icy Veins build 7",
+    "code": "CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMzyMzYmx2MYmZmZDZGLb0AMzMDAEgZb2WAzGDAMwMzMzMbMDmZwMYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/assassination-rogue-pve-dps-spec-builds-talents",
+    "class_id": 4,
+    "spec_id": 259,
+    "label": "Assassination Icy Veins build 1",
+    "code": "CMQAAAAAAAAAAAAAAAAAAAAAAYmlxsNDGAAAAAY2GsNDAAAAAIbzMzMzMjxyMzMbzsMzMzYGzYMmZMMAbmlBGwCYZYCMsYwMDwYMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/assassination-rogue-pve-dps-spec-builds-talents",
+    "class_id": 4,
+    "spec_id": 259,
+    "label": "Assassination Icy Veins build 2",
+    "code": "CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAY2GsNDAAAAAIbzMzMzMjxyMzMbzsMzMPwYMzYMmZGjBYzsMwAWALDTghFDmZAGjB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/assassination-rogue-pve-dps-spec-builds-talents",
+    "class_id": 4,
+    "spec_id": 259,
+    "label": "Assassination Icy Veins build 3",
+    "code": "CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAY2GsNDAAAAAIbzMzMzMjxyMzMbzsMzMPgZMzYMMzYMAbmlBGwCYZYCMsYwMDwYMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/outlaw-rogue-pve-dps-spec-builds-talents",
+    "class_id": 4,
+    "spec_id": 260,
+    "label": "Outlaw Icy Veins build 1",
+    "code": "CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMmZmtZmZmZMmF4BmZbaZw2MAAAAAALLzMzwMzMziZmZbAAAAYmBAjZxwADMLsQLsxAMzgBG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/outlaw-rogue-pve-dps-spec-builds-talents",
+    "class_id": 4,
+    "spec_id": 260,
+    "label": "Outlaw Icy Veins build 2",
+    "code": "CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMjZmtZmZMzMzsAmZbaZw2MAAAAAALLzMzwMzMziZmZbAAAAYmBAjZxwADMLsQLsxAMzgBG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/subtlety-rogue-pve-dps-spec-builds-talents",
+    "class_id": 4,
+    "spec_id": 261,
+    "label": "Subtlety Icy Veins build 1",
+    "code": "CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDDzMzMzw8AbzYGbbzMzMzMjBjZ2GAAAAGMmFzyADYBsMMBmFMDzMAzYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/subtlety-rogue-pve-dps-spec-builds-talents",
+    "class_id": 4,
+    "spec_id": 261,
+    "label": "Subtlety Icy Veins build 2",
+    "code": "CUQA5HmDzx68KWyrW/8Y781L7Dgx2MAAAAAwsMGLTMbLjxMMjZmZmZGGbzYGbbzMzMzMjBjZ2GAAAAGMGwY2MMwAziWoFbYGwMDmxA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/subtlety-rogue-pve-dps-spec-builds-talents",
+    "class_id": 4,
+    "spec_id": 261,
+    "label": "Subtlety Icy Veins build 3",
+    "code": "CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbLjxMMjZmZmZGGbzYGbbzMzMzMjBjZ2GAAAAGMmFzyADYBsMMhMLYGmZAmxA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/elemental-shaman-pve-dps-spec-builds-talents",
+    "class_id": 7,
+    "spec_id": 262,
+    "label": "Elemental Icy Veins build 1",
+    "code": "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMmZmZZZZMMjBAAAAsYmNYADY2YCMLAwsNzMjZ2WmJMzsxyMzMjZwyMWMzwMLDAYAgZGDDD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/elemental-shaman-pve-dps-spec-builds-talents",
+    "class_id": 7,
+    "spec_id": 262,
+    "label": "Elemental Icy Veins build 2",
+    "code": "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMGjZZZZMmhBAAAAsYmNYADY2YCMLAwsNzMjx2iJMzsNWmZmZMjFLzMmZGzMLAADAMzYYYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/elemental-shaman-pve-dps-spec-builds-talents",
+    "class_id": 7,
+    "spec_id": 262,
+    "label": "Elemental Icy Veins build 3",
+    "code": "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMGjZZZZMmhBAAAAsYmNYADY2YCMLAwsNzMjZ2WmJMzYsYmZGzYxyMjZmxMzCAwAAzMGGGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/enhancement-shaman-pve-dps-spec-builds-talents",
+    "class_id": 7,
+    "spec_id": 263,
+    "label": "Enhancement Icy Veins build 1",
+    "code": "CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZZGzMjllZgZmNWmZmZYYMDAwMMmZMzEYmBDGDA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/enhancement-shaman-pve-dps-spec-builds-talents",
+    "class_id": 7,
+    "spec_id": 263,
+    "label": "Enhancement Icy Veins build 2",
+    "code": "CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAAsBYzMG2gFYGGawCAzyMmxYZxYjZmtxyMzMzYswMAAzwYmhRgZGMYMA",
+    "expected_status": "observed-drift",
+    "expected_decode_error": "CHOICE_CONFLICT"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/enhancement-shaman-pve-dps-spec-builds-talents",
+    "class_id": 7,
+    "spec_id": 263,
+    "label": "Enhancement Icy Veins build 3",
+    "code": "CcQAAAAAAAAAAAAAAAAAAAAAAMzMjZmZmZmZmZmZGzAAAAAAAAAALwGMjFN2GAzA2AYWmxMGLLzAzMGLmZmZMWYGAADMGzMxMDAMGA",
+    "expected_status": "observed-drift",
+    "expected_decode_error": "CHOICE_CONFLICT"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/restoration-shaman-pve-healing-spec-builds-talents",
+    "class_id": 7,
+    "spec_id": 264,
+    "label": "Restoration Icy Veins build 1",
+    "code": "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZmZmZGjZMsBbwMW0YbAMDshxMMLzMGNLLzMbmxsxixMjhlZZAAAAzMYmBgxgZA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/restoration-shaman-pve-healing-spec-builds-talents",
+    "class_id": 7,
+    "spec_id": 264,
+    "label": "Restoration Icy Veins build 2",
+    "code": "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNjZGjZGzMYsBbwMW0YbAMDsZGmBbjZmpZbZmhZMbsMzMzYwsMAAAwMzgZGAYwM",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/restoration-shaman-pve-healing-spec-builds-talents",
+    "class_id": 7,
+    "spec_id": 264,
+    "label": "Restoration Icy Veins build 3",
+    "code": "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNzMzMzMzYmhxiZWgBMgZhJwYhBY2mZMa2WmZ2MzMLsYmZGDmlBAAAYGAMzgZwM",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/affliction-warlock-pve-dps-spec-builds-talents",
+    "class_id": 9,
+    "spec_id": 265,
+    "label": "Affliction Icy Veins build 1",
+    "code": "CkQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZhhZmZmlBAAYmZZ2mZmlxAAjllBGwEMDbBG2GAAAmBAAwMDzMjBzwMzMzMGMzMzAAmBG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/affliction-warlock-pve-dps-spec-builds-talents",
+    "class_id": 9,
+    "spec_id": 265,
+    "label": "Affliction Icy Veins build 2",
+    "code": "CkQAAAAAAAAAAAAAAAAAAAAAAwMjZGNLmxyMzYWGAAwMzsMLmZ2GDAMWWGYATwMsFYYbAAAYGAAAzMjZGmtxYGzMzMDDzMzMAgBMA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/affliction-warlock-pve-dps-spec-builds-talents",
+    "class_id": 9,
+    "spec_id": 265,
+    "label": "Affliction Icy Veins build 3",
+    "code": "CkQAAAAAAAAAAAAAAAAAAAAAAwMjZGNLmxyMzYWGAAwMzsMLzMzyYAgxyyADYAzwWghtBAAgZAAAMzMmZY2GjZwMzMMMzMzAAmBG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/demonology-warlock-pve-dps-spec-builds-talents",
+    "class_id": 9,
+    "spec_id": 266,
+    "label": "Demonology Icy Veins build 1",
+    "code": "CoQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjhZmxsMAAAAAAAjtlBGwAmhtQGbmhZ2mlZmZMDAYMzMzAMzMmxMDAAwMzMzMjZYZAYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/demonology-warlock-pve-dps-spec-builds-talents",
+    "class_id": 9,
+    "spec_id": 266,
+    "label": "Demonology Icy Veins build 2",
+    "code": "CoQAAAAAAAAAAAAAAAAAAAAAAwMjZGNLmxmZGzyAAAAAAAAGzYYBGYb0CNsYMzYZ2mZmxMAwMjZGzMDwYmxMbAAgxMzMzww2MGwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/demonology-warlock-pve-dps-spec-builds-talents",
+    "class_id": 9,
+    "spec_id": 266,
+    "label": "Demonology Icy Veins build 3",
+    "code": "CoQAAAAAAAAAAAAAAAAAAAAAAwMjZGNLmxiZGzyAAAAAAAMWWGYADYG2CM2MmZsMmxMzMAwMzMGDwMzYmxMbAAgxMzMzYw2MDwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/destruction-warlock-pve-dps-spec-builds-talents",
+    "class_id": 9,
+    "spec_id": 267,
+    "label": "Destruction Icy Veins build 1",
+    "code": "CsQAAAAAAAAAAAAAAAAAAAAAAwMmZGNLMzmZmZWmFzMzsYMWMDAAmZGzMziNYgZxoxMAmtYjBAAGDM2AAmZwYGzYDAAwMzMAAMGG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/destruction-warlock-pve-dps-spec-builds-talents",
+    "class_id": 9,
+    "spec_id": 267,
+    "label": "Destruction Icy Veins build 2",
+    "code": "CsQAAAAAAAAAAAAAAAAAAAAAAwMjZGNLmxmZGzysNzYmFzYZZMAAYGjZmZBMmxwCMw2wCNWYAAgxMMsBgZGgxMjZ2AAAMzMzAAYMM",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/destruction-warlock-pve-dps-spec-builds-talents",
+    "class_id": 9,
+    "spec_id": 267,
+    "label": "Destruction Icy Veins build 3",
+    "code": "CsQAAAAAAAAAAAAAAAAAAAAAAwMjZGNLmxmZGzysZGzsYYZZmBAAzMjZmZxCMwsY0YGAzG2YAAgxMAAAzMYMzMmNAAAzMzMAAMDD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/brewmaster-monk-pve-tank-spec-builds-talents",
+    "class_id": 10,
+    "spec_id": 268,
+    "label": "Brewmaster Icy Veins build 1",
+    "code": "CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGPwYWM2mxMDAAAAAAALLYEmBmhxmZMmZmZMzywMmZZYZzy2sNMLAAwysMtMbzsMAAAAzwGYmBMNGAAwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/brewmaster-monk-pve-tank-spec-builds-talents",
+    "class_id": 10,
+    "spec_id": 268,
+    "label": "Brewmaster Icy Veins build 2",
+    "code": "CwQAAAAAAAAAAAAAAAAAAAAAAAAAAwMLbGDzwyM2MmZMAAAAAAALLgYmBmhBzgZmZGzsNMjZWGW2stNbzYWAAgNAAAwsNLNzMzGDbAMzw0YADAYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/brewmaster-monk-pve-tank-spec-builds-talents",
+    "class_id": 10,
+    "spec_id": 268,
+    "label": "Brewmaster Icy Veins build 3",
+    "code": "CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZZzYGzwyM2MmZMAAAAAAALLgYmBmhBzgZmZGzsNMjZWGW2ssNbzYWAAglZZaZ2mZZAAAAMsBmZATjBMAgB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/windwalker-monk-pve-dps-spec-builds-talents",
+    "class_id": 10,
+    "spec_id": 269,
+    "label": "Windwalker Icy Veins build 1",
+    "code": "C0QAAAAAAAAAAAAAAAAAAAAAAMzYM2GmhlZGbzAAAAAAAAAAAAsMMCzwwAmZGmZmZY2GmhZZmAAWMz2MjZmZmBAwGAMLzSzMzsAgBmZAYsMAGwFA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/windwalker-monk-pve-dps-spec-builds-talents",
+    "class_id": 10,
+    "spec_id": 269,
+    "label": "Windwalker Icy Veins build 2",
+    "code": "C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYZmZ2mBAAAAAAAAAAAYZYEmhhBMjhZmZGmNMDzyMBAswsxMmZmZAAsYmlZZMBAAmZGAzAMWGDYmZ2M",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/mistweaver-monk-pve-healing-spec-builds-talents",
+    "class_id": 10,
+    "spec_id": 270,
+    "label": "Mistweaver Icy Veins build 1",
+    "code": "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghx2YZYzixMzyyM2wYGmZZbbmxCzoZMDYwAsMzMzwsBDWmJAAAAAAYxyMLzyMDAAMgBYGwYYsMZMDA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/mistweaver-monk-pve-healing-spec-builds-talents",
+    "class_id": 10,
+    "spec_id": 270,
+    "label": "Mistweaver Icy Veins build 2",
+    "code": "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghxyMLjZx2MmZsZstsNjZ2Mz22yMjFmRzYGwgBDmZmZY2GmhZ5BmAAAAAAgFLzsMLzMAAwAAMDYMwiMmBA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/mistweaver-monk-pve-healing-spec-builds-talents",
+    "class_id": 10,
+    "spec_id": 270,
+    "label": "Mistweaver Icy Veins build 3",
+    "code": "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghxyMLjZx2MzMz2G2sNjZ2Mz22yMjFmZaGzYBDGglZmZGmNYwyMBAAAAAALWmZZWmZAAAYAYGwAsMZMDA",
+    "expected_status": "observed-drift",
+    "expected_violations": [
+      "CURRENCY_BUDGET_MISMATCH"
+    ]
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/havoc-demon-hunter-pve-dps-spec-builds-talents",
+    "class_id": 12,
+    "spec_id": 577,
+    "label": "Havoc Icy Veins build 1",
+    "code": "CEkAAAAAAAAAAAAAAAAAAAAAAYgZmZMjZmZmxMZMzAAAAAAAmNjZbmxYmtZmxyMjZsMzwMLzsMDGGLbMhxMjhFAAAAAAAwMDwAAAAwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/havoc-demon-hunter-pve-dps-spec-builds-talents",
+    "class_id": 12,
+    "spec_id": 577,
+    "label": "Havoc Icy Veins build 2",
+    "code": "CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMz2MmZmxYmMmZAAAAAAAzixsNDzMwMWmZmZYmBzyAbzmZMMbMNmZGzYDAAAYAAAAMzgBAAAgB",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/havoc-demon-hunter-pve-dps-spec-builds-talents",
+    "class_id": 12,
+    "spec_id": 577,
+    "label": "Havoc Icy Veins build 3",
+    "code": "CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMjZMzMjxMhZGAAAAAAwsYmhZMzAzYZmZmxyMDmlB2mNzYY2YaMzMzM2AAAAAAAAYmBDAAAAD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/havoc-demon-hunter-pve-dps-spec-builds-talents",
+    "class_id": 12,
+    "spec_id": 577,
+    "label": "Havoc Icy Veins build 4",
+    "code": "CEkAAAAAAAAAAAAAAAAAAAAAAYgZmZ2mxMzMGzkxMDAAAAAAYWMmtZYmZ2mZGLzMmxyMDzsMz2MYYssxEGzMmxCAAAAAAAYmBYAAAAYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/vengeance-demon-hunter-pve-tank-spec-builds-talents",
+    "class_id": 12,
+    "spec_id": 581,
+    "label": "Vengeance Icy Veins build 1",
+    "code": "CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZMzMjMzMYWMzMDMjZGzYGzMDzMzM2GzsNGAAAAAAAAwMzYDAAAADGzMzMbtNzMDAAAAAwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/vengeance-demon-hunter-pve-tank-spec-builds-talents",
+    "class_id": 12,
+    "spec_id": 581,
+    "label": "Vengeance Icy Veins build 2",
+    "code": "CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZMMzkZmBWMjZwMjZGzMzMzYwMzM2YmtxwAAAAAAAAwMzMbAAAAYgZmZmZrtZmZAgBAAAwA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/devastation-evoker-pve-dps-spec-builds-talents",
+    "class_id": 13,
+    "spec_id": 1467,
+    "label": "Devastation Icy Veins build 1",
+    "code": "CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZgZYGzMgBjZamZmpZmx2MMzMzMzMzAmxMGzMLzMDMwYwGsMGN2GAzAwGGYmBDD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/devastation-evoker-pve-dps-spec-builds-talents",
+    "class_id": 13,
+    "spec_id": 1467,
+    "label": "Devastation Icy Veins build 2",
+    "code": "CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZAMzwMwMYMTjZmpZmZ2mhZmZmZmZGwMzMGzMLzMDMwYwGsMGN2GAzAwGGYmBDD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/preservation-evoker-pve-healing-spec-builds-talents",
+    "class_id": 13,
+    "spec_id": 1468,
+    "label": "Preservation Icy Veins build 1",
+    "code": "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAMzMDmZMYGzmhZmZbYAAwMjZMDGzIzMDAAAwMzMZGzMmtZGAYGzALgFwMMB2MsZYAMzMGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/preservation-evoker-pve-healing-spec-builds-talents",
+    "class_id": 13,
+    "spec_id": 1468,
+    "label": "Preservation Icy Veins build 2",
+    "code": "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAmZmZ2WmZGDjxsZGw2wAAAzYGzMjhZiZmBAAAMzMTGzMjxMzAAjZgFwCYGmAbM2MMAmZGD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/preservation-evoker-pve-healing-spec-builds-talents",
+    "class_id": 13,
+    "spec_id": 1468,
+    "label": "Preservation Icy Veins build 3",
+    "code": "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAYmZ2WmHAzYmxsZMzMzyAAAMzYGDmxMyMzAAAAMzMTmxMjZbmZAwAjZsxCMwMM0AWgxMDwYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/preservation-evoker-pve-healing-spec-builds-talents",
+    "class_id": 13,
+    "spec_id": 1468,
+    "label": "Preservation Icy Veins build 4",
+    "code": "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAMzMz2yAzYmxsZGjx2wAAAzYGzghZyMzMAAAw2MzMNjZmZGjZAAYMjFWgBmhhGGWgxMDAD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/augmentation-evoker-pve-dps-spec-builds-talents",
+    "class_id": 13,
+    "spec_id": 1473,
+    "label": "Augmentation Icy Veins build 1",
+    "code": "CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZ2AAAAAAAAYmhxMYM1YmZGAAAAMjZMmZWGzMwMMwYGLsADMDDNwCGjZGAYA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/augmentation-evoker-pve-dps-spec-builds-talents",
+    "class_id": 13,
+    "spec_id": 1473,
+    "label": "Augmentation Icy Veins build 2",
+    "code": "CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbjZmxyMYmtZMzMmBAAAAAAAAmhHYGYM1YmZGAAAAMzMjxMz2YmBmZzYwCsMGGbDgZQshxMYmBDG",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/augmentation-evoker-pve-dps-spec-builds-talents",
+    "class_id": 13,
+    "spec_id": 1473,
+    "label": "Augmentation Icy Veins build 3",
+    "code": "CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZ2AAAAAAAAYmhZGYM1YmZGAAAAMjZMmZWGzMwMMwYGLsADMDDNwCGzMzAAD",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/devourer-demon-hunter-pve-dps-spec-builds-talents",
+    "class_id": 12,
+    "spec_id": 1480,
+    "label": "Devourer Icy Veins build 1",
+    "code": "CgcBAAAAAAAAAAAAAAAAAAAAAAAWMzMzMzMjBmBAAAAAAY5BGz2gZAAAAAAAAYGzw8AzMzMzMzMjZ2mZM202CACYAMmZmtZmpZbmlZmxYGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/devourer-demon-hunter-pve-dps-spec-builds-talents",
+    "class_id": 12,
+    "spec_id": 1480,
+    "label": "Devourer Icy Veins build 2",
+    "code": "CgcBAAAAAAAAAAAAAAAAAAAAAAAWMzMzMzYMGmBAAAAAAY5BGz2gZAAAAAAAAYGzw8AzMzMzMzMjZ2mZM202CACYAMmZmtZmpZZmlZmhZGA",
+    "expected_status": "compatible"
+  },
+  {
+    "source_kind": "external",
+    "source": "Icy Veins",
+    "url": "https://www.icy-veins.com/wow/devourer-demon-hunter-pve-dps-spec-builds-talents",
+    "class_id": 12,
+    "spec_id": 1480,
+    "label": "Devourer Icy Veins build 3",
+    "code": "CgcBAAAAAAAAAAAAAAAAAAAAAAA2MzMzMzMjxwMAAAAAAAmxAmBAAAAAAAgZMDzDMzMzMzMzMmZbmxYTbbAIgBwMzMz2Mz0sNz2MzwMDA",
+    "expected_status": "compatible"
+  },
+  {
+    "source": "local-generated",
+    "url": "local://retail/12.1.0.69404/spec/1444",
+    "label": "Initial smoke build",
+    "class_id": 7,
+    "spec_id": 1444,
+    "code": "CQaBAAAAAAAAAAAAAAAAAAAAAwCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "source_kind": "local-smoke"
+  },
+  {
+    "source": "local-generated",
+    "url": "local://retail/12.1.0.69404/spec/1446",
+    "label": "Initial smoke build",
+    "class_id": 1,
+    "spec_id": 1446,
+    "code": "CYaBAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "source_kind": "local-smoke"
+  },
+  {
+    "source": "local-generated",
+    "url": "local://retail/12.1.0.69404/spec/1447",
+    "label": "Initial smoke build",
+    "class_id": 11,
+    "spec_id": 1447,
+    "code": "CcaBAAAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "source_kind": "local-smoke"
+  },
+  {
+    "source": "local-generated",
+    "url": "local://retail/12.1.0.69404/spec/1448",
+    "label": "Initial smoke build",
+    "class_id": 3,
+    "spec_id": 1448,
+    "code": "CgaBAAAAAAAAAAAAAAAAAAAAAAAAWAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "source_kind": "local-smoke"
+  },
+  {
+    "source": "local-generated",
+    "url": "local://retail/12.1.0.69404/spec/1449",
+    "label": "Initial smoke build",
+    "class_id": 8,
+    "spec_id": 1449,
+    "code": "CkaBAAAAAAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "source_kind": "local-smoke"
+  },
+  {
+    "source": "local-generated",
+    "url": "local://retail/12.1.0.69404/spec/1450",
+    "label": "Initial smoke build",
+    "class_id": 10,
+    "spec_id": 1450,
+    "code": "CoaBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "source_kind": "local-smoke"
+  },
+  {
+    "source": "local-generated",
+    "url": "local://retail/12.1.0.69404/spec/1451",
+    "label": "Initial smoke build",
+    "class_id": 2,
+    "spec_id": 1451,
+    "code": "CsaBAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "source_kind": "local-smoke"
+  },
+  {
+    "source": "local-generated",
+    "url": "local://retail/12.1.0.69404/spec/1452",
+    "label": "Initial smoke build",
+    "class_id": 5,
+    "spec_id": 1452,
+    "code": "CwaBAAAAAAAAAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "source_kind": "local-smoke"
+  },
+  {
+    "source": "local-generated",
+    "url": "local://retail/12.1.0.69404/spec/1453",
+    "label": "Initial smoke build",
+    "class_id": 4,
+    "spec_id": 1453,
+    "code": "C0aBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "source_kind": "local-smoke"
+  },
+  {
+    "source": "local-generated",
+    "url": "local://retail/12.1.0.69404/spec/1454",
+    "label": "Initial smoke build",
+    "class_id": 9,
+    "spec_id": 1454,
+    "code": "C4aBAAAAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "source_kind": "local-smoke"
+  },
+  {
+    "source": "local-generated",
+    "url": "local://retail/12.1.0.69404/spec/1455",
+    "label": "Initial smoke build",
+    "class_id": 6,
+    "spec_id": 1455,
+    "code": "C8aBAAAAAAAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "source_kind": "local-smoke"
+  },
+  {
+    "source": "local-generated",
+    "url": "local://retail/12.1.0.69404/spec/1456",
+    "label": "Initial smoke build",
+    "class_id": 12,
+    "spec_id": 1456,
+    "code": "CAbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "source_kind": "local-smoke"
+  },
+  {
+    "source": "local-generated",
+    "url": "local://retail/12.1.0.69404/spec/1465",
+    "label": "Initial smoke build",
+    "class_id": 13,
+    "spec_id": 1465,
+    "code": "CkbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "source_kind": "local-smoke"
+  }
+]

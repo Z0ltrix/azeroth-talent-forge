@@ -8,18 +8,23 @@
 
 **Forge deliberate World of Warcraft talent builds with Codex.**
 
-A local Codex plugin for WoW talent planning and public Warcraft Logs analysis.
-It works from your stated goal and explicit changes, then returns inspectable
-planner links, import strings, and bounded report data.
+A local Codex plugin for Retail WoW talent planning and public Warcraft Logs
+analysis. Talent runtime operations use a pinned LadybugDB graph and require no
+network. Online access is limited to the explicit maintainer asset-refresh
+pipeline.
 
 > No opaque prebuilt builds. No personal defaults. Every talent change remains
 > directed by you and visible in the resulting plan.
 
 ## What It Does
 
-- Inspect current Wowhead planner builds and Blizzard import strings.
-- Apply explicit, name-based talent swaps; generate verified Wowhead planner
-  URLs and Blizzard-compatible import strings.
+- Import, inspect, validate, compare, modify, and generate Retail Blizzard
+  talent strings locally.
+- Read source-attributed talent descriptions/effects for every class,
+  specialization, and hero subtree.
+- Enforce independent Class, Specialization, and Hero point pools for the
+  requested level, including source-defined free ranks.
+- Generate a Wowhead share URL locally; no account upload is performed.
 - Discover public Warcraft Logs characters, guilds, rankings, and Mythic+ runs.
 - Analyze selected report fights, actor metrics, events, casts, interrupts, and
   survival data with explicit scope and completeness metadata.
@@ -35,12 +40,11 @@ azeroth-talent-forge/
 |   `-- azeroth-talent-forge/
 |       +-- .codex-plugin/plugin.json
 |       `-- skills/
-|           +-- wowhead-talent-planner/
+|           +-- talents/
 |           |   +-- SKILL.md
 |           |   +-- references/
 |           |   `-- scripts/
-|           |       +-- wowhead_assets.py
-|           |       `-- wowhead_talent_builder.py
+|           |       `-- talents.py
 |           `-- warcraftlogs/
 |               +-- SKILL.md
 |               +-- references/
@@ -60,17 +64,31 @@ GitHub repository social preview: `docs/img/azeroth-talent-forge-github-social.j
 ## Requirements
 
 - Windows, macOS, or Linux
-- Python 3.8+
-- Network access for refreshing current Wowhead talent data
+- Python 3.10–3.14
+- `ladybug==0.19.1` for the talent runtime
+- Network only when a maintainer explicitly refreshes a pinned asset snapshot
 - Codex with plugin support for using the bundled skill inside Codex
 
-No Python package install is required for the included scripts.
+Install talent dependencies in a local virtual environment:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install -r plugins\azeroth-talent-forge\requirements-talents.txt
+```
+
+After assets are bundled, talent runtime commands work with network access
+blocked. Warcraft Logs retains its separate API requirements.
 
 ## License
 
 This repository, including the bundled Codex plugin, skills, and scripts, is
 licensed under the [GNU Affero General Public License v3.0 or later](LICENSE)
 (`AGPL-3.0-or-later`), unless a file states otherwise.
+
+Third-party data provenance, attribution, bundled-content boundaries, and
+redistribution caveats are documented in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The repository license does
+not relicense Blizzard or upstream platform data.
 
 If you modify and provide this plugin through a hosted agent or another network
 service, the AGPL requires you to offer the corresponding source code of that
@@ -169,65 +187,146 @@ Ask Codex for a WoW talent build by stating:
 - content type, such as Mythic+, raid, solo, leveling, or PvP
 - goal, such as survivability, DPS, utility, comfort, or a route-specific need
 - must-have or must-avoid talents
-- current Wowhead link or Blizzard import string, if you have one
+- Blizzard import string or bundled preset, if you have one
 
 Example prompt:
 
 ```text
 Build me a Protection Warrior Mountain Thane Mythic+ talent setup focused on survivability.
-Keep Shield Charge and give me a Wowhead planner link plus import code.
+Keep Shield Charge and give me a validated import code plus share URL.
 ```
 
-## Script Usage
+## Talent Script Usage
 
 Run commands from the repository root.
 
-Cache current Wowhead planner assets:
+Inspect the pinned local asset:
 
 ```powershell
-python plugins\azeroth-talent-forge\skills\wowhead-talent-planner\scripts\wowhead_assets.py "https://www.wowhead.com/talent-calc/blizzard/..." --json
+python plugins\azeroth-talent-forge\skills\talents\scripts\talents.py assets info
 ```
 
-Apply explicit swaps to a base Blizzard/Wowhead import string:
+Inspect and validate a pasted Blizzard string:
 
 ```powershell
-python -B plugins\azeroth-talent-forge\skills\wowhead-talent-planner\scripts\wowhead_talent_builder.py `
-  --base "https://www.wowhead.com/talent-calc/blizzard/..." `
-  --clear "Old Talent Name" `
-  --set "New Talent Name" `
-  --choice "Choice Node Name=Choice Name"
+python plugins\azeroth-talent-forge\skills\talents\scripts\talents.py inspect --code "BLIZZARD_STRING" --level 90
+python plugins\azeroth-talent-forge\skills\talents\scripts\talents.py validate --code "BLIZZARD_STRING" --level 90
 ```
 
-The builder prints:
+Modify or generate locally:
 
-- Wowhead planner link
-- Blizzard-compatible import code
-- point totals per tree
-- checked talent changes
+```powershell
+python plugins\azeroth-talent-forge\skills\talents\scripts\talents.py modify --code "BLIZZARD_STRING" --level 90 --set "20=1"
+python plugins\azeroth-talent-forge\skills\talents\scripts\talents.py generate --spec 73 --level 90 --prefer 20=10 --require 40
+python plugins\azeroth-talent-forge\skills\talents\scripts\talents.py presets list
+```
 
-The builder does not contain bundled presets. Every build starts from the user-provided `--base` value and explicit edits.
+Every build-producing command returns a validated Blizzard string, bundled
+build identity, source-patch provenance, and a Wowhead share URL. Zero-hash
+inputs are supported but cannot prove their originating patch.
+
+### Public string fixtures
+
+The end-to-end suite replays the full published-code corpus for all 40
+playable specializations: 161 Method codes, 127 Icy Veins codes, and one
+manually captured Wowhead calculator code. They are stored with source URLs
+and labels in
+`plugins/azeroth-talent-forge/skills/talents/tests/fixtures/online_strings.json`
+and tested offline for import, validation, export, and selection round-trip:
+
+```powershell
+python -m unittest discover -s plugins\azeroth-talent-forge\skills\talents\tests
+```
+
+The corpus also has 13 separately marked local smoke fixtures for the
+non-playable `Initial` graphs. Each external fixture is marked `compatible` or
+`observed-drift`; the latter are retained to detect upstream/patch drift and
+are expected to fail local validation. At least one compatible code exists for
+every playable spec across the two independent guide sources. The suite makes
+no live-client import assertion.
 
 ## Included Skills
 
-### Wowhead Talent Planner
+### Talents
 
-`plugins\azeroth-talent-forge\skills\wowhead-talent-planner` supports:
+`plugins\azeroth-talent-forge\skills\talents` supports:
 
-- reading current Wowhead planner/talent assets
-- distinguishing Wowhead path hashes from Blizzard import strings
-- decoding and re-encoding Blizzard-style import strings
-- applying talent changes by name
-- generating a Wowhead `/talent-calc/blizzard/<hash>` URL
-- storing class/spec reference notes under `references/`
-
-It verifies named talent changes by reopening or importing the generated plan.
+- offline Retail Blizzard-string import/export
+- graph validation of ranks, choices, availability edges, free spec ranks,
+  hero trees, and exact per-pool level budgets
+- deterministic compare, modify, and constraint-based generation
+- source-attributed patch-specific presets
+- generated class/spec/hero talent references with descriptions and effects
 
 ## Development Notes
 
 - Keep `SKILL.md` generic and workflow-focused.
 - Keep class/spec knowledge in `plugins/azeroth-talent-forge/skills/<skill>/references/`.
-- Do not add bundled talent presets unless the plugin is intentionally changed to support presets.
+- Graph and class references are generated from the same normalized snapshot.
+- Every feature has one `references/features/*.md` file.
+- Every talent must have source-attributed name, effect, IDs, ranks, and graph ownership.
 - Build recommendations should come from the user's stated goal and current sources, not personal defaults.
+- `TraitCurrencySource`, `TraitCost`, and `TraitCond` are normalized into the
+  graph. The runtime charges only source-represented rules; it never guesses a
+  point total or a free rank.
+
+### Rebuilding Retail talent assets (maintainers)
+
+The bundled talent graph and class references are generated from one pinned,
+exact-build snapshot. Runtime commands never access the network; only this
+maintainer workflow does.
+
+1. Pin the Retail build and locale in `tools/talents/sources.toml`.
+2. Download the configured Wago DB2/WoWDBDefs/Wowhead inputs into a temporary
+   raw bundle. Receipts contain URLs, build, locale, timestamps, and SHA-256
+   hashes:
+
+   ```powershell
+   python tools\talents\sync_sources.py `
+     --config tools\talents\sources.toml `
+     --build 12.1.0.69404 --locale enUS `
+     --output "$env:TEMP\atf-talents-12.1.0.69404-full"
+   ```
+
+3. Normalize and filter the exact-build data. Wowhead supplies patch-matched
+   talent text and spec/node membership where DB2 is incomplete:
+
+   ```powershell
+   python tools\talents\normalize_sources.py `
+     --input "$env:TEMP\atf-talents-12.1.0.69404-full" `
+     --build 12.1.0.69404 --locale enUS `
+     --output tools\talents\snapshots\12.1.0.69404\snapshot.json.gz
+   ```
+
+4. Generate the Markdown feature/class/spec references from that snapshot:
+
+   ```powershell
+   python tools\talents\generate_references.py `
+     --snapshot tools\talents\snapshots\12.1.0.69404\snapshot.json.gz `
+     --feature-registry tools\talents\reference_sources\features.json `
+     --planning-notes tools\talents\reference_sources\planning_notes.json `
+     --output plugins\azeroth-talent-forge\skills\talents\references
+   ```
+
+5. Compile the immutable Ladybug graph and manifest, then verify all hashes:
+
+   ```powershell
+   python tools\talents\compile_assets.py compile `
+     tools\talents\snapshots\12.1.0.69404\snapshot.json.gz `
+     plugins\azeroth-talent-forge\skills\talents\assets\retail\12.1.0.69404 `
+     plugins\azeroth-talent-forge\skills\talents\references
+
+   python tools\talents\compile_assets.py verify `
+     plugins\azeroth-talent-forge\skills\talents\assets\retail\12.1.0.69404\talents.lbdb `
+     plugins\azeroth-talent-forge\skills\talents\assets\retail\12.1.0.69404\manifest.json `
+     plugins\azeroth-talent-forge\skills\talents\assets\retail\12.1.0.69404\presets.json `
+     plugins\azeroth-talent-forge\skills\talents\references
+   ```
+
+The generated snapshot, graph, manifest, and references are the reviewable
+build artifacts. Raw downloads stay outside the repository and may be removed
+after verification. A patch change requires a new snapshot directory and a
+fresh asset manifest; never silently refresh the runtime asset.
 
 ## Warcraft Logs
 

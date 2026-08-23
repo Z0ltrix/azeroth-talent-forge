@@ -13,7 +13,7 @@ from typing import Any
 
 
 PARSER_VERSION = 1
-MAX_RESPONSE_BYTES = 50 * 1024 * 1024
+MAX_RESPONSE_BYTES = 200 * 1024 * 1024
 ALLOWED_HOSTS = {
     "wago.tools",
     "raw.githubusercontent.com",
@@ -65,6 +65,8 @@ def build_source_urls(config: dict[str, dict[str, str]], build: str, locale: str
     for table in (item.strip() for item in config["wago"]["tables"].split(",")):
         if table:
             urls[table] = config["wago"]["url"].format(table=table, build=build, locale=locale)
+    for table in (item.strip() for item in config["wago"].get("dbd_tables", config["wago"]["tables"]).split(",")):
+        if table:
             urls[f"{table}.dbd"] = config["wowdbdefs"]["base_url"].format(table=table)
     urls["wowhead-talents"] = config["wowhead"]["talent_data_url"]
     return urls

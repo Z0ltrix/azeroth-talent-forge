@@ -28,6 +28,34 @@ class ValidatorTests(unittest.TestCase):
         result = validate_build(self._build([Selection(10, 20, 0, 2), Selection(30, 40, 1)]), self.graph)
         self.assertTrue(result.valid)
 
+    def test_currency_budget_uses_the_exact_level_schedule(self):
+        graph = SpecGraph(
+            self.graph.snapshot, 1, 73, self.graph.nodes, self.graph.names, self.graph.descriptions,
+            costs=((10, 500, 1), (30, 500, 1)),
+            currency_budgets=((500, 10, 1), (500, 12, 1)),
+        )
+        build = TalentBuild(graph.snapshot, 1, 73, 10, None, None, (Selection(10, 20, 1), Selection(30, 40, 1)))
+        result = validate_build(build, graph)
+        self.assertFalse(result.valid)
+        self.assertIn("CURRENCY_BUDGET_MISMATCH", {item.code for item in result.violations})
+
+    def test_spec_granted_rank_does_not_consume_currency(self):
+        graph = SpecGraph(
+            self.graph.snapshot, 1, 73, self.graph.nodes, self.graph.names, self.graph.descriptions,
+            costs=((10, 500, 1),), currency_budgets=((500, 10, 0),), grants=((10, 1),),
+        )
+        result = validate_build(TalentBuild(graph.snapshot, 1, 73, 10, None, None, (Selection(10, 20, 1),)), graph)
+        self.assertTrue(result.valid)
+
+    def test_rejects_a_level_outside_the_asset_schedule(self):
+        graph = SpecGraph(
+            self.graph.snapshot, 1, 73, self.graph.nodes, self.graph.names, self.graph.descriptions,
+            currency_budgets=((500, 10, 1), (500, 90, 1)),
+        )
+        result = validate_build(TalentBuild(graph.snapshot, 1, 73, 91, None, None, ()), graph)
+        self.assertFalse(result.valid)
+        self.assertIn("UNSUPPORTED_LEVEL", {item.code for item in result.violations})
+
 
 if __name__ == "__main__":
     unittest.main()

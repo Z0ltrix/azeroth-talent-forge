@@ -1,0 +1,1090 @@
+{
+  "asset_schema_version": 1,
+  "channel": "retail-live",
+  "classes": [
+    {
+      "id": 1,
+      "name": "Warrior"
+    },
+    {
+      "id": 2,
+      "name": "Paladin"
+    },
+    {
+      "id": 3,
+      "name": "Hunter"
+    },
+    {
+      "id": 4,
+      "name": "Rogue"
+    },
+    {
+      "id": 5,
+      "name": "Priest"
+    },
+    {
+      "id": 6,
+      "name": "Death Knight"
+    },
+    {
+      "id": 7,
+      "name": "Shaman"
+    },
+    {
+      "id": 8,
+      "name": "Mage"
+    },
+    {
+      "id": 9,
+      "name": "Warlock"
+    },
+    {
+      "id": 10,
+      "name": "Monk"
+    },
+    {
+      "id": 11,
+      "name": "Druid"
+    },
+    {
+      "id": 12,
+      "name": "Demon Hunter"
+    },
+    {
+      "id": 13,
+      "name": "Evoker"
+    }
+  ],
+  "codec_node_order": "ascending-node-id",
+  "export_tree_hash": "zero",
+  "game_build": "12.1.0.69404",
+  "game_version": "12.1.0",
+  "graph": {
+    "engine": "ladybug",
+    "engine_version": "0.19.1",
+    "file": "talents.lbdb",
+    "sha256": "1a99f6ec2fff71367299f90f43670a9c3e881932807eccede7c06558a08f424d"
+  },
+  "locale": "enUS",
+  "normalized_sha256": "d9de7a01e7f82fe3aea8cb6e5577907fc4b2064ed176d2906020f1116e443c76",
+  "presets": {
+    "file": "presets.json",
+    "sha256": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f"
+  },
+  "product": "wow",
+  "references_sha256": "074fed5f6a13b3f0f87d47b1c38095e1aa8f1d728f0fc9ca7f689e20bd762ebc",
+  "serialization_versions": [
+    2
+  ],
+  "sources": [
+    {
+      "content_sha256": "679168021cdee163c317b93cc7d9b540e37c77183102f25cdefa16a8ec81584f",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:16:50Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "ChrClasses",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "ChrClasses-a19f0984ac82-csv",
+      "url": "https://wago.tools/db2/ChrClasses/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "59992d8658830af0da899af01052c220ffee4e3bb28f2ff12419ba5e5d79c9b5",
+      "etag": "\"862a798c088421e1b6c0a7377fcf70588501aade0b10dea7a11a9387a51c3680\"",
+      "fetched_at": "2026-08-23T16:16:51Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "ChrClasses.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "ChrClasses.dbd-b7ce162b95d6-ChrClasses.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/ChrClasses.dbd"
+    },
+    {
+      "content_sha256": "4e67c0772fca8cfc857e8a7fc9952538c35018e91f2734284f71089087d60c69",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:16:51Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "ChrSpecialization",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "ChrSpecialization-690749882fce-csv",
+      "url": "https://wago.tools/db2/ChrSpecialization/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "ad5ae4f5572957520ada3ec115bf60b79a8eadb67504bf0a4a49a685ee97c49c",
+      "etag": "\"f2371542f9a1079498ba8503e5d2dfaec6fa6e927d4d1a2116a847bb2671abdc\"",
+      "fetched_at": "2026-08-23T16:16:51Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "ChrSpecialization.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "ChrSpecialization.dbd-67433734395a-ChrSpecialization.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/ChrSpecialization.dbd"
+    },
+    {
+      "content_sha256": "abea2fb03577dab08d986435fc96f81ad70af175d92ff304852190d3a6e90636",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:16:52Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "SpecSetMember",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "SpecSetMember-dbcfaa75bab3-csv",
+      "url": "https://wago.tools/db2/SpecSetMember/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "75854a9c51c9a73e7b14eec5986d0315bbd5f7e60a8f7c48091cb81017164480",
+      "etag": "\"d03397a419dd421854efbd92bb800b4643938b67233e2279b1ed84d249eab9e4\"",
+      "fetched_at": "2026-08-23T16:16:52Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "SpecSetMember.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "SpecSetMember.dbd-a74259759a92-SpecSetMember.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/SpecSetMember.dbd"
+    },
+    {
+      "content_sha256": "7766e0d6cf1b042dceb3b609068c6bad90df0f79f533ddf7238e7e7ff9f1a1bf",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:16:56Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "Spell",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "Spell-d7b5c2250adc-csv",
+      "url": "https://wago.tools/db2/Spell/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "604bfb192da521e37b248dafc938d0b6a04c65ee821c9fb1d9b941a179f9777b",
+      "etag": "\"03132f3be482009c2d667e42897a2bdcfb67282274b90b26fab364db4c58a5ed\"",
+      "fetched_at": "2026-08-23T16:16:56Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "Spell.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "Spell.dbd-35cbfbda915c-Spell.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/Spell.dbd"
+    },
+    {
+      "content_sha256": "ff5bf186fb671c5b9c7ee26cd2392523bb4a7eef6343039124f8fe643a6cb015",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:29Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "SpellEffect",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "SpellEffect-e0738ce64cee-csv",
+      "url": "https://wago.tools/db2/SpellEffect/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "669dcd5bac15390435a6e2c2ba101eca837e2968c75c6d4419e6136e73ae18d6",
+      "etag": "\"9cb19283d735d89df734490eac66e303b321d78075fc26e200d086e3257e5f76\"",
+      "fetched_at": "2026-08-23T16:17:29Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "SpellEffect.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "SpellEffect.dbd-443fb90d57ca-SpellEffect.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/SpellEffect.dbd"
+    },
+    {
+      "content_sha256": "738470b332fbd5b85b28a4cb2ed4c389b85503be85fd19e8c153738376bbd9f1",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:32Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "SpellName",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "SpellName-ba20e953e6d6-csv",
+      "url": "https://wago.tools/db2/SpellName/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "e821809f847032781fab79bb163626a92ce7e2460724231d7dd6f522f9b66416",
+      "etag": "\"f33cfe8feec1e352e9c1e85670b75938ce77d39ee625ca6bb680048f9161b107\"",
+      "fetched_at": "2026-08-23T16:17:32Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "SpellName.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "SpellName.dbd-054d82cc42c8-SpellName.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/SpellName.dbd"
+    },
+    {
+      "content_sha256": "b4c8b3bd7136353f581101b69202acba6630fc08c58eadbc043357490efeefbf",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:32Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitCond",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitCond-977885629210-csv",
+      "url": "https://wago.tools/db2/TraitCond/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "2bba6390521382fd548ce29737134b3fd9fc3bbf1f993b35a09586c8af667ff4",
+      "etag": "\"1bb9e5383e349e7429902188c921c778b7a141afd292ed766bd6d08521528ad2\"",
+      "fetched_at": "2026-08-23T16:17:33Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitCond.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitCond.dbd-b15ab08e6371-TraitCond.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitCond.dbd"
+    },
+    {
+      "content_sha256": "7b7dd62c0cb10acf4773393b7a7ec9dce14c76b10701e2d30fee62488a85fe87",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:33Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitCost",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitCost-aeb0ff0a7195-csv",
+      "url": "https://wago.tools/db2/TraitCost/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "f9623894c09980de9afdf1563c36d74df8a1be54834e9bf1e86fc84b2002087a",
+      "etag": "\"2919ea20762738dacc9ca96d1a3e0b7a4c0e65eed129074c9cf0f02d33a5336b\"",
+      "fetched_at": "2026-08-23T16:17:33Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitCost.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitCost.dbd-9dab3c429d3f-TraitCost.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitCost.dbd"
+    },
+    {
+      "content_sha256": "8a4e1fa46ec95a0ee0d9177a78b6e4b47d312d7bd3e86a90238e28cc36925abd",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:34Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitCurrency",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitCurrency-819613ad5128-csv",
+      "url": "https://wago.tools/db2/TraitCurrency/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "433d08bd16b84a578afe203a1511810ce8b446ecdb15c868b3fad2830ec840c4",
+      "etag": "\"8e63305b69da7a0ae00041a7d052c450dbe77c0b16b377d1acb2674c0f274600\"",
+      "fetched_at": "2026-08-23T16:17:34Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitCurrency.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitCurrency.dbd-8ce7db2ebe75-TraitCurrency.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitCurrency.dbd"
+    },
+    {
+      "content_sha256": "08c8ecbfb032632281ddc891533ece6970c440e28fa5d79a27bd45014f574ef1",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:34Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitCurrencySource",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitCurrencySource-083969e69a13-csv",
+      "url": "https://wago.tools/db2/TraitCurrencySource/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "da7feb8772b1b0a5350a76efbbb84544c23fc150252ce2ed33b259168c3fee0d",
+      "etag": "\"84e98467fac1164fbcc1d9fa69faf94d6e0e04bb92a02900245bd036fdbfacca\"",
+      "fetched_at": "2026-08-23T16:17:34Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitCurrencySource.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitCurrencySource.dbd-c6faf48da8c8-TraitCurrencySource.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitCurrencySource.dbd"
+    },
+    {
+      "content_sha256": "2f4b7c4cc137e73a764a5c006d2bbc3f397a56baba78037c010ea06c1fb81cd1",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:35Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitDefinition",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitDefinition-91df993d6742-csv",
+      "url": "https://wago.tools/db2/TraitDefinition/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "3f74e44ee2b38fe18989483e0afe1a853f01544bf4c31c677ce52fd686e43ec1",
+      "etag": "\"02d59cc6a60f0a82434ef62a3b98339bcafbe11999837c2c8077555bc8fd0c47\"",
+      "fetched_at": "2026-08-23T16:17:35Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitDefinition.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitDefinition.dbd-f47965b4b547-TraitDefinition.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitDefinition.dbd"
+    },
+    {
+      "content_sha256": "8f1fc7337614ab7d773d8fdea34c14b3fb08fa68eee500e2218bf20301a1ca4a",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:35Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitDefinitionEffectPoints",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitDefinitionEffectPoints-08fdac6361b5-csv",
+      "url": "https://wago.tools/db2/TraitDefinitionEffectPoints/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "88cbf7570539a65f19fc38356b0f54a6e91b378da657307b20b76ffc19b09b1c",
+      "etag": "\"3a196ef77ec22bee115a06adde297287d36b5b0b4e0898f410338374fc1f69e1\"",
+      "fetched_at": "2026-08-23T16:17:36Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitDefinitionEffectPoints.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitDefinitionEffectPoints.dbd-64addeb279cb-TraitDefinitionEffectPoints.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitDefinitionEffectPoints.dbd"
+    },
+    {
+      "content_sha256": "6b5694ea9d1e25f34fac1c388c045aa205cc1ab53b33e4cfedde7419bcc0f7d3",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:36Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitEdge",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitEdge-40ad968b5e79-csv",
+      "url": "https://wago.tools/db2/TraitEdge/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "0a419debec6f3b5c4719e3a7de74c167dbe09b59f78fe1eb5f5e619d5939d304",
+      "etag": "\"378974cb5063ccc14bf81e5541ffe4ed60f8fc779b6921834d65132e3f9d1c05\"",
+      "fetched_at": "2026-08-23T16:17:36Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitEdge.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitEdge.dbd-d8ea7f422303-TraitEdge.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitEdge.dbd"
+    },
+    {
+      "content_sha256": "af4977323c023c2bf5b64bcfeb8bd456c67cd417c566d28cf7a622fc1de9f916",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:37Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNode",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNode-1101f9f11b5d-csv",
+      "url": "https://wago.tools/db2/TraitNode/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "a6b1a90c1a331cf9e20d1b2c512661cc06e571819ca4ef2e6d71888e87796742",
+      "etag": "\"4c299772ee94cb2c3652d5e36440015a95896a1c1b7130e64c74c0b0292f1f06\"",
+      "fetched_at": "2026-08-23T16:17:37Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNode.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNode.dbd-b07b8b435f20-TraitNode.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitNode.dbd"
+    },
+    {
+      "content_sha256": "c317b6af61012241519e504f1c6281081a2802c6ab1b1305fcf7f926a052e7c7",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:37Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeEntry",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeEntry-903ed4fdfdb1-csv",
+      "url": "https://wago.tools/db2/TraitNodeEntry/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "4d75ad515131978b8abd15d2600a6be5c3a8bf9a801ecb442a0ae02c82a27d76",
+      "etag": "\"8450a67c7db6fc8fa636e8d39e99954bc2afd8b4dbae76d73a7025a1eb7dcf47\"",
+      "fetched_at": "2026-08-23T16:17:38Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeEntry.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeEntry.dbd-037907f5426c-TraitNodeEntry.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitNodeEntry.dbd"
+    },
+    {
+      "content_sha256": "1a22a66a62ff502a65775a7882bcbd4b706c1ceb52a51d01683d867a96e9e6af",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:38Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeEntryXTraitCost",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeEntryXTraitCost-7d52860a8627-csv",
+      "url": "https://wago.tools/db2/TraitNodeEntryXTraitCost/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "47c17ea053c8f351733bc51e56e68f3b59373666a7d312fcbf3d6a9b7afed4bb",
+      "etag": "\"ec017fe1c67687c8883442a9a1c540e230d54b72df796c45a34e6f53e5700dde\"",
+      "fetched_at": "2026-08-23T16:17:38Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeEntryXTraitCost.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeEntryXTraitCost.dbd-429d2665a3e4-TraitNodeEntryXTraitCost.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitNodeEntryXTraitCost.dbd"
+    },
+    {
+      "content_sha256": "8212e8980d9544858bbfad519609b483bcc45554b064d5abe991f84934e46f54",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:39Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeGroup",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeGroup-7c47a9895def-csv",
+      "url": "https://wago.tools/db2/TraitNodeGroup/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "f508e6f7a69fc49e1fe0993cdf3fb3442bda48ec33ff9862fdd041b292664d0d",
+      "etag": "\"ff4173d2afd27400d41805096c719893cee2d1e32db2d7fb9a9e77485942f6c7\"",
+      "fetched_at": "2026-08-23T16:17:39Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeGroup.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeGroup.dbd-2abbdee8abf1-TraitNodeGroup.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitNodeGroup.dbd"
+    },
+    {
+      "content_sha256": "9a263d07fd5df3b1f8fe3ae90ebb88548d40b1ae97d290997282a2f66fe17568",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:39Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeGroupXTraitCond",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeGroupXTraitCond-ac8e4f3f4522-csv",
+      "url": "https://wago.tools/db2/TraitNodeGroupXTraitCond/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "86fbeecc374ebb52b14f30ded8d596ee357d83029e14fb46f0b9c92d9ba401f2",
+      "etag": "\"47d3f4efc479123c52cef16f3bfc3d31436903d5a0bb5a4fb8000ce8a2b4351b\"",
+      "fetched_at": "2026-08-23T16:17:39Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeGroupXTraitCond.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeGroupXTraitCond.dbd-d3c6f8ba3aa6-TraitNodeGroupXTraitCond.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitNodeGroupXTraitCond.dbd"
+    },
+    {
+      "content_sha256": "4e663028f19fc7d4500a55ad18975b08c2ede1d2a0b6922ebbcd94d53f01d0bd",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:40Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeGroupXTraitCost",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeGroupXTraitCost-db43c78a8708-csv",
+      "url": "https://wago.tools/db2/TraitNodeGroupXTraitCost/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "3404f102bf7c223fdbef4f6c2515b8e1af1769026565588f8f25d04119c9e81b",
+      "etag": "\"4e295fb0254a771459f6d89f1079b90d466440a9ff82aece4203058abb48e38c\"",
+      "fetched_at": "2026-08-23T16:17:40Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeGroupXTraitCost.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeGroupXTraitCost.dbd-311aee555e83-TraitNodeGroupXTraitCost.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitNodeGroupXTraitCost.dbd"
+    },
+    {
+      "content_sha256": "863831344468c3dae67dfaf9b796d59c501444a609106e39fc4bab95ae6f081e",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:40Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeGroupXTraitNode",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeGroupXTraitNode-ec4de4bc7f4e-csv",
+      "url": "https://wago.tools/db2/TraitNodeGroupXTraitNode/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "0e7747ed44f7521de03ebf9c41873748199b9b167ddd143cfe7c589e82638b16",
+      "etag": "\"95b2d5af229f03b1416cd3f60caf5f4ec2ea743774be642fa89d3c20d86b514f\"",
+      "fetched_at": "2026-08-23T16:17:41Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeGroupXTraitNode.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeGroupXTraitNode.dbd-9760b6cc74d3-TraitNodeGroupXTraitNode.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitNodeGroupXTraitNode.dbd"
+    },
+    {
+      "content_sha256": "167459ad581d11e689612c153b07b9267c85fb8adf28787fc26459799d61d829",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:41Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeXTraitCond",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeXTraitCond-09af0d258f1e-csv",
+      "url": "https://wago.tools/db2/TraitNodeXTraitCond/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "1b0c7604a0783f37809abeb8cb51ad6a781324ba2017d272697669bb11297ea2",
+      "etag": "\"1427780646ca511216d12747c09597ffac4715364014017a89d8c30f07167463\"",
+      "fetched_at": "2026-08-23T16:17:41Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeXTraitCond.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeXTraitCond.dbd-d6decbcfafdf-TraitNodeXTraitCond.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitNodeXTraitCond.dbd"
+    },
+    {
+      "content_sha256": "41469dd4433040ffd3e242221aba1ddf604c2286344b0a1ec53d7d6bd716106a",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:42Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeXTraitCost",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeXTraitCost-baf7743ae71d-csv",
+      "url": "https://wago.tools/db2/TraitNodeXTraitCost/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "57861c086d1f17c63cb9c66d2c4b22639401d0a35e752f3a9c0a669da0907ad0",
+      "etag": "\"0a67b90a1b00550ec68c16e2b6a36995484d3f0ccd16c9666a9407b458d40181\"",
+      "fetched_at": "2026-08-23T16:17:42Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeXTraitCost.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeXTraitCost.dbd-2d73e4eb3b45-TraitNodeXTraitCost.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitNodeXTraitCost.dbd"
+    },
+    {
+      "content_sha256": "273a1b5017e14a94b9d3c44f62ff3b9108441b914ebd16b2070e9d26ec7ad59b",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:42Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeXTraitNodeEntry",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeXTraitNodeEntry-4f03b04a0d84-csv",
+      "url": "https://wago.tools/db2/TraitNodeXTraitNodeEntry/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "e9667dd9cbed477c281fe6b54cae566bf3db1c3542f2e7da0e23a725b9360d26",
+      "etag": "\"4a619110b31d78e5bd3e4b749e16c954b7581a8bc36d3197460c4355922a02dd\"",
+      "fetched_at": "2026-08-23T16:17:42Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitNodeXTraitNodeEntry.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitNodeXTraitNodeEntry.dbd-47e6adce853d-TraitNodeXTraitNodeEntry.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitNodeXTraitNodeEntry.dbd"
+    },
+    {
+      "content_sha256": "6bcf70ea5f6c5638db65a31a3ef2fba28962c782fe95ef8cb3a73c0caac4dd76",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:43Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitSubTree",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitSubTree-b61f703e7e15-csv",
+      "url": "https://wago.tools/db2/TraitSubTree/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "4c65cab9f5797ac9a381acd0dd5f0baf51fea93a21ee82a24bfb7a78a7998dce",
+      "etag": "\"7fa353299516d787764e3fdbe5ca2f41edac8555d64dec95d5801c7feba39648\"",
+      "fetched_at": "2026-08-23T16:17:43Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitSubTree.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitSubTree.dbd-cba30f2a4a0b-TraitSubTree.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitSubTree.dbd"
+    },
+    {
+      "content_sha256": "54eebfa282fc0bbb750c6faa07f70490f4d48f092650568ba3df2492a04ee3b6",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:43Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitTree",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitTree-91ff4ccdace6-csv",
+      "url": "https://wago.tools/db2/TraitTree/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "5bd9ce803ab58ac0605931e5639beaac7f941d64c8f277e1e44c0e1fe3aa5ae0",
+      "etag": "\"df0060707a8f324c05649f02b43b144fa6a46af009cf4f5d3c8310b70d1021d0\"",
+      "fetched_at": "2026-08-23T16:17:43Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitTree.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitTree.dbd-7c7acea18b92-TraitTree.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitTree.dbd"
+    },
+    {
+      "content_sha256": "42c6f08c0b218c16bed2f692d1c0c84c2fa1d58e4b92b9086fea5cc6526fdb1a",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:44Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitTreeXTraitCurrency",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitTreeXTraitCurrency-7d76b5c36b74-csv",
+      "url": "https://wago.tools/db2/TraitTreeXTraitCurrency/csv?build=12.1.0.69404&locale=enUS"
+    },
+    {
+      "content_sha256": "e66822f306266bf251acf7f96b7e97c44891b75c310560df0048140c6886736b",
+      "etag": "\"faca4ccee07d60cbbeedc49d2c073ed56a924aed49082d10c9291185b0bce887\"",
+      "fetched_at": "2026-08-23T16:17:44Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "TraitTreeXTraitCurrency.dbd",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "TraitTreeXTraitCurrency.dbd-6bfac3320946-TraitTreeXTraitCurrency.dbd",
+      "url": "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/TraitTreeXTraitCurrency.dbd"
+    },
+    {
+      "content_sha256": "d62f8ad240aeb9a3799c7c5a381e6bc7bcf3b72aeddbb0d476422c17ea6b1364",
+      "etag": null,
+      "fetched_at": "2026-08-23T16:17:44Z",
+      "game_build": "12.1.0.69404",
+      "http_status": 200,
+      "kind": "wowhead-talents",
+      "last_modified": null,
+      "locale": "enUS",
+      "parser_version": 1,
+      "path": "wowhead-talents-1a2d32329acf-talents-dragonflight",
+      "url": "https://nether.wowhead.com/data/talents-dragonflight?dv=41&db=1787319870"
+    }
+  ],
+  "specs": [
+    {
+      "class_id": 8,
+      "id": 62,
+      "name": "Arcane",
+      "role": "2"
+    },
+    {
+      "class_id": 8,
+      "id": 63,
+      "name": "Fire",
+      "role": "2"
+    },
+    {
+      "class_id": 8,
+      "id": 64,
+      "name": "Frost",
+      "role": "2"
+    },
+    {
+      "class_id": 2,
+      "id": 65,
+      "name": "Holy",
+      "role": "1"
+    },
+    {
+      "class_id": 2,
+      "id": 66,
+      "name": "Protection",
+      "role": "0"
+    },
+    {
+      "class_id": 2,
+      "id": 70,
+      "name": "Retribution",
+      "role": "2"
+    },
+    {
+      "class_id": 1,
+      "id": 71,
+      "name": "Arms",
+      "role": "2"
+    },
+    {
+      "class_id": 1,
+      "id": 72,
+      "name": "Fury",
+      "role": "2"
+    },
+    {
+      "class_id": 1,
+      "id": 73,
+      "name": "Protection",
+      "role": "0"
+    },
+    {
+      "class_id": 11,
+      "id": 102,
+      "name": "Balance",
+      "role": "2"
+    },
+    {
+      "class_id": 11,
+      "id": 103,
+      "name": "Feral",
+      "role": "2"
+    },
+    {
+      "class_id": 11,
+      "id": 104,
+      "name": "Guardian",
+      "role": "0"
+    },
+    {
+      "class_id": 11,
+      "id": 105,
+      "name": "Restoration",
+      "role": "1"
+    },
+    {
+      "class_id": 6,
+      "id": 250,
+      "name": "Blood",
+      "role": "0"
+    },
+    {
+      "class_id": 6,
+      "id": 251,
+      "name": "Frost",
+      "role": "2"
+    },
+    {
+      "class_id": 6,
+      "id": 252,
+      "name": "Unholy",
+      "role": "2"
+    },
+    {
+      "class_id": 3,
+      "id": 253,
+      "name": "Beast Mastery",
+      "role": "2"
+    },
+    {
+      "class_id": 3,
+      "id": 254,
+      "name": "Marksmanship",
+      "role": "2"
+    },
+    {
+      "class_id": 3,
+      "id": 255,
+      "name": "Survival",
+      "role": "2"
+    },
+    {
+      "class_id": 5,
+      "id": 256,
+      "name": "Discipline",
+      "role": "1"
+    },
+    {
+      "class_id": 5,
+      "id": 257,
+      "name": "Holy",
+      "role": "1"
+    },
+    {
+      "class_id": 5,
+      "id": 258,
+      "name": "Shadow",
+      "role": "2"
+    },
+    {
+      "class_id": 4,
+      "id": 259,
+      "name": "Assassination",
+      "role": "2"
+    },
+    {
+      "class_id": 4,
+      "id": 260,
+      "name": "Outlaw",
+      "role": "2"
+    },
+    {
+      "class_id": 4,
+      "id": 261,
+      "name": "Subtlety",
+      "role": "2"
+    },
+    {
+      "class_id": 7,
+      "id": 262,
+      "name": "Elemental",
+      "role": "2"
+    },
+    {
+      "class_id": 7,
+      "id": 263,
+      "name": "Enhancement",
+      "role": "2"
+    },
+    {
+      "class_id": 7,
+      "id": 264,
+      "name": "Restoration",
+      "role": "1"
+    },
+    {
+      "class_id": 9,
+      "id": 265,
+      "name": "Affliction",
+      "role": "2"
+    },
+    {
+      "class_id": 9,
+      "id": 266,
+      "name": "Demonology",
+      "role": "2"
+    },
+    {
+      "class_id": 9,
+      "id": 267,
+      "name": "Destruction",
+      "role": "2"
+    },
+    {
+      "class_id": 10,
+      "id": 268,
+      "name": "Brewmaster",
+      "role": "0"
+    },
+    {
+      "class_id": 10,
+      "id": 269,
+      "name": "Windwalker",
+      "role": "2"
+    },
+    {
+      "class_id": 10,
+      "id": 270,
+      "name": "Mistweaver",
+      "role": "1"
+    },
+    {
+      "class_id": 12,
+      "id": 577,
+      "name": "Havoc",
+      "role": "2"
+    },
+    {
+      "class_id": 12,
+      "id": 581,
+      "name": "Vengeance",
+      "role": "0"
+    },
+    {
+      "class_id": 7,
+      "id": 1444,
+      "name": "Initial",
+      "role": "2"
+    },
+    {
+      "class_id": 1,
+      "id": 1446,
+      "name": "Initial",
+      "role": "2"
+    },
+    {
+      "class_id": 11,
+      "id": 1447,
+      "name": "Initial",
+      "role": "2"
+    },
+    {
+      "class_id": 3,
+      "id": 1448,
+      "name": "Initial",
+      "role": "2"
+    },
+    {
+      "class_id": 8,
+      "id": 1449,
+      "name": "Initial",
+      "role": "2"
+    },
+    {
+      "class_id": 10,
+      "id": 1450,
+      "name": "Initial",
+      "role": "2"
+    },
+    {
+      "class_id": 2,
+      "id": 1451,
+      "name": "Initial",
+      "role": "2"
+    },
+    {
+      "class_id": 5,
+      "id": 1452,
+      "name": "Initial",
+      "role": "1"
+    },
+    {
+      "class_id": 4,
+      "id": 1453,
+      "name": "Initial",
+      "role": "2"
+    },
+    {
+      "class_id": 9,
+      "id": 1454,
+      "name": "Initial",
+      "role": "2"
+    },
+    {
+      "class_id": 6,
+      "id": 1455,
+      "name": "Initial",
+      "role": "2"
+    },
+    {
+      "class_id": 12,
+      "id": 1456,
+      "name": "Initial",
+      "role": "2"
+    },
+    {
+      "class_id": 13,
+      "id": 1465,
+      "name": "Initial",
+      "role": "2"
+    },
+    {
+      "class_id": 13,
+      "id": 1467,
+      "name": "Devastation",
+      "role": "2"
+    },
+    {
+      "class_id": 13,
+      "id": 1468,
+      "name": "Preservation",
+      "role": "1"
+    },
+    {
+      "class_id": 13,
+      "id": 1473,
+      "name": "Augmentation",
+      "role": "2"
+    },
+    {
+      "class_id": 12,
+      "id": 1480,
+      "name": "Devourer",
+      "role": "2"
+    }
+  ]
+}
