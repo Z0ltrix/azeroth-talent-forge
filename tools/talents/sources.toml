@@ -1,0 +1,19 @@
+[snapshot]
+product = "wow"
+channel = "retail-live"
+build = "12.1.0.69404"
+locale = "enUS"
+
+[wago]
+url = "https://wago.tools/db2/{table}/csv?build={build}&locale={locale}"
+tables = "ChrClasses,ChrSpecialization,TraitTree,TraitNode,TraitNodeEntry,TraitNodeXTraitNodeEntry,TraitDefinition,TraitDefinitionEffectPoints,TraitEdge,TraitCond,TraitCost,TraitCostDefinition,TraitCurrency,TraitCurrencySource,TraitSubTree,Spell,SpellEffect"
+
+[wowdbdefs]
+base_url = "https://raw.githubusercontent.com/wowdev/WoWDBDefs/8d621ba9e7186458489a2b5aab0d2c303b104362/definitions/{table}.dbd"
+
+[wowhead]
+talent_data_url = "https://nether.wowhead.com/data/talents-dragonflight?dv=41&db=1787319870"
+share_url = "https://www.wowhead.com/talent-calc/blizzard/{code}"
+
+[guides]
+hosts = "www.wowhead.com,nether.wowhead.com,www.method.gg"

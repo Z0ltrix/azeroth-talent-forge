@@ -1,0 +1,4 @@
+// Copyright Blizzard Entertainment
+build 12.1.0.69404
+int ID;
+locstring OverrideName;
