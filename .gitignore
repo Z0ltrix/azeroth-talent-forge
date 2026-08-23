@@ -13,3 +13,6 @@ __pycache__/
 
 # Temporary Warcraft Logs exports
 tmp/
+
+# Talents local development environment
+.venv/

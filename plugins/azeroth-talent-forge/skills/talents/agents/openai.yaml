@@ -1,0 +1,4 @@
+interface:
+  display_name: Talents
+  short_description: Build and verify Retail WoW talent strings locally.
+  default_prompt: Import, inspect, compare, modify, generate, or export a Retail WoW talent string offline.
