@@ -210,13 +210,16 @@ WARCRAFTLOGS_CLIENT_SECRET=your-client-secret
 Credential precedence is per field: CLI parameters (`--client-id` and
 `--client-secret`) > the explicit `--env-file` (or repository `./.env`) >
 process environment variables. The script accepts `rate-limit`, `metadata`,
-`report`, and `find` commands. Examples:
+`report`, `find`, and local `compare actor-metrics` commands. Examples:
 
 ```powershell
 python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py rate-limit
 python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py metadata zones
 python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report summary https://www.warcraftlogs.com/reports/REPORTCODE
 python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report events REPORTCODE --fight 1 --max-pages 1
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report fights REPORTCODE --player Ratelka --encounter "Den of Nalorakk" --key 6 --timed --latest 1
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report actor-metrics REPORTCODE --fight 1 --player Ratelka --output target.json
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py compare actor-metrics target.json reference.json --output comparison.json
 python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py find character --name Character --server Area-52 --region us
 python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py find global --instance 1300 --top 10
 ```
@@ -225,6 +228,8 @@ Metadata is cached locally for 24 hours; use `--no-cache` for a refresh. Event
 downloads are deliberately bounded by a fight ID or time window and page limit.
 Every command prints JSON with scope, filters, completeness, pagination, and
 warnings so sampled or truncated results are not mistaken for exhaustive data.
+`report actor-metrics` preserves numeric ability IDs and explicit missing data;
+`compare actor-metrics` is offline and does not resolve credentials.
 
 For Codex cloud execution, allow outbound `warcraftlogs.com` and HTTP `POST`
 to the public API endpoint. No API client secret or access token belongs in

@@ -6,6 +6,22 @@ CLI supplies bounded, provenance-rich raw data; the agent performs the
 comparison locally. There is intentionally no monolithic `compare-run`
 endpoint.
 
+For a direct actor comparison, acquire deterministic files after run selection:
+
+```powershell
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report actor-metrics REPORTCODE --fight FIGHTID --player Ratelka --output target.json
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py compare actor-metrics target.json reference.json --output comparison.json
+```
+
+The comparison joins components by category + ability_id, where the ability ID
+is numeric. Display names can change and must remain metadata; abilities with
+the same name but different IDs stay separate. Composite parents are not added
+to their valid leaf components. Component casts describe API rows and are not
+button presses. Inspect warnings for context differences (dungeon, encounter,
+key, affixes, specialization, role, or scope), and keep missing values in
+`missing_data` instead of converting them to zero. The command returns data for
+the agent and does not emit a natural-language verdict.
+
 ## Evaluation recipe
 
 1. Discover the target character's public report candidates for the user's

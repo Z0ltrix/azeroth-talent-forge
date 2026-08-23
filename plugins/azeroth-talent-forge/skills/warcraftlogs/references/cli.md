@@ -25,6 +25,7 @@ password. `--no-cache` bypasses metadata cache reads and writes.
 | `rate-limit` | Current public API budget. |
 | `metadata KIND` | Normalized metadata collections and IDs. |
 | `report KIND REPORT` | One public report surface. |
+| `compare actor-metrics TARGET REFERENCE` | Offline comparison of two saved actor-metrics envelopes; no credentials or network. |
 | `find character|guild|global` | Public report discovery. |
 
 The targeted report flow is deliberately staged: discovery returns report IDs,
@@ -61,6 +62,54 @@ selection and is recorded in the output envelope, not sent to the API.
 For report targeting, `report fights --player NAME` and `report player-details
 --player NAME` apply a local actor-name filter. `report details` additionally
 requires `--fight ID` or a fight ID in the report URL.
+
+## Targeted fight selection
+
+`report fights REPORT` accepts these local selectors:
+
+```text
+--encounter NAME_OR_ID
+--key N
+--timed | --depleted
+--latest N
+```
+
+The selection order is fixed: explicit fight, player, absolute time, encounter,
+key, completion outcome, then latest. `--encounter` accepts a positive numeric
+encounter/game-zone ID or a unique case-insensitive fight/game-zone name;
+unknown names return no rows and ambiguous names are invalid input. `--key` is
+an exact positive `keystoneLevel`. Timed and depleted require a completed,
+positive-level key; they are mutually exclusive. `--latest` sorts by absolute
+end time, then absolute start time, then fight ID. The envelope's `selection`
+metadata contains requested filters, `source_count`, `selected_count`, and the
+selection order.
+
+## Actor metrics and offline comparison
+
+Fetch one actor's complete default detail set after selecting a fight:
+
+```powershell
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report actor-metrics REPORTCODE --fight FIGHTID --player Ratelka --output ratelka.json
+```
+
+The data has `metrics_schema_version: 1` and preserves run/actor context,
+totals, `damage_components`, `cast_components`, utility, survival,
+`missing_data`, and derivation notes. Component identity is `(category,
+ability_id)` using numeric IDs. Display names are metadata; composite parents
+with valid children are not added to child totals; and component casts are not
+treated as button presses.
+
+Compare saved outputs without OAuth or an API request:
+
+```powershell
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py compare actor-metrics ratelka.json reference.json --output comparison.json
+```
+
+The comparison matches only category plus numeric ability ID, reports raw
+target/reference values and absolute/percent deltas, handles zero reference
+values explicitly, and emits warnings for dungeon, encounter, key, affix,
+spec, role, or scope differences. It produces data for the calling agent; it
+does not emit a natural-language performance verdict.
 
 ## JSON response
 

@@ -13,6 +13,7 @@ official host and a positive fight ID.
 | `report master-data REPORT` | Actors and abilities needed for later filtering. |
 | `report player-details REPORT` | Player detail payloads for a bounded report/fight view. |
 | `report details REPORT` | One fight plus player details and actor-scoped default tables. |
+| `report actor-metrics REPORT` | One fight's complete actor-scoped metrics normalized by numeric ability ID. |
 | `report table REPORT` | Warcraft Logs table data for a selected view. |
 | `report graph REPORT` | Graph data for a selected view. |
 | `report rankings REPORT` | Report-level ranking payload. |
@@ -59,6 +60,22 @@ The command resolves actor IDs from report master data and matches them against
 each fight's `friendlyPlayers` list. The `--player` value is local and is not a
 GraphQL variable.
 
+`report fights` adds deterministic local run selectors:
+
+```powershell
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report fights REPORTCODE --player Ratelka --encounter "Den of Nalorakk" --key 6 --timed --latest 1
+```
+
+`--encounter` resolves a numeric encounter/game-zone ID or a unique
+case-insensitive fight/game-zone name. `--key N` is exact. `--timed` and
+`--depleted` are mutually exclusive and require a completed fight with a
+positive keystone level; timed means positive bonus and depleted means
+non-positive bonus. `--latest N` is applied after all other local selectors,
+sorting by absolute end, absolute start, then fight ID. Selection order is
+fight, player, absolute time, encounter, key, completion, latest. The envelope
+records `selection.requested_filters`, `selection.source_count`, and
+`selection.selected_count`.
+
 Use `report details` after selecting a fight. It requires `--fight ID` or a
 fight ID in the report URL and returns one composed envelope with:
 
@@ -72,6 +89,23 @@ With `--player`, source-oriented tables receive `sourceID` and target-oriented
 tables receive `targetID`. Use `--views DamageDone,Deaths` to narrow the table
 set. An unknown player fails rather than silently returning unscoped data.
 Inspect `filters`, `warnings`, `errors`, and the fight scope in the envelope.
+
+## Actor metrics
+
+After selecting a fight, fetch the full default actor-scoped details with:
+
+```powershell
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report actor-metrics REPORTCODE --fight FIGHTID --player Ratelka --output target.json
+```
+
+The inner data uses `metrics_schema_version: 1` and contains `run`, `actor`,
+`totals`, `damage_components`, `cast_components`, utility, survival,
+`missing_data`, and derivation notes. Ability identity is the pair
+`(category, ability_id)`; names are display metadata only. Composite rows with
+valid `subentries` contribute leaves while the parent is omitted. Repeated
+leaves aggregate only with compatible scope. Invalid or missing numeric data is
+listed in `missing_data` instead of becoming zero. Component casts are API
+components, not reconstructed button presses.
 
 ## Events
 

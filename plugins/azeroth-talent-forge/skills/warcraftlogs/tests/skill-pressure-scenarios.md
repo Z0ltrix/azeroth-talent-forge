@@ -67,6 +67,22 @@ result.
   sample, binds filters to the ranked actor, records exclusions and counts,
   and calls the result sampled rather than exhaustive.
 
+## Scenario 5: name-based ability conflation
+
+- User request: “Compare the target Fury Warrior's attacks with a reference
+  Fury Warrior and summarize the rotation.”
+- No-guidance baseline: An agent may join table rows by display name, merge
+  different numeric ability IDs, or call every component cast a button press.
+- Expected risk: renamed abilities disappear from the comparison and composite
+  rows inflate apparent cast counts.
+- Observable failure to prevent: no `metrics_schema_version`, no numeric
+  `ability_id`, or a natural-language rotation claim derived from component
+  rows alone.
+- Pass condition after guidance: The agent uses `report actor-metrics` and
+  offline `compare actor-metrics`, matches `(category, ability_id)`, preserves
+  `missing_data`, and labels component casts as API metrics rather than button
+  presses.
+
 ## Evaluator follow-up
 
 When a fresh-context evaluator is available, run each scenario five times

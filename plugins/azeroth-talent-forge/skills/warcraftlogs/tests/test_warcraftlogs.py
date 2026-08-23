@@ -251,6 +251,30 @@ class PackagingTests(unittest.TestCase):
         self.assertIn("local run evaluation", prompt.lower())
         self.assertIn("comparable public-log cohorts", prompt.lower())
 
+    def test_warcraftlogs_docs_cover_targeting_and_actor_metrics(self):
+        root = self.ROOT
+        repo_readme = SCRIPT.parents[5] / "README.md"
+        documents = {
+            "skill": (root / "SKILL.md").read_text(encoding="utf-8"),
+            "cli": (root / "references" / "cli.md").read_text(encoding="utf-8"),
+            "reports": (root / "references" / "reports.md").read_text(encoding="utf-8"),
+            "discovery": (root / "references" / "discovery.md").read_text(encoding="utf-8"),
+            "evaluation": (root / "references" / "evaluation.md").read_text(encoding="utf-8"),
+            "readme": repo_readme.read_text(encoding="utf-8"),
+        }
+        for phrase in ("report fights", "--encounter", "--key", "--timed", "--depleted", "--latest", "report actor-metrics", "compare actor-metrics", "numeric ability ID", "component casts"):
+            self.assertIn(phrase.lower(), documents["skill"].lower())
+        for phrase in ("report actor-metrics", "compare actor-metrics", "local", "no credential"):
+            self.assertIn(phrase, documents["cli"].lower())
+        for phrase in ("--encounter", "--key", "--timed", "--depleted", "--latest", "metrics_schema_version", "missing_data"):
+            self.assertIn(phrase, documents["reports"].lower())
+        for phrase in ("bracket", "fightRankings.error", "not pushed", "sampled"):
+            self.assertIn(phrase, documents["discovery"])
+        for phrase in ("category + ability_id", "display names", "button presses", "context"):
+            self.assertIn(phrase, documents["evaluation"].lower())
+        for phrase in ("report actor-metrics", "compare actor-metrics"):
+            self.assertIn(phrase, documents["readme"].lower())
+
     def test_documented_fight_selector_matches_public_cli(self):
         cli = (self.ROOT / "references" / "cli.md").read_text(encoding="utf-8")
         reports = (self.ROOT / "references" / "reports.md").read_text(encoding="utf-8")

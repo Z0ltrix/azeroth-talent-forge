@@ -65,6 +65,20 @@ for source rows, hydrated candidates, exclusions, returned candidates, and
 truncation. `--leaderboard` is intentionally rejected by the public endpoint
 adapter.
 
+For an exact key, `--key-min N --key-max N` is translated to the ranking API's
+`bracket: N-1`. The returned candidate is still hydrated and its actual
+`keystoneLevel` is verified locally; the ranking bracket is not accepted as
+proof of the run's key. A key range does not have one safe ranking bracket, so
+it remains a bounded local filter and emits a warning that the range was not pushed
+into the ranking request. Positive bounds are required and minimum may
+not exceed maximum.
+
+If the API returns an embedded `fightRankings.error` field, the script emits a
+sanitized structured `RANKING_ERROR` and exits with the API/data-contract error
+status. It must not turn that response into an empty successful result. Global
+results remain `sampled`; they are bounded ranking candidates, not an
+exhaustive leaderboard.
+
 ## Filter semantics
 
 - Direct ranking/report fields are evaluated without hydration when present.

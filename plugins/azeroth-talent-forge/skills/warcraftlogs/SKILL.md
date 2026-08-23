@@ -38,8 +38,9 @@ Typical character workflow:
 
 ```powershell
 python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py find character --name Ratelka --server Dun-Morogh --region EU --start-time $start --end-time $end --latest 1
-python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report fights REPORTCODE --player Ratelka
-python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report details REPORTCODE --fight FIGHTID --player Ratelka
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report fights REPORTCODE --player Ratelka --encounter "Den of Nalorakk" --key 6 --timed --latest 1
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py report actor-metrics REPORTCODE --fight FIGHTID --player Ratelka --output ratelka.json
+python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py compare actor-metrics ratelka.json reference.json --output comparison.json
 ```
 
 - For “today,” convert the user's timezone window to absolute epoch
@@ -51,10 +52,24 @@ python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py 
 - `report fights --player NAME` resolves actor IDs through that report's master
   data and returns only fights containing that player. `report player-details
   --player NAME` filters the returned detail payload locally.
+- `report fights` also supports local `--encounter`, exact `--key`, mutually
+  exclusive `--timed`/`--depleted`, and `--latest N` filters. The fixed order is
+  fight, player, absolute time, encounter, key, completion, latest. The output
+  records requested filters, source count, selected count, and ordering.
 - `report details --fight ID --player NAME` fetches one fight, player details,
   and the default actor-scoped tables (`DamageDone`, `Healing`, `DamageTaken`,
   `Deaths`, `Interrupts`, `Casts`). Use `--views` to narrow those tables. Events
   remain a separate bounded opt-in command.
+- `report actor-metrics REPORT --fight ID --player NAME` fetches the complete
+  default actor-scoped detail set and emits `metrics_schema_version: 1` with
+  run, actor, totals, damage components, cast components, utility, survival,
+  and explicit `missing_data`. Components use category plus numeric ability ID;
+  display names are metadata only. Composite parents are not counted as extra
+  leaves, and component casts are not button presses.
+- `compare actor-metrics TARGET.json REFERENCE.json` is local-only: it requires
+  no credentials or network access, matches category plus numeric ability ID,
+  reports raw values/deltas, and warns about context or scope differences. It
+  does not produce a natural-language verdict.
 - Before local evaluation, inspect `scope`, `filters`, `completeness`,
   `pagination.truncated`, `warnings`, and `errors`. Never turn partial or
   sampled data into an exhaustive claim.
@@ -86,6 +101,11 @@ python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py 
   `--leaderboard` before making an API call. It is ranking-based and always
   `completeness: "sampled"`, never an exhaustive public-report search. Keep
   `--top` and `--max-pages` bounded.
+- Global exact-key discovery translates `--key-min N --key-max N` when equal to
+  ranking `bracket: N-1`, then verifies the hydrated fight's actual key. Key
+  ranges stay local and carry a warning that no ranking bracket was pushed.
+  An embedded `fightRankings.error` is a structured fatal API error, not an
+  empty successful result.
 - Reference metadata: `metadata regions`, `realms`, `zones`, `encounters`,
   `seasons`, `classes`, `specs`, `affixes`, and `abilities` list normalized API
   names and IDs (with `realms` narrowed by region/name). Use these collections
