@@ -66,6 +66,16 @@ GitHub repository social preview: `docs/img/azeroth-talent-forge-github-social.j
 
 No Python package install is required for the included scripts.
 
+## License
+
+This repository, including the bundled Codex plugin, skills, and scripts, is
+licensed under the [GNU Affero General Public License v3.0 or later](LICENSE)
+(`AGPL-3.0-or-later`), unless a file states otherwise.
+
+If you modify and provide this plugin through a hosted agent or another network
+service, the AGPL requires you to offer the corresponding source code of that
+modified version to users interacting with it remotely.
+
 ## Plugin Installation
 
 Codex installs plugins from a configured marketplace. In this repository,

@@ -1,6 +1,6 @@
 {
   "name": "azeroth-talent-forge",
-  "version": "0.3.3+codex.20260823113723",
+  "version": "0.3.4",
   "description": "Local World of Warcraft talent planning and public Warcraft Logs analysis tools for Codex.",
   "author": {
     "name": "Christian Pfarr"
