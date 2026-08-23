@@ -1,8 +1,28 @@
+![Azeroth Talent Forge — original dark forge artwork](docs/img/azeroth-talent-forge-banner.png)
+
 # Azeroth Talent Forge
 
-Local Codex plugin for World of Warcraft talent planning.
+<p align="center">
+  <img src="docs/img/azeroth-talent-forge-icon.png" width="72" height="72" alt="Azeroth Talent Forge anvil icon">
+</p>
 
-The plugin helps Codex inspect Wowhead talent planner builds, compare selected talents, apply user-directed talent swaps, and generate Blizzard-compatible Wowhead planner links/import strings. It is intentionally neutral: it does not ship class-specific prebuilt builds or personal preferences.
+**Forge deliberate World of Warcraft talent builds with Codex.**
+
+A local Codex plugin for WoW talent planning and public Warcraft Logs analysis.
+It works from your stated goal and explicit changes, then returns inspectable
+planner links, import strings, and bounded report data.
+
+> No opaque prebuilt builds. No personal defaults. Every talent change remains
+> directed by you and visible in the resulting plan.
+
+## What It Does
+
+- Inspect current Wowhead planner builds and Blizzard import strings.
+- Apply explicit, name-based talent swaps; generate verified Wowhead planner
+  URLs and Blizzard-compatible import strings.
+- Discover public Warcraft Logs characters, guilds, rankings, and Mythic+ runs.
+- Analyze selected report fights, actor metrics, events, casts, interrupts, and
+  survival data with explicit scope and completeness metadata.
 
 ## Contents
 
@@ -12,18 +32,25 @@ azeroth-talent-forge/
 |   +-- plugins/
 |       +-- marketplace.json
 +-- plugins/
-    +-- azeroth-talent-forge/
-        +-- .codex-plugin/
-        |   +-- plugin.json
-        +-- skills/
-            +-- wowhead-talent-planner/
-                +-- SKILL.md
-                +-- agents/openai.yaml
-                +-- references/
-                |   +-- protection-warrior.md
-                +-- scripts/
-                    +-- wowhead_assets.py
-                    +-- wowhead_talent_builder.py
+|   `-- azeroth-talent-forge/
+|       +-- .codex-plugin/plugin.json
+|       `-- skills/
+|           +-- wowhead-talent-planner/
+|           |   +-- SKILL.md
+|           |   +-- references/
+|           |   `-- scripts/
+|           |       +-- wowhead_assets.py
+|           |       `-- wowhead_talent_builder.py
+|           `-- warcraftlogs/
+|               +-- SKILL.md
+|               +-- references/
+|               `-- scripts/
+|                   +-- warcraftlogs.py
+|                   `-- graphql/
++-- docs/
+    `-- img/
+        +-- azeroth-talent-forge-banner.png
+        `-- azeroth-talent-forge-icon.png
 ```
 
 ## Requirements
@@ -166,7 +193,9 @@ The builder prints:
 
 The builder does not contain bundled presets. Every build starts from the user-provided `--base` value and explicit edits.
 
-## Current Skill
+## Included Skills
+
+### Wowhead Talent Planner
 
 `plugins\azeroth-talent-forge\skills\wowhead-talent-planner` supports:
 
@@ -176,6 +205,8 @@ The builder does not contain bundled presets. Every build starts from the user-p
 - applying talent changes by name
 - generating a Wowhead `/talent-calc/blizzard/<hash>` URL
 - storing class/spec reference notes under `references/`
+
+It verifies named talent changes by reopening or importing the generated plan.
 
 ## Development Notes
 

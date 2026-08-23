@@ -1,6 +1,6 @@
 {
   "name": "azeroth-talent-forge",
-  "version": "0.3.1",
+  "version": "0.3.3+codex.20260823113723",
   "description": "Local World of Warcraft talent planning and public Warcraft Logs analysis tools for Codex.",
   "author": {
     "name": "Christian Pfarr"
@@ -12,6 +12,9 @@
     "longDescription": "Azeroth Talent Forge adds local Codex skills and scripts for World of Warcraft talent planning, Wowhead planner links, and Blizzard import strings.",
     "developerName": "Christian Pfarr",
     "category": "Productivity",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png",
+    "logoDark": "./assets/icon.png",
     "capabilities": [
       "World of Warcraft talent planning",
       "Wowhead planner link generation",
