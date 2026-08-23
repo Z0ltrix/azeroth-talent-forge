@@ -65,7 +65,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 print(json.dumps(make_global_result([], args.top, {}, errors=[{"message": "Warcraft Logs API response did not contain global discovery data"}]), ensure_ascii=True))
                 return 4
             print(json.dumps(result, ensure_ascii=True))
-            return 0
+            return 4 if result.get("fatal_error") else 0
         if args.find_command not in ("character", "guild"):
             return 0
         try:

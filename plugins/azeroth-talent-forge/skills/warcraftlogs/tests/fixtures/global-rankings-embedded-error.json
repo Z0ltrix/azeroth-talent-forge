@@ -1,0 +1,12 @@
+{
+  "data": {
+    "worldData": {
+      "encounter": {
+        "fightRankings": {
+          "error": "This ranking request is not available",
+          "rankings": []
+        }
+      }
+    }
+  }
+}

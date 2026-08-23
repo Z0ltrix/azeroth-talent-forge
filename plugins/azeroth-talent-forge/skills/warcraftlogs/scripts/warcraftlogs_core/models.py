@@ -114,6 +114,12 @@ class DiscoveryFilters:
             "key_min", "key_max", "affixes", "timed", "depleted", "difficulty", "kill", "wipe",
         ))
 
+    @property
+    def exact_key(self) -> Optional[int]:
+        if self.key_min is None or self.key_max is None or self.key_min != self.key_max:
+            return None
+        return self.key_min
+
     def direct_variables(self) -> dict:
         variables = {}
         if self.start_time is not None:
@@ -254,10 +260,14 @@ def report_matches(report, fights, actors, filters: DiscoveryFilters, character_
     if filters.partition is not None and not any(f.get("partition") == filters.partition or report.get("partition") == filters.partition for f in fights):
         reasons.append("partition")
     levels = [f.get("keystoneLevel") for f in fights if isinstance(f.get("keystoneLevel"), (int, float))]
-    if filters.key_min is not None and not any(level >= filters.key_min for level in levels):
-        reasons.append("key_min")
-    if filters.key_max is not None and not any(level <= filters.key_max for level in levels):
-        reasons.append("key_max")
+    if filters.exact_key is not None:
+        if not any(level == filters.exact_key for level in levels):
+            reasons.append("key")
+    else:
+        if filters.key_min is not None and not any(level >= filters.key_min for level in levels):
+            reasons.append("key_min")
+        if filters.key_max is not None and not any(level <= filters.key_max for level in levels):
+            reasons.append("key_max")
     if filters.affixes:
         affix_values = [
             value for fight in fights for value in _items(fight.get("keystoneAffixes"))

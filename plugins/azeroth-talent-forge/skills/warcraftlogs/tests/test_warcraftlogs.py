@@ -1666,6 +1666,76 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(result["requested_top"], 2)
         self.assertIn(warcraftlogs.GLOBAL_WARNING, result["warnings"])
 
+    def test_global_key_bounds_are_positive_and_ordered(self):
+        for options in (("--key-min", "0"), ("--key-max", "0"), ("--key-min", "8", "--key-max", "6")):
+            args = warcraftlogs.build_parser().parse_args(["find", "global", "--zone", "1300", *options])
+            with self.subTest(options=options), self.assertRaises(ValueError):
+                warcraftlogs._global_filters(args)
+
+    def test_global_exact_key_pushes_ranking_bracket(self):
+        client = FixtureClient({
+            "encounter-rankings": fixture("global-rankings-page-1.json"),
+            "report-fights": fixture("report-fights.json"),
+        })
+        result = warcraftlogs.discover_global(
+            client,
+            warcraftlogs.DiscoveryFilters(encounter=2902, zone=1300, key_min=6, key_max=6),
+            top=2,
+            page=1,
+        )
+        ranking_call = next(variables for name, variables in zip(client.calls, client.variables) if name == "encounter-rankings")
+        self.assertEqual(ranking_call["bracket"], 5)
+        self.assertEqual(result["requested_key"], 6)
+        self.assertEqual(result["ranking_bracket"], 5)
+
+    def test_global_key_range_is_local_and_warned(self):
+        client = FixtureClient({
+            "encounter-rankings": fixture("global-rankings-page-1.json"),
+            "report-fights": fixture("report-fights.json"),
+        })
+        result = warcraftlogs.discover_global(
+            client,
+            warcraftlogs.DiscoveryFilters(encounter=2902, zone=1300, key_min=5, key_max=7),
+            top=2,
+            page=1,
+        )
+        ranking_call = next(variables for name, variables in zip(client.calls, client.variables) if name == "encounter-rankings")
+        self.assertNotIn("bracket", ranking_call)
+        self.assertTrue(any("not pushed" in warning for warning in result["warnings"]))
+
+    def test_global_embedded_ranking_error_is_not_empty_success(self):
+        client = FixtureClient({
+            "encounter-rankings": fixture("global-rankings-embedded-error.json"),
+        })
+        result = warcraftlogs.discover_global(
+            client,
+            warcraftlogs.DiscoveryFilters(encounter=2902, zone=1300),
+            top=2,
+            page=1,
+        )
+        self.assertEqual(result["data"], [])
+        self.assertTrue(result["partial"])
+        self.assertTrue(result["fatal_error"])
+        self.assertEqual(result["errors"][0]["extensions"]["code"], "RANKING_ERROR")
+
+    def test_global_cli_embedded_ranking_error_returns_nonzero(self):
+        client = FixtureClient({
+            "metadata-world": fixture("metadata-world.json"),
+            "encounter-rankings": fixture("global-rankings-embedded-error.json"),
+        })
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ), redirect_stdout(output), redirect_stderr(io.StringIO()):
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret",
+                "--env-file", str(Path(directory) / "missing.env"),
+                "find", "global", "--zone", "1300", "--top", "2",
+            ])
+        result = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 4)
+        self.assertTrue(result["fatal_error"])
+
     def test_global_ranking_candidates_accept_nested_report_fight_id_and_dedupe(self):
         rows, pagination = warcraftlogs._ranking_page(fixture("global-rankings-nested-report.json"))
 

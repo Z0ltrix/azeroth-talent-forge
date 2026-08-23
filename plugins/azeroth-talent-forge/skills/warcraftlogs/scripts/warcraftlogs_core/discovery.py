@@ -14,6 +14,10 @@ from .reports import (hydrate_discovery_report, report_data, _pagination_data,
                       _public_report_payload, make_envelope)
 from .transport import sanitize_graphql_errors
 
+
+class RankingResponseError(RuntimeError):
+    """The ranking field returned an embedded API error."""
+
 def _identity_variables(name, server, region) -> dict:
     if not isinstance(name, str) or not name.strip():
         raise ValueError("Character or guild name is required")
@@ -38,8 +42,8 @@ def _discovery_filters(args, allow_partition=False) -> DiscoveryFilters:
             raise ValueError("Discovery time bounds must be finite and non-negative")
     if args.start_time is not None and args.end_time is not None and args.start_time > args.end_time:
         raise ValueError("Discovery start time must not exceed end time")
-    if args.key_min is not None and args.key_min < 0 or args.key_max is not None and args.key_max < 0:
-        raise ValueError("Key bounds must be non-negative")
+    if args.key_min is not None and args.key_min < 1 or args.key_max is not None and args.key_max < 1:
+        raise ValueError("Key bounds must be positive")
     if args.key_min is not None and args.key_max is not None and args.key_min > args.key_max:
         raise ValueError("Key minimum must not exceed key maximum")
     return DiscoveryFilters(
@@ -109,8 +113,8 @@ def _global_filters(args, client=None) -> DiscoveryFilters:
             raise ValueError("Discovery time bounds must be finite and non-negative")
     if args.start_time is not None and args.end_time is not None and args.start_time > args.end_time:
         raise ValueError("Discovery start time must not exceed end time")
-    if (args.key_min is not None and args.key_min < 0) or (args.key_max is not None and args.key_max < 0):
-        raise ValueError("Key bounds must be non-negative")
+    if (args.key_min is not None and args.key_min < 1) or (args.key_max is not None and args.key_max < 1):
+        raise ValueError("Key bounds must be positive")
     if args.key_min is not None and args.key_max is not None and args.key_min > args.key_max:
         raise ValueError("Key minimum must not exceed key maximum")
     values = {
@@ -295,6 +299,8 @@ def _ranking_page(payload: Mapping[str, object]) -> Tuple[list, dict]:
         return [item for item in raw if isinstance(item, Mapping)], {}
     if not isinstance(raw, Mapping):
         raise TypeError("Encounter rankings were not JSON")
+    if raw.get("error"):
+        raise RankingResponseError("Warcraft Logs ranking request returned an embedded error")
     rows = raw.get("rankings", raw.get("data", []))
     if not isinstance(rows, list):
         raise TypeError("Encounter ranking rows were not a list")
@@ -510,7 +516,7 @@ def make_global_result(rows, sample_size, filters, ranking_basis="encounter_rank
             "pages_fetched": int(metadata.get("pages_fetched", 1)),
             "truncated": truncated,
         },
-        warnings=[GLOBAL_WARNING],
+        warnings=[GLOBAL_WARNING] + list(metadata.get("warnings", [])),
     )
     result.update({
         "ranking_basis": ranking_basis,
@@ -530,6 +536,11 @@ def make_global_result(rows, sample_size, filters, ranking_basis="encounter_rank
     if metadata.get("errors"):
         result["partial"] = True
         result["errors"] = sanitize_graphql_errors(metadata["errors"])
+    for field in ("requested_key", "ranking_bracket"):
+        if field in metadata and metadata[field] is not None:
+            result[field] = metadata[field]
+    if metadata.get("fatal_error"):
+        result["fatal_error"] = True
     return result
 
 
@@ -598,6 +609,13 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
         "zoneID": zone_id,
         "page": page,
     }
+    exact_key = filters.exact_key
+    ranking_bracket = exact_key - 1 if exact_key is not None else None
+    discovery_warnings = []
+    if exact_key is not None:
+        variables["bracket"] = ranking_bracket
+    elif filters.key_min is not None or filters.key_max is not None:
+        discovery_warnings.append("Key ranges are enforced after bounded local hydration; ranking bracket was not pushed down.")
     variables.update(filters.direct_variables())
     for field, value in (
         ("difficulty", filters.difficulty), ("partition", filters.partition),
@@ -613,12 +631,21 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
     hydrated_count = 0
     exclusion_reasons = {}
     errors = []
+    fatal_error = False
     while pages_fetched < max_pages and (pages_fetched == 0 or has_more):
         variables["page"] = current_page
         try:
             payload = client.execute("encounter-rankings", variables)
             errors.extend(payload.get("errors", []) if isinstance(payload, Mapping) else [])
             page_rows, pagination = _ranking_page(payload)
+        except RankingResponseError:
+            errors.append({
+                "message": "Warcraft Logs ranking request failed",
+                "path": ["fightRankings"],
+                "extensions": {"code": "RANKING_ERROR"},
+            })
+            fatal_error = True
+            break
         except Exception as error:
             errors.append({"message": str(error)})
             break
@@ -711,6 +738,10 @@ def discover_global(client, filters: DiscoveryFilters, top: int, page: int, max_
         exclusion_reasons=exclusion_reasons,
         errors=errors,
         metric=metric,
+        warnings=discovery_warnings,
+        requested_key=exact_key,
+        ranking_bracket=ranking_bracket,
+        fatal_error=fatal_error,
     )
 
 
