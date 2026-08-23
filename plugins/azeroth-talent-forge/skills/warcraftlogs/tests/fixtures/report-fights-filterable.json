@@ -1,0 +1,103 @@
+{
+  "data": {
+    "reportData": {
+      "report": {
+        "visibility": "public",
+        "archiveStatus": {"isArchived": false, "isAccessible": true, "archiveDate": null},
+        "startTime": 1000000,
+        "fights": [
+          {
+            "id": 20,
+            "name": "Den of Nalorakk",
+            "encounterID": 3107,
+            "difficulty": 10,
+            "startTime": 1000,
+            "endTime": 2000,
+            "kill": true,
+            "inProgress": false,
+            "gameZone": {"id": 2444, "name": "Midnight"},
+            "keystoneLevel": 6,
+            "keystoneBonus": 1,
+            "keystoneAffixes": [9],
+            "friendlyPlayers": [1]
+          },
+          {
+            "id": 21,
+            "name": "Den of Nalorakk",
+            "encounterID": 3107,
+            "difficulty": 10,
+            "startTime": 2000,
+            "endTime": 3000,
+            "kill": true,
+            "inProgress": false,
+            "gameZone": {"id": 2444, "name": "Midnight"},
+            "keystoneLevel": 6,
+            "keystoneBonus": 0,
+            "keystoneAffixes": [9],
+            "friendlyPlayers": [1]
+          },
+          {
+            "id": 22,
+            "name": "Den of Nalorakk",
+            "encounterID": 3107,
+            "difficulty": 10,
+            "startTime": 3000,
+            "endTime": 4000,
+            "kill": true,
+            "inProgress": false,
+            "gameZone": {"id": 2444, "name": "Midnight"},
+            "keystoneLevel": 7,
+            "keystoneBonus": 2,
+            "keystoneAffixes": [9],
+            "friendlyPlayers": [1]
+          },
+          {
+            "id": 23,
+            "name": "The Dawnbreaker",
+            "encounterID": 2832,
+            "difficulty": 10,
+            "startTime": 4000,
+            "endTime": 5000,
+            "kill": true,
+            "inProgress": false,
+            "gameZone": {"id": 2335, "name": "The War Within"},
+            "keystoneLevel": 6,
+            "keystoneBonus": 1,
+            "keystoneAffixes": [9],
+            "friendlyPlayers": [1]
+          },
+          {
+            "id": 24,
+            "name": "Den of Nalorakk",
+            "encounterID": 3107,
+            "difficulty": 10,
+            "startTime": 5000,
+            "endTime": 6000,
+            "kill": false,
+            "inProgress": true,
+            "gameZone": {"id": 2444, "name": "Midnight"},
+            "keystoneLevel": 6,
+            "keystoneBonus": 0,
+            "keystoneAffixes": [9],
+            "friendlyPlayers": [1]
+          },
+          {
+            "id": 25,
+            "name": "Den of Nalorakk",
+            "encounterID": 3107,
+            "difficulty": 10,
+            "startTime": 6000,
+            "endTime": 7000,
+            "kill": true,
+            "inProgress": false,
+            "gameZone": {"id": 2444, "name": "Midnight"},
+            "keystoneLevel": 6,
+            "keystoneBonus": 1,
+            "keystoneAffixes": [9],
+            "friendlyPlayers": [2]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -769,6 +769,31 @@ class ReportTests(unittest.TestCase):
                 )
         return exit_code, output.getvalue(), errors.getvalue(), client
 
+    def test_report_fights_parser_accepts_targeting_filters(self):
+        args = warcraftlogs.build_parser().parse_args([
+            "report", "fights", "REPORT123",
+            "--player", "Ratelka",
+            "--encounter", "Den of Nalorakk",
+            "--key", "6",
+            "--timed",
+            "--latest", "1",
+        ])
+        self.assertEqual(args.encounter, "Den of Nalorakk")
+        self.assertEqual(args.key, 6)
+        self.assertTrue(args.timed)
+        self.assertFalse(args.depleted)
+        self.assertEqual(args.latest, 1)
+
+    def test_report_fights_parser_rejects_invalid_targeting_filters(self):
+        invalid = (
+            ("--timed", "--depleted"),
+            ("--key", "0"),
+            ("--latest", "0"),
+        )
+        for options in invalid:
+            with self.subTest(options=options), self.assertRaises(SystemExit):
+                warcraftlogs.build_parser().parse_args(["report", "fights", "REPORT123", *options])
+
     def test_report_queries_select_consumed_object_fields(self):
         summary = warcraftlogs.load_query("report-summary")
         fights = warcraftlogs.load_query("report-fights")
@@ -842,7 +867,7 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(client.variables[0]["fightIDs"], [9])
         self.assertEqual(result["data"][0]["keystoneLevel"], 12)
         self.assertEqual(result["data"][0]["keystoneAffixes"], [9])
-        self.assertEqual(result["data"][1]["friendlyPlayers"], [])
+        self.assertEqual(result["data"][0]["friendlyPlayers"], [1])
 
     def test_fights_filters_to_player_using_report_master_data(self):
         exit_code, output, errors, client = self.run_report(
@@ -861,6 +886,70 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(errors, "")
         self.assertEqual([fight["id"] for fight in result["data"]], [9])
         self.assertEqual(result["filters"]["player"], "Tankadin")
+        self.assertEqual(client.calls, ["report-fights", "report-master-data"])
+
+    def test_filter_enriched_fights_applies_targeting_order(self):
+        payload = fixture("report-fights-filterable.json")
+        fights = payload["data"]["reportData"]["report"]["fights"]
+        enriched = warcraftlogs.select_fights(fights[:5], 1000000, warnings=[])
+
+        selected, metadata = warcraftlogs.filter_enriched_fights(
+            enriched,
+            encounter="Den of Nalorakk",
+            key=6,
+            timed=True,
+            latest=1,
+        )
+        self.assertEqual([fight["id"] for fight in selected], [20])
+        self.assertEqual(metadata["source_count"], 5)
+        self.assertEqual(metadata["selected_count"], 1)
+        self.assertEqual(
+            metadata["selection_order"],
+            ["fight", "player", "absolute_time", "encounter", "key", "completion", "latest"],
+        )
+
+        depleted, unused = warcraftlogs.filter_enriched_fights(enriched, key=6, depleted=True)
+        self.assertEqual([fight["id"] for fight in depleted], [21])
+
+    def test_filter_enriched_fights_rejects_ambiguous_encounter(self):
+        fights = [
+            {"id": 1, "name": "Shared Name", "encounterID": 10},
+            {"id": 2, "name": "shared name", "encounterID": 11},
+        ]
+        with self.assertRaises(ValueError):
+            warcraftlogs.filter_enriched_fights(fights, encounter="SHARED NAME")
+
+    def test_filter_enriched_fights_unknown_encounter_is_empty(self):
+        selected, metadata = warcraftlogs.filter_enriched_fights(
+            [{"id": 1, "name": "Known", "encounterID": 10}], encounter="Unknown"
+        )
+        self.assertEqual(selected, [])
+        self.assertEqual(metadata["selected_count"], 0)
+
+    def test_fights_command_applies_targeting_filters_and_selection_metadata(self):
+        exit_code, output, errors, client = self.run_report(
+            {
+                "report-fights": fixture("report-fights-filterable.json"),
+                "report-master-data": fixture("report-master-data.json"),
+            },
+            "fights",
+            "AbCd1234",
+            "--player", "Tankadin",
+            "--encounter", "Den of Nalorakk",
+            "--key", "6",
+            "--timed",
+            "--latest", "1",
+        )
+        result = json.loads(output)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(errors, "")
+        self.assertEqual([fight["id"] for fight in result["data"]], [20])
+        self.assertEqual(result["filters"]["encounter"], "Den of Nalorakk")
+        self.assertEqual(result["filters"]["key"], 6)
+        self.assertTrue(result["filters"]["timed"])
+        self.assertEqual(result["filters"]["latest"], 1)
+        self.assertEqual(result["selection"]["source_count"], 6)
+        self.assertEqual(result["selection"]["selected_count"], 1)
         self.assertEqual(client.calls, ["report-fights", "report-master-data"])
 
     def test_fights_player_partial_master_data_error_is_sanitized_without_traceback(self):
@@ -1995,20 +2084,39 @@ class DiscoveryTests(unittest.TestCase):
     def test_keystone_timed_and_depleted_require_level_and_bonus(self):
         filters = warcraftlogs.DiscoveryFilters(timed=True)
         timed, timed_reasons = warcraftlogs.report_matches(
-            {}, [{"keystoneLevel": 10, "keystoneBonus": 1}], [], filters
+            {}, [{"keystoneLevel": 10, "keystoneBonus": 1, "kill": True, "inProgress": False}], [], filters
         )
         self.assertTrue(timed)
         self.assertEqual(timed_reasons, [])
         depleted, depleted_reasons = warcraftlogs.report_matches(
-            {}, [{"keystoneLevel": 10, "keystoneBonus": 0}], [], warcraftlogs.DiscoveryFilters(depleted=True)
+            {}, [{"keystoneLevel": 10, "keystoneBonus": 0, "kill": True, "inProgress": False}], [], warcraftlogs.DiscoveryFilters(depleted=True)
         )
         self.assertTrue(depleted)
         self.assertEqual(depleted_reasons, [])
         null_bonus, null_reasons = warcraftlogs.report_matches(
-            {}, [{"keystoneLevel": 10, "keystoneBonus": None}], [], filters
+            {}, [{"keystoneLevel": 10, "keystoneBonus": None, "kill": True, "inProgress": False}], [], filters
         )
         self.assertFalse(null_bonus)
         self.assertEqual(null_reasons, ["timed"])
+
+    def test_fight_status_requires_completed_positive_key(self):
+        from warcraftlogs_core import models
+
+        self.assertEqual(
+            models._fight_status({"keystoneLevel": 6, "keystoneBonus": 1, "kill": True, "inProgress": False}),
+            (True, False),
+        )
+        self.assertEqual(
+            models._fight_status({"keystoneLevel": 6, "keystoneBonus": 0, "kill": True, "inProgress": False}),
+            (False, True),
+        )
+        for fight in (
+            {"keystoneLevel": 6, "keystoneBonus": 1, "kill": False, "inProgress": True},
+            {"keystoneLevel": 6, "keystoneBonus": 0, "kill": False, "inProgress": False},
+            {"keystoneLevel": 0, "keystoneBonus": 2, "kill": True, "inProgress": False},
+        ):
+            with self.subTest(fight=fight):
+                self.assertEqual(models._fight_status(fight), (False, False))
 
     def test_character_filters_use_canonical_actor_name(self):
         filters = warcraftlogs.DiscoveryFilters(class_name="Paladin")

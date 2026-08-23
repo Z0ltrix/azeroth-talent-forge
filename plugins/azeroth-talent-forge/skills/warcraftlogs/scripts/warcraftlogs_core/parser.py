@@ -3,6 +3,16 @@ import argparse
 from .models import GLOBAL_TOP_MAX, GLOBAL_MAX_PAGES
 from .reports import _add_report_options, _add_json_report_options, EVENT_PAGE_LIMIT, EVENT_MAX_PAGES
 
+def _positive_int(value):
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    return parsed
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="warcraftlogs.py")
     parser.add_argument("--client-id")
@@ -28,6 +38,12 @@ def build_parser() -> argparse.ArgumentParser:
     fights = report_parsers.add_parser("fights")
     _add_report_options(fights, translate=True, absolute_window=True)
     fights.add_argument("--player")
+    fights.add_argument("--encounter")
+    fights.add_argument("--key", type=_positive_int)
+    outcome = fights.add_mutually_exclusive_group()
+    outcome.add_argument("--timed", action="store_true")
+    outcome.add_argument("--depleted", action="store_true")
+    fights.add_argument("--latest", type=_positive_int)
     master_data = report_parsers.add_parser("master-data")
     _add_report_options(master_data, translate=True)
     player_details = report_parsers.add_parser("player-details")

@@ -239,6 +239,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         warnings = []
         try:
             payload = client.execute("report-" + args.report_command, variables)
+            source_fight_count = None
             data = report_data(
                 payload,
                 args.report_command,
@@ -247,6 +248,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 getattr(args, "time_mode", None) or "started",
                 warnings=warnings,
             )
+            if args.report_command == "fights":
+                source_fight_count = len(data)
             if getattr(args, "player", None) is not None:
                 master_data = None
                 if args.report_command == "fights":
@@ -255,6 +258,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         raise PartialGraphQLError(master_payload["errors"])
                     master_data = report_data(master_payload, "master-data")
                 data = filter_report_data_by_player(args.report_command, data, args.player, master_data=master_data)
+            selection = None
+            if args.report_command == "fights":
+                data, selection = filter_enriched_fights(
+                    data,
+                    fight_id=variables.get("fightIDs", [None])[0],
+                    absolute_start=getattr(args, "absolute_start_time", None),
+                    absolute_end=getattr(args, "absolute_end_time", None),
+                    time_mode=getattr(args, "time_mode", None) or "started",
+                    encounter=getattr(args, "encounter", None),
+                    key=getattr(args, "key", None),
+                    timed=getattr(args, "timed", False),
+                    depleted=getattr(args, "depleted", False),
+                    latest=getattr(args, "latest", None),
+                )
+                selection["source_count"] = source_fight_count
+                if getattr(args, "player", None) is not None:
+                    selection["requested_filters"]["player"] = args.player
         except AuthenticationError as error:
             print(str(error), file=sys.stderr)
             return 3
@@ -278,6 +298,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             data,
             warnings=warnings,
             errors=payload.get("errors"),
+            **({"selection": selection} if selection is not None else {}),
         )
         if args.output:
             try:

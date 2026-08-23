@@ -10,7 +10,7 @@ from typing import Mapping, Optional, Sequence, Tuple
 from .models import (
     DiscoveryFilters, PublicReportError, PartialGraphQLError, ReportReference, REPORT_CODE, REPORT_HOSTS, _items,
     KILL_TYPES, TABLE_DATA_TYPES, GRAPH_DATA_TYPES, HOSTILITY_TYPES, VIEW_TYPES,
-    RANKING_COMPARE_TYPES, RANKING_TIMEFRAMES, RANKING_METRICS,
+    RANKING_COMPARE_TYPES, RANKING_TIMEFRAMES, RANKING_METRICS, _fight_status,
 )
 from .metadata import normalize_name
 from .transport import sanitize_graphql_errors, utc_now
@@ -241,6 +241,23 @@ def report_request(args) -> tuple:
     player = getattr(args, "player", None)
     if player is not None:
         filters["player"] = player
+    if args.report_command == "fights":
+        if getattr(args, "timed", False) and getattr(args, "depleted", False):
+            raise ValueError("Timed and depleted fight filters are mutually exclusive")
+        key = getattr(args, "key", None)
+        latest = getattr(args, "latest", None)
+        if key is not None and (isinstance(key, bool) or not isinstance(key, int) or key < 1):
+            raise ValueError("Report key must be a positive integer")
+        if latest is not None and (isinstance(latest, bool) or not isinstance(latest, int) or latest < 1):
+            raise ValueError("Report latest must be a positive integer")
+        for attribute in ("encounter", "key", "latest"):
+            value = getattr(args, attribute, None)
+            if value is not None:
+                filters[attribute] = value
+        if getattr(args, "timed", False):
+            filters["timed"] = True
+        if getattr(args, "depleted", False):
+            filters["depleted"] = True
     return reference, variables, scope, filters
 
 
@@ -277,6 +294,128 @@ def select_fights(fights, report_start_ms, start_ms=None, end_ms=None, mode="sta
         if matches:
             selected.append(dict(fight, absoluteStartTime=absolute_start, absoluteEndTime=absolute_end))
     return selected
+
+
+_FIGHT_SELECTION_ORDER = ["fight", "player", "absolute_time", "encounter", "key", "completion", "latest"]
+
+
+def _fight_identity(fight):
+    encounter_id = fight.get("encounterID")
+    game_zone = fight.get("gameZone")
+    zone_id = game_zone.get("id") if isinstance(game_zone, Mapping) else None
+    zone_name = game_zone.get("name") if isinstance(game_zone, Mapping) else None
+    if encounter_id is not None:
+        return ("encounter", encounter_id)
+    if zone_id is not None:
+        return ("zone", zone_id)
+    return ("name", str(zone_name).casefold() if zone_name is not None else str(fight.get("name", "")).casefold())
+
+
+def _encounter_matches(fight, requested):
+    encounter_id = fight.get("encounterID")
+    game_zone = fight.get("gameZone")
+    zone_id = game_zone.get("id") if isinstance(game_zone, Mapping) else None
+    zone_name = game_zone.get("name") if isinstance(game_zone, Mapping) else None
+    fight_name = fight.get("name")
+    if isinstance(requested, str) and requested.isdigit():
+        requested = int(requested)
+    if isinstance(requested, int) and not isinstance(requested, bool):
+        return encounter_id == requested or zone_id == requested
+    wanted = str(requested).casefold()
+    return wanted in {
+        str(fight_name).casefold() if fight_name is not None else "",
+        str(zone_name).casefold() if zone_name is not None else "",
+    }
+
+
+def filter_enriched_fights(
+    fights,
+    *,
+    fight_id=None,
+    absolute_start=None,
+    absolute_end=None,
+    time_mode="started",
+    encounter=None,
+    key=None,
+    timed=False,
+    depleted=False,
+    latest=None,
+):
+    """Apply deterministic local filters to fights with absolute timestamps."""
+    if timed and depleted:
+        raise ValueError("Timed and depleted fight filters are mutually exclusive")
+    if key is not None and (isinstance(key, bool) or not isinstance(key, int) or key < 1):
+        raise ValueError("Report key must be a positive integer")
+    if latest is not None and (isinstance(latest, bool) or not isinstance(latest, int) or latest < 1):
+        raise ValueError("Report latest must be a positive integer")
+    if time_mode not in ("started", "overlap", "completed"):
+        raise ValueError("Invalid fight time mode")
+    if absolute_start is not None and absolute_start < 0 or absolute_end is not None and absolute_end < 0:
+        raise ValueError("Absolute fight times must not be negative")
+    if absolute_start is not None and absolute_end is not None and absolute_start > absolute_end:
+        raise ValueError("Absolute fight start time must not exceed end time")
+
+    source = [dict(fight) for fight in _items(fights) if isinstance(fight, Mapping)]
+    selected = source
+    if fight_id is not None:
+        selected = [fight for fight in selected if fight.get("id") == fight_id]
+    if absolute_start is not None or absolute_end is not None:
+        filtered = []
+        for fight in selected:
+            start = fight.get("absoluteStartTime")
+            end = fight.get("absoluteEndTime")
+            if not isinstance(start, (int, float)) or isinstance(start, bool) or not isinstance(end, (int, float)) or isinstance(end, bool):
+                continue
+            if time_mode == "started":
+                matches = (absolute_start is None or start >= absolute_start) and (absolute_end is None or start < absolute_end)
+            elif time_mode == "overlap":
+                matches = (absolute_start is None or end > absolute_start) and (absolute_end is None or start < absolute_end)
+            else:
+                matches = (absolute_start is None or end > absolute_start) and (absolute_end is None or end < absolute_end)
+            if matches:
+                filtered.append(fight)
+        selected = filtered
+
+    if encounter is not None:
+        matching = [fight for fight in selected if _encounter_matches(fight, encounter)]
+        identities = {_fight_identity(fight) for fight in matching}
+        if not matching:
+            selected = []
+        elif not (isinstance(encounter, int) or (isinstance(encounter, str) and encounter.isdigit())) and len(identities) > 1:
+            raise ValueError("Encounter name is ambiguous")
+        else:
+            selected = matching
+    if key is not None:
+        selected = [fight for fight in selected if fight.get("keystoneLevel") == key]
+    if timed or depleted:
+        selected = [
+            fight for fight in selected
+            if (_fight_status(fight)[0] if timed else _fight_status(fight)[1])
+        ]
+    if latest is not None:
+        selected = sorted(
+            selected,
+            key=lambda fight: (
+                fight.get("absoluteEndTime") if fight.get("absoluteEndTime") is not None else -1,
+                fight.get("absoluteStartTime") if fight.get("absoluteStartTime") is not None else -1,
+                fight.get("id") if fight.get("id") is not None else -1,
+            ),
+            reverse=True,
+        )[:latest]
+
+    requested = {
+        name: value for name, value in (
+            ("fight", fight_id), ("absolute_start_time", absolute_start), ("absolute_end_time", absolute_end),
+            ("time_mode", time_mode), ("encounter", encounter), ("key", key),
+            ("timed", timed), ("depleted", depleted), ("latest", latest),
+        ) if value is not None and value is not False
+    }
+    return selected, {
+        "requested_filters": requested,
+        "source_count": len(source),
+        "selected_count": len(selected),
+        "selection_order": list(_FIGHT_SELECTION_ORDER),
+    }
 
 
 def report_data(payload: Mapping[str, object], kind: str, absolute_start=None, absolute_end=None, time_mode="started", warnings=None):

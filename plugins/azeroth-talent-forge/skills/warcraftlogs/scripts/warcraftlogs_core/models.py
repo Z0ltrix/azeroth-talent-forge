@@ -187,11 +187,18 @@ def _actor_role_matches(actor, requested) -> bool:
 def _fight_status(fight) -> Tuple[bool, bool]:
     level = fight.get("keystoneLevel")
     bonus = fight.get("keystoneBonus")
-    if level is None or bonus is None:
+    completed = fight.get("kill") is True and fight.get("inProgress") is not True
+    if (
+        not completed
+        or isinstance(level, bool) or not isinstance(level, (int, float)) or level <= 0
+        or isinstance(bonus, bool) or not isinstance(bonus, (int, float))
+    ):
         return False, False
     if bonus in (1, 2, 3):
         return True, False
-    return False, True
+    if bonus <= 0:
+        return False, True
+    return False, False
 
 
 def report_matches(report, fights, actors, filters: DiscoveryFilters, character_name=None) -> Tuple[bool, List[str]]:
