@@ -29,6 +29,8 @@ the remaining upstream-terms review requirement.
 Feature reference registry: `import-export`, `inspect`, `validate`, `compare`,
 `modify`, `generate`, `presets`, `patch-assets`, and `errors` under
 `references/features/`. Read the matching file before executing that mode.
+For a fresh local virtual environment, read `references/setup.md` before
+running the CLI; always use that environment's Python interpreter.
 
 Commands:
 
