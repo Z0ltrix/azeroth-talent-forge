@@ -50,8 +50,12 @@ azeroth-talent-forge/
 +-- docs/
     `-- img/
         +-- azeroth-talent-forge-banner.png
+        +-- azeroth-talent-forge-github-social.jpg
         `-- azeroth-talent-forge-icon.png
 ```
+
+GitHub repository social preview: `docs/img/azeroth-talent-forge-github-social.jpg`
+(1280×640, under 1 MB).
 
 ## Requirements
 
