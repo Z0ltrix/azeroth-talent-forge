@@ -1700,6 +1700,82 @@ class MetricsTests(unittest.TestCase):
         rows = [row for row in result["damage_components"] if row["ability_id"] == 1001]
         self.assertEqual(len(rows), 2)
 
+
+class MetricsComparisonTests(unittest.TestCase):
+    def test_compare_actor_metrics_matches_only_category_and_numeric_id(self):
+        from warcraftlogs_core import metrics
+
+        target = fixture("actor-metrics-target.json")["data"]
+        reference = fixture("actor-metrics-reference.json")["data"]
+        result = metrics.compare_actor_metrics(target, reference)
+        matched = next(item for item in result["matched"] if item["ability_id"] == 1001)
+        self.assertEqual(matched["deltas"]["total"], {
+            "target": 120,
+            "reference": 100,
+            "absolute_delta": 20,
+            "percent_delta": 20.0,
+        })
+        self.assertTrue(matched["metadata"]["name_changed"])
+        self.assertEqual({item["ability_id"] for item in result["only_target"]}, {1003})
+        self.assertEqual({item["ability_id"] for item in result["only_reference"]}, {1002})
+        zero = next(item for item in result["matched"] if item["ability_id"] == 2000)
+        self.assertIsNone(zero["deltas"]["total"]["percent_delta"])
+        self.assertEqual(zero["deltas"]["total"]["percent_delta_reason"], "reference_zero")
+        self.assertNotIn("verdict", result)
+
+    def test_compare_actor_metrics_validates_schema(self):
+        from warcraftlogs_core import metrics
+
+        target = fixture("actor-metrics-target.json")["data"]
+        target["metrics_schema_version"] = 99
+        with self.assertRaises(ValueError):
+            metrics.compare_actor_metrics(target, fixture("actor-metrics-reference.json")["data"])
+
+    def test_compare_parser_and_cli_do_not_resolve_credentials(self):
+        args = warcraftlogs.build_parser().parse_args([
+            "compare", "actor-metrics", "target.json", "reference.json", "--output", "comparison.json",
+        ])
+        self.assertEqual(args.command, "compare")
+        self.assertEqual(args.kind, "actor-metrics")
+
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, patch.object(
+            warcraftlogs, "resolve_credentials", side_effect=AssertionError("credentials must not be resolved")
+        ), redirect_stdout(output), redirect_stderr(io.StringIO()):
+            exit_code = warcraftlogs.main([
+                "compare", "actor-metrics",
+                str(Path(__file__).parent / "fixtures" / "actor-metrics-target.json"),
+                str(Path(__file__).parent / "fixtures" / "actor-metrics-reference.json"),
+            ])
+        result = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(result["command"], "compare actor-metrics")
+
+    def test_compare_cli_writes_standard_envelope(self):
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, redirect_stdout(output), redirect_stderr(io.StringIO()):
+            path = Path(directory) / "comparison.json"
+            exit_code = warcraftlogs.main([
+                "compare", "actor-metrics",
+                str(Path(__file__).parent / "fixtures" / "actor-metrics-target.json"),
+                str(Path(__file__).parent / "fixtures" / "actor-metrics-reference.json"),
+                "--output", str(path),
+            ])
+            result = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(result["command"], "compare actor-metrics")
+        self.assertEqual(json.loads(output.getvalue())["records_written"], 1)
+
+    def test_compare_cli_rejects_non_actor_metrics_envelope(self):
+        with tempfile.TemporaryDirectory() as directory, redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()) as errors:
+            invalid = Path(directory) / "invalid.json"
+            invalid.write_text("{}", encoding="utf-8")
+            exit_code = warcraftlogs.main([
+                "compare", "actor-metrics", str(invalid), str(invalid),
+            ])
+        self.assertEqual(exit_code, 4)
+        self.assertIn("compare actor metrics", errors.getvalue().lower())
+
     def test_normalize_actor_metrics_rejects_invalid_detail_shape(self):
         from warcraftlogs_core import metrics
 

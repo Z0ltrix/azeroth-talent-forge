@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "command": "report actor-metrics",
+  "source": {"provider": "warcraftlogs", "endpoint": "client", "fetched_at": "2026-08-23T10:00:00Z"},
+  "scope": {"report_code": "Target001", "fight_id": 20},
+  "filters": {"player": "Ratelka"},
+  "completeness": "single_report",
+  "pagination": {"pages_fetched": 1, "truncated": false},
+  "rate_limit": {},
+  "warnings": [],
+  "metrics_schema_version": 1,
+  "data": {
+    "metrics_schema_version": 1,
+    "run": {"fight_id": 20, "name": "Den of Nalorakk", "encounter_id": 3107, "key_level": 6, "key_bonus": 1, "keystoneAffixes": [9]},
+    "actor": {"actor_id": 1, "name": "Ratelka", "specName": "Fury", "role": "dps"},
+    "totals": {},
+    "damage_components": [
+      {"category": "DamageDone", "ability_id": 1001, "name": "Renamed Strike", "observed_names": ["Renamed Strike"], "scope": "actor", "ancestry": [], "ancestries": [[]], "values": {"total": 120}},
+      {"category": "DamageDone", "ability_id": 1003, "name": "Only Target", "observed_names": ["Only Target"], "scope": "actor", "ancestry": [], "ancestries": [[]], "values": {"total": 30}},
+      {"category": "DamageDone", "ability_id": 2000, "name": "Zero Reference", "observed_names": ["Zero Reference"], "scope": "actor", "ancestry": [], "ancestries": [[]], "values": {"total": 10}}
+    ],
+    "cast_components": [],
+    "healing_components": [],
+    "utility": {},
+    "survival": {},
+    "misc_components": [],
+    "missing_data": [],
+    "derivations": []
+  }
+}

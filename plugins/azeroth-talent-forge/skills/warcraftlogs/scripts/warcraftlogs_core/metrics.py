@@ -217,3 +217,144 @@ def normalize_actor_metrics(details: Mapping[str, object]) -> dict:
                     indexes[index_key] = component
                     destination.append(component)
     return result
+
+
+def _validate_metrics_data(data):
+    if not isinstance(data, Mapping):
+        raise ValueError("Actor metrics data must be an object")
+    if data.get("metrics_schema_version") != METRICS_SCHEMA_VERSION:
+        raise ValueError("Unsupported actor metrics schema version")
+    for key in ("run", "actor", "damage_components", "cast_components", "utility", "survival"):
+        if key not in data:
+            raise ValueError("Actor metrics data is missing %s" % key)
+
+
+def _component_records(data):
+    records = []
+    for section in ("damage_components", "cast_components", "healing_components", "misc_components"):
+        value = data.get(section, [])
+        if not isinstance(value, list):
+            raise ValueError("Actor metrics section %s must be a list" % section)
+        records.extend(value)
+    for section in ("utility", "survival"):
+        value = data.get(section, {})
+        if not isinstance(value, Mapping):
+            raise ValueError("Actor metrics section %s must be an object" % section)
+        for category, rows in value.items():
+            if not isinstance(rows, list):
+                raise ValueError("Actor metrics category %s must be a list" % category)
+            records.extend(rows)
+    return records
+
+
+def _index_components(data):
+    indexed = {}
+    for record in _component_records(data):
+        if not isinstance(record, Mapping):
+            raise ValueError("Actor metric component must be an object")
+        category = record.get("category")
+        ability_id = record.get("ability_id")
+        if not isinstance(category, str) or isinstance(ability_id, bool) or not isinstance(ability_id, int) or ability_id < 1:
+            raise ValueError("Actor metric component identity is invalid")
+        values = record.get("values")
+        if not isinstance(values, Mapping):
+            raise ValueError("Actor metric component values must be an object")
+        key = (category, ability_id)
+        if key not in indexed:
+            indexed[key] = {
+                "category": category,
+                "ability_id": ability_id,
+                "name": record.get("name"),
+                "names": list(record.get("observed_names") or ([record.get("name")] if record.get("name") is not None else [])),
+                "scopes": [record.get("scope")] if record.get("scope") is not None else [],
+                "values": dict(values),
+            }
+            continue
+        current = indexed[key]
+        for name in record.get("observed_names") or ([record.get("name")] if record.get("name") is not None else []):
+            if name not in current["names"]:
+                current["names"].append(name)
+        scope = record.get("scope")
+        if scope is not None and scope not in current["scopes"]:
+            current["scopes"].append(scope)
+        for field, value in values.items():
+            if field not in current["values"]:
+                current["values"][field] = value
+            elif isinstance(current["values"][field], (int, float)) and isinstance(value, (int, float)):
+                current["values"][field] += value
+    return indexed
+
+
+def _context_warnings(target, reference):
+    warnings = []
+    target_run = target.get("run", {})
+    reference_run = reference.get("run", {})
+    target_actor = target.get("actor", {})
+    reference_actor = reference.get("actor", {})
+    for label, left, right in (
+        ("encounter", target_run.get("encounter_id"), reference_run.get("encounter_id")),
+        ("key", target_run.get("key_level"), reference_run.get("key_level")),
+        ("affixes", target_run.get("keystoneAffixes"), reference_run.get("keystoneAffixes")),
+        ("spec", target_actor.get("specName"), reference_actor.get("specName")),
+        ("role", target_actor.get("role"), reference_actor.get("role")),
+    ):
+        if left is None or right is None:
+            warnings.append("Comparison context missing %s." % label)
+        elif left != right:
+            warnings.append("Comparison context differs for %s." % label)
+    return warnings
+
+
+def _delta(target_value, reference_value):
+    result = {"target": target_value, "reference": reference_value}
+    if not isinstance(target_value, (int, float)) or isinstance(target_value, bool) or not isinstance(reference_value, (int, float)) or isinstance(reference_value, bool):
+        result.update({"absolute_delta": None, "percent_delta": None, "percent_delta_reason": "missing_numeric_value"})
+        return result
+    result["absolute_delta"] = target_value - reference_value
+    if reference_value == 0:
+        result["percent_delta"] = None
+        result["percent_delta_reason"] = "reference_zero"
+    else:
+        result["percent_delta"] = (target_value - reference_value) / reference_value * 100
+    return result
+
+
+def compare_actor_metrics(target: Mapping[str, object], reference: Mapping[str, object]) -> dict:
+    """Compare normalized metrics locally using category plus numeric ability ID."""
+    _validate_metrics_data(target)
+    _validate_metrics_data(reference)
+    target_index = _index_components(target)
+    reference_index = _index_components(reference)
+    matched = []
+    for category, ability_id in sorted(set(target_index) & set(reference_index)):
+        left = target_index[(category, ability_id)]
+        right = reference_index[(category, ability_id)]
+        fields = sorted(set(left["values"]) | set(right["values"]))
+        matched.append({
+            "category": category,
+            "ability_id": ability_id,
+            "target": {"name": left["name"], "observed_names": left["names"], "scopes": left["scopes"]},
+            "reference": {"name": right["name"], "observed_names": right["names"], "scopes": right["scopes"]},
+            "deltas": {field: _delta(left["values"].get(field), right["values"].get(field)) for field in fields},
+            "metadata": {
+                "name_changed": left["names"] != right["names"],
+                "scope_changed": left["scopes"] != right["scopes"],
+            },
+        })
+    only_target = [target_index[key] for key in sorted(set(target_index) - set(reference_index))]
+    only_reference = [reference_index[key] for key in sorted(set(reference_index) - set(target_index))]
+    warnings = _context_warnings(target, reference)
+    if any(item["metadata"]["scope_changed"] for item in matched):
+        warnings.append("Metric scope differs for at least one matched ability.")
+    return {
+        "comparison_schema_version": 1,
+        "matched": matched,
+        "only_target": only_target,
+        "only_reference": only_reference,
+        "warnings": warnings,
+        "derivations": [
+            "Components are matched by category plus numeric ability_id.",
+            "Display names are metadata and do not define identity.",
+            "Percent deltas are omitted when the reference value is zero.",
+        ],
+    }

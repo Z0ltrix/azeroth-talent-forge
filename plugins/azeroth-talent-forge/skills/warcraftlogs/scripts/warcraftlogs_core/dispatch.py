@@ -12,7 +12,7 @@ from .reports import *
 from .reports import _validate_output_path
 from .discovery import *
 from .discovery import _identity_variables, _discovery_filters, _filters_dict, _global_filters, _expansion_variables
-from .metrics import METRICS_SCHEMA_VERSION, normalize_actor_metrics
+from .metrics import METRICS_SCHEMA_VERSION, compare_actor_metrics, normalize_actor_metrics
 from .parser import build_parser
 
 def _print_graphql_error_or_fallback(payload, fallback):
@@ -22,8 +22,45 @@ def _print_graphql_error_or_fallback(payload, fallback):
     else:
         print(fallback, file=sys.stderr)
 
+
+def _load_actor_metrics_envelope(path):
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(payload, Mapping) or payload.get("command") != "report actor-metrics":
+        raise ValueError("Actor metrics input must be a report actor-metrics envelope")
+    if payload.get("metrics_schema_version") != METRICS_SCHEMA_VERSION:
+        raise ValueError("Unsupported actor metrics schema version")
+    if not isinstance(payload.get("data"), Mapping):
+        raise ValueError("Actor metrics input is missing data")
+    return payload
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.command == "compare":
+        if args.kind != "actor-metrics":
+            return 2
+        try:
+            target = _load_actor_metrics_envelope(args.target)
+            reference = _load_actor_metrics_envelope(args.reference)
+            comparison = compare_actor_metrics(target["data"], reference["data"])
+            envelope = make_envelope(
+                "compare actor-metrics",
+                {"target": args.target, "reference": args.reference},
+                {"target_command": target["command"], "reference_command": reference["command"]},
+                "local_comparison",
+                comparison,
+                warnings=comparison.get("warnings", []),
+            )
+            envelope["source"] = {"provider": "local", "endpoint": "filesystem", "fetched_at": utc_now()}
+            if args.output:
+                _validate_output_path(args.output)
+                write_json_atomic(args.output, envelope)
+                print(json.dumps(output_receipt("compare actor-metrics", args.output, 1, envelope["pagination"]), ensure_ascii=True))
+            else:
+                print(json.dumps(envelope, ensure_ascii=True))
+            return 0
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            print("Could not compare actor metrics input files", file=sys.stderr)
+            return 4
     if args.command not in ("rate-limit", "metadata", "report", "find"):
         return 0
     try:

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "command": "report actor-metrics",
+  "source": {"provider": "warcraftlogs", "endpoint": "client", "fetched_at": "2026-08-23T10:01:00Z"},
+  "scope": {"report_code": "Reference01", "fight_id": 21},
+  "filters": {"player": "Referencewarrior"},
+  "completeness": "single_report",
+  "pagination": {"pages_fetched": 1, "truncated": false},
+  "rate_limit": {},
+  "warnings": [],
+  "metrics_schema_version": 1,
+  "data": {
+    "metrics_schema_version": 1,
+    "run": {"fight_id": 21, "name": "Den of Nalorakk", "encounter_id": 3107, "key_level": 6, "key_bonus": 1, "keystoneAffixes": [9]},
+    "actor": {"actor_id": 2, "name": "Referencewarrior", "specName": "Fury", "role": "dps"},
+    "totals": {},
+    "damage_components": [
+      {"category": "DamageDone", "ability_id": 1001, "name": "Old Strike", "observed_names": ["Old Strike"], "scope": "actor", "ancestry": [], "ancestries": [[]], "values": {"total": 100}},
+      {"category": "DamageDone", "ability_id": 1002, "name": "Shared Display Name", "observed_names": ["Shared Display Name"], "scope": "actor", "ancestry": [], "ancestries": [[]], "values": {"total": 50}},
+      {"category": "DamageDone", "ability_id": 2000, "name": "Zero Reference", "observed_names": ["Zero Reference"], "scope": "actor", "ancestry": [], "ancestries": [[]], "values": {"total": 0}}
+    ],
+    "cast_components": [],
+    "healing_components": [],
+    "utility": {},
+    "survival": {},
+    "misc_components": [],
+    "missing_data": [],
+    "derivations": []
+  }
+}
