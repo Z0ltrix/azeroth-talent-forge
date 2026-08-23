@@ -65,9 +65,9 @@ def _iter_leaves(row, ancestry=()):
     children = row.get("subentries")
     valid_children = [child for child in children if isinstance(child, Mapping)] if isinstance(children, list) else []
     if valid_children:
-        label = row.get("name") or row.get("guid") or "container"
+        parent = {"ability_id": _ability_id(row), "name": _display_name(row)}
         for child in valid_children:
-            yield from _iter_leaves(child, ancestry + (str(label),))
+            yield from _iter_leaves(child, ancestry + (parent,))
         return
     yield row, ancestry
 
@@ -209,6 +209,12 @@ def normalize_actor_metrics(details: Mapping[str, object]) -> dict:
                     "ancestry": list(ancestry),
                     "ancestries": [list(ancestry)],
                     "values": values,
+                    "provenance": {
+                        "source_view": category,
+                        "source_kind": "report-table",
+                        "derivation": "leaf_component",
+                        "scope": scope,
+                    },
                 }
                 index_key = (category, ability_id, scope)
                 if index_key in indexes:
@@ -291,7 +297,14 @@ def _context_warnings(target, reference):
     reference_run = reference.get("run", {})
     target_actor = target.get("actor", {})
     reference_actor = reference.get("actor", {})
+    target_zone = target_run.get("gameZone")
+    reference_zone = reference_run.get("gameZone")
+    if isinstance(target_zone, Mapping):
+        target_zone = (target_zone.get("id"), target_zone.get("name"))
+    if isinstance(reference_zone, Mapping):
+        reference_zone = (reference_zone.get("id"), reference_zone.get("name"))
     for label, left, right in (
+        ("dungeon", target_zone, reference_zone),
         ("encounter", target_run.get("encounter_id"), reference_run.get("encounter_id")),
         ("key", target_run.get("key_level"), reference_run.get("key_level")),
         ("affixes", target_run.get("keystoneAffixes"), reference_run.get("keystoneAffixes")),

@@ -105,7 +105,8 @@ The inner data uses `metrics_schema_version: 1` and contains `run`, `actor`,
 valid `subentries` contribute leaves while the parent is omitted. Repeated
 leaves aggregate only with compatible scope. Invalid or missing numeric data is
 listed in `missing_data` instead of becoming zero. Component casts are API
-components, not reconstructed button presses.
+components, not reconstructed button presses. Each component retains source
+view, derivation, scope, and parent ID/name ancestry as provenance metadata.
 
 ## Events
 

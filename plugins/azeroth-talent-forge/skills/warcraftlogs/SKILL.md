@@ -65,7 +65,8 @@ python plugins\azeroth-talent-forge\skills\warcraftlogs\scripts\warcraftlogs.py 
   run, actor, totals, damage components, cast components, utility, survival,
   and explicit `missing_data`. Components use category plus numeric ability ID;
   display names are metadata only. Composite parents are not counted as extra
-  leaves, and component casts are not button presses.
+  leaves; parent IDs/names, source view, derivation, scope, and ancestry remain
+  component provenance. Component casts are not button presses.
 - `compare actor-metrics TARGET.json REFERENCE.json` is local-only: it requires
   no credentials or network access, matches category plus numeric ability ID,
   reports raw values/deltas, and warns about context or scope differences. It

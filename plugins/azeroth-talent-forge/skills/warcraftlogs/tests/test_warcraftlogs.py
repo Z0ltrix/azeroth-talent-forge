@@ -1702,6 +1702,8 @@ class MetricsTests(unittest.TestCase):
         self.assertEqual(next(row for row in damage if row["ability_id"] == 1001)["values"]["total"], 350)
         self.assertEqual(next(row for row in damage if row["ability_id"] == 1001)["name"], "Shared Name")
         self.assertIn("Renamed Name", next(row for row in damage if row["ability_id"] == 1001)["observed_names"])
+        self.assertEqual(next(row for row in damage if row["ability_id"] == 1001)["ancestry"], [{"ability_id": 9000, "name": "Parent Container"}])
+        self.assertEqual(next(row for row in damage if row["ability_id"] == 1001)["provenance"]["source_view"], "DamageDone")
         self.assertNotIn(9000, {row["ability_id"] for row in damage})
 
         casts = result["cast_components"]
@@ -1746,6 +1748,16 @@ class MetricsComparisonTests(unittest.TestCase):
         self.assertIsNone(zero["deltas"]["total"]["percent_delta"])
         self.assertEqual(zero["deltas"]["total"]["percent_delta_reason"], "reference_zero")
         self.assertNotIn("verdict", result)
+
+    def test_compare_actor_metrics_warns_on_different_dungeons(self):
+        from warcraftlogs_core import metrics
+
+        target = fixture("actor-metrics-target.json")["data"]
+        reference = fixture("actor-metrics-reference.json")["data"]
+        target["run"]["gameZone"] = {"id": 2444, "name": "Midnight"}
+        reference["run"]["gameZone"] = {"id": 2335, "name": "The War Within"}
+        result = metrics.compare_actor_metrics(target, reference)
+        self.assertTrue(any("dungeon" in warning.lower() for warning in result["warnings"]))
 
     def test_compare_actor_metrics_validates_schema(self):
         from warcraftlogs_core import metrics
