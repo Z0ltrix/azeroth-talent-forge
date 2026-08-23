@@ -188,6 +188,22 @@ class PackagingTests(unittest.TestCase):
         self.assertEqual(manifest["version"], "0.2.0")
         self.assertIn("skills", manifest)
 
+    def test_repo_agents_documents_plugin_release_rules(self):
+        repo_root = SCRIPT.parents[5]
+        agents_path = repo_root / "AGENTS.md"
+        self.assertTrue(agents_path.is_file())
+        agents = agents_path.read_text(encoding="utf-8")
+        required_phrases = (
+            "one version bump per coherent delivery",
+            "Semantic Versioning",
+            "fixture-backed tests",
+            "SKILL.md",
+            "applicable reference files",
+            "credentials",
+        )
+        for phrase in required_phrases:
+            self.assertIn(phrase, agents)
+
     def test_ui_metadata_is_present_with_explicit_interface_fields(self):
         metadata = self.ROOT / "agents" / "openai.yaml"
         self.assertTrue(metadata.is_file())
