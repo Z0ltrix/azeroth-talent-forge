@@ -12,6 +12,7 @@ from .reports import *
 from .reports import _validate_output_path
 from .discovery import *
 from .discovery import _identity_variables, _discovery_filters, _filters_dict, _global_filters, _expansion_variables
+from .metrics import METRICS_SCHEMA_VERSION, normalize_actor_metrics
 from .parser import build_parser
 
 def _print_graphql_error_or_fallback(payload, fallback):
@@ -223,6 +224,56 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     print("Could not write report output file", file=sys.stderr)
                     return 4
                 print(json.dumps(output_receipt("report details", args.output, 1, envelope["pagination"], details.get("errors")), ensure_ascii=True))
+                return 0
+            print(json.dumps(envelope, ensure_ascii=True))
+            return 0
+        if args.report_command == "actor-metrics":
+            try:
+                unused, variables, scope, filters = report_request(args)
+                if "fightIDs" not in variables:
+                    raise ValueError("Actor metrics requires a fight ID")
+                if args.output:
+                    _validate_output_path(args.output)
+                warnings = []
+                details = fetch_report_details(
+                    client,
+                    unused.code,
+                    variables["fightIDs"][0],
+                    player_name=args.player,
+                    translate=True,
+                    views=None,
+                    warnings=warnings,
+                )
+                normalized = normalize_actor_metrics(details)
+            except ValueError as error:
+                print(str(error), file=sys.stderr)
+                return 2
+            except AuthenticationError as error:
+                print(str(error), file=sys.stderr)
+                return 3
+            except PublicReportError as error:
+                print(str(error), file=sys.stderr)
+                return 4
+            except (ApiError, KeyError, TypeError, OSError):
+                print("Warcraft Logs API response did not contain a public report", file=sys.stderr)
+                return 4
+            envelope = make_envelope(
+                "report actor-metrics",
+                scope,
+                filters,
+                "single_report",
+                normalized,
+                warnings=warnings,
+                errors=details.get("errors"),
+                metrics_schema_version=METRICS_SCHEMA_VERSION,
+            )
+            if args.output:
+                try:
+                    write_json_atomic(args.output, envelope)
+                except (OSError, TypeError, ValueError):
+                    print("Could not write actor metrics output file", file=sys.stderr)
+                    return 4
+                print(json.dumps(output_receipt("report actor-metrics", args.output, 1, envelope["pagination"], details.get("errors")), ensure_ascii=True))
                 return 0
             print(json.dumps(envelope, ensure_ascii=True))
             return 0

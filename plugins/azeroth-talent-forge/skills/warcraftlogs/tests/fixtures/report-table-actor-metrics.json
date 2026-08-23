@@ -1,0 +1,15 @@
+{
+  "data": {
+    "reportData": {
+      "report": {
+        "visibility": "public",
+        "archiveStatus": {"isArchived": false, "isAccessible": true, "archiveDate": null},
+        "table": {
+          "entries": [
+            {"guid": 1001, "name": "Test Strike", "total": 123, "casts": 4}
+          ]
+        }
+      }
+    }
+  }
+}

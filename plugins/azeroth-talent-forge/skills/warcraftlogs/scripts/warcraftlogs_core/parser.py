@@ -55,6 +55,11 @@ def build_parser() -> argparse.ArgumentParser:
     details.add_argument("--player")
     details.add_argument("--views")
     details.add_argument("--no-translate", dest="translate", action="store_false", default=True)
+    actor_metrics = report_parsers.add_parser("actor-metrics")
+    actor_metrics.add_argument("reference", help="report code or official Warcraft Logs report URL")
+    actor_metrics.add_argument("--fight", type=int, required=True)
+    actor_metrics.add_argument("--player", required=True)
+    actor_metrics.add_argument("--output")
     for kind in ("table", "graph"):
         command = report_parsers.add_parser(kind)
         _add_json_report_options(command)

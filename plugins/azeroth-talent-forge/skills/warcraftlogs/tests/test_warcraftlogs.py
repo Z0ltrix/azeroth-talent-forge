@@ -795,6 +795,21 @@ class ReportTests(unittest.TestCase):
             with self.subTest(options=options), self.assertRaises(SystemExit):
                 warcraftlogs.build_parser().parse_args(["report", "fights", "REPORT123", *options])
 
+    def test_actor_metrics_parser_requires_fight_and_player(self):
+        args = warcraftlogs.build_parser().parse_args([
+            "report", "actor-metrics", "REPORT123",
+            "--fight", "20",
+            "--player", "Ratelka",
+            "--output", "metrics.json",
+        ])
+        self.assertEqual(args.report_command, "actor-metrics")
+        self.assertEqual(args.fight, 20)
+        self.assertEqual(args.player, "Ratelka")
+        self.assertEqual(args.output, "metrics.json")
+        for missing in (("--player", "Ratelka"), ("--fight", "20")):
+            with self.subTest(missing=missing), self.assertRaises(SystemExit):
+                warcraftlogs.build_parser().parse_args(["report", "actor-metrics", "REPORT123", *missing])
+
     def test_report_queries_select_consumed_object_fields(self):
         summary = warcraftlogs.load_query("report-summary")
         fights = warcraftlogs.load_query("report-fights")
@@ -1029,6 +1044,73 @@ class ReportTests(unittest.TestCase):
         self.assertEqual({variables["dataType"] for variables in table_variables}, {"DamageDone", "Healing", "DamageTaken", "Deaths", "Interrupts", "Casts"})
         self.assertTrue(all(variables.get("sourceID") == 1 for variables in table_variables if variables["dataType"] in {"DamageDone", "Healing", "Interrupts", "Casts"}))
         self.assertTrue(all(variables.get("targetID") == 1 for variables in table_variables if variables["dataType"] in {"DamageTaken", "Deaths"}))
+
+    def test_actor_metrics_fetches_and_normalizes_details(self):
+        exit_code, output, errors, client = self.run_report(
+            {
+                "report-fights": fixture("report-fights-filterable.json"),
+                "report-master-data": fixture("report-master-data.json"),
+                "report-player-details": fixture("report-player-details.json"),
+                "report-table": fixture("report-table-actor-metrics.json"),
+            },
+            "actor-metrics",
+            "AbCd1234",
+            "--fight", "20",
+            "--player", "Tankadin",
+        )
+        result = json.loads(output)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(errors, "")
+        self.assertEqual(result["command"], "report actor-metrics")
+        self.assertEqual(result["data"]["metrics_schema_version"], 1)
+        self.assertEqual(result["data"]["run"]["fight_id"], 20)
+        self.assertEqual(result["data"]["actor"]["actor_id"], 1)
+        self.assertEqual(client.calls.count("report-table"), 6)
+
+    def test_actor_metrics_invalid_detail_shape_returns_error(self):
+        exit_code, output, errors, client = self.run_report(
+            {
+                "report-fights": fixture("report-fights-filterable.json"),
+                "report-master-data": fixture("report-master-data.json"),
+                "report-player-details": fixture("report-player-details.json"),
+                "report-table": {"data": {"reportData": {"report": {
+                    "visibility": "public",
+                    "archiveStatus": {"isAccessible": True},
+                }}}},
+            },
+            "actor-metrics",
+            "AbCd1234",
+            "--fight", "20",
+            "--player", "Tankadin",
+        )
+        self.assertEqual(exit_code, 4)
+        self.assertEqual(output, "")
+        self.assertIn("public report", errors)
+
+    def test_actor_metrics_writes_output_atomically(self):
+        client = FixtureClient({
+            "report-fights": fixture("report-fights-filterable.json"),
+            "report-master-data": fixture("report-master-data.json"),
+            "report-player-details": fixture("report-player-details.json"),
+            "report-table": fixture("report-table-actor-metrics.json"),
+        })
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory, patch.object(
+            warcraftlogs, "WarcraftLogsClient", return_value=client
+        ), patch.dict(os.environ, {}, clear=True), redirect_stdout(output), redirect_stderr(io.StringIO()):
+            path = Path(directory) / "actor-metrics.json"
+            exit_code = warcraftlogs.main([
+                "--client-id", "client-id", "--client-secret", "client-secret",
+                "--env-file", str(Path(directory) / "missing.env"),
+                "report", "actor-metrics", "AbCd1234", "--fight", "20",
+                "--player", "Tankadin", "--output", str(path),
+            ])
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        receipt = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(payload["command"], "report actor-metrics")
+        self.assertEqual(receipt["command"], "report actor-metrics")
+        self.assertEqual(receipt["records_written"], 1)
 
     def test_details_includes_requested_views_in_filters(self):
         exit_code, output, errors, client = self.run_report(
